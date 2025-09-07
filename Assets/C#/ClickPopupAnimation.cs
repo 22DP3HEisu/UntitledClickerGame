@@ -3,8 +3,8 @@ using TMPro;
 
 public class ClickPopupAnimation : MonoBehaviour
 {
-    public float moveUpSpeed = 60f;      // Faster upward movement
-    public float fadeDuration = 0.3f;    // Faster fade
+    public float moveUpSpeed = 60f; 
+    public float fadeDuration = 0.3f; 
     private TextMeshProUGUI tmpText;
     private Color startColor;
     private float timer = 0f;

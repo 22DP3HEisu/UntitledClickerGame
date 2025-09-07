@@ -3,7 +3,7 @@ using TMPro;
 
 public class ClickPopupSpawner : MonoBehaviour
 {
-    public RectTransform canvasRectTransform; // Assign your Canvas RectTransform in Inspector
+    public RectTransform canvasRectTransform;
 
     public void SpawnPopup(Vector2 worldPosition, string text)
     {
