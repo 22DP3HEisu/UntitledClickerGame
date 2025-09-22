@@ -1,33 +1,16 @@
-const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
-
-// Load environment variables
-require('dotenv').config();
-
-// Database configuration from environment variables
-const config = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306
-};
-
-// Create connection
-const connection = mysql.createConnection(config);
+const { executeQuery, executeRawQuery, testConnection, closeConnection } = require('../lib/database');
 
 // Function to run migrations
 async function runMigrations() {
   try {
-    // Connect to database
-    connection.connect((err) => {
-      if (err) {
-        console.error('Error connecting to database:', err);
-        return;
-      }
-      console.log('Connected to MySQL database');
-    });
+    // Test database connection
+    const connected = await testConnection();
+    if (!connected) {
+      console.error('Failed to connect to database');
+      return;
+    }
 
     // Create migrations table to track executed migrations
     const createMigrationsTable = `
@@ -70,7 +53,7 @@ async function runMigrations() {
       
       for (const statement of statements) {
         if (statement.trim()) {
-          await executeQuery(statement);
+          await executeRawQuery(statement);
         }
       }
 
@@ -84,21 +67,8 @@ async function runMigrations() {
   } catch (error) {
     console.error('Migration failed:', error);
   } finally {
-    connection.end();
+    await closeConnection();
   }
-}
-
-// Helper function to promisify MySQL queries
-function executeQuery(query, params = []) {
-  return new Promise((resolve, reject) => {
-    connection.query(query, params, (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
 }
 
 // Run migrations
