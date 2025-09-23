@@ -25,12 +25,14 @@ public class Clicker : MonoBehaviour
 
             if (hit != null && hit.transform == targetTransform)
             {
-                // Increase sprite size
                 HorseSprite.localScale = originalScale * scaleUpFactor;
                 StartCoroutine(ResetScale());
 
-                ClickManager.Instance.AddClicks(1);
-                popupSpawner.SpawnPopup(mousePos, "+1");
+                if (ClickManager.Instance != null)
+                    ClickManager.Instance.AddClicks(1);
+
+                if (popupSpawner != null)
+                    popupSpawner.SpawnPopup(mousePos, "+1");
             }
         }
     }
