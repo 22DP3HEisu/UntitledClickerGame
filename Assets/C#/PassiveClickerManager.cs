@@ -31,7 +31,7 @@ public class PassiveClickerManager : MonoBehaviour
             ClickManager.Instance.AddClicks(totalClicks);
     }
 
-    // Upgrade a clicker by index, using Cookie Clicker price logic
+    // Upgrade a clicker by index
     public bool UpgradeClicker(int index, int currentClicks)
     {
         if (index >= 0 && index < passiveClickers.Count)
