@@ -25,7 +25,8 @@ public class PassiveClickerManager : MonoBehaviour
         int totalClicks = 0;
         foreach (var clicker in passiveClickers)
         {
-            totalClicks += Mathf.RoundToInt(clicker.clicksPerSecond * clicker.level * tickInterval);
+            int clicks = Mathf.RoundToInt(clicker.clicksPerSecond * clicker.level * tickInterval);
+            totalClicks += clicks;
         }
         if (totalClicks > 0)
             ClickManager.Instance.AddClicks(totalClicks);
@@ -40,12 +41,12 @@ public class PassiveClickerManager : MonoBehaviour
             int price = clicker.GetCurrentPrice();
             if (currentClicks >= price)
             {
-                ClickManager.Instance.AddClicks(-price); // Subtract price from clicks
+                ClickManager.Instance.AddClicks(-price);
                 clicker.level++;
-                return true; // Upgrade successful
+                return true;
             }
         }
-        return false; // Not enough clicks or invalid index
+        return false;
     }
 
     public List<PassiveClickerData> GetPassiveClickers()
