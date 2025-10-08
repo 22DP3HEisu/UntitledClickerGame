@@ -4,34 +4,39 @@ using TMPro;
 public class ClickPopupSpawner : MonoBehaviour
 {
     public RectTransform canvasRectTransform;
-
     public void SpawnPopup(Vector2 worldPosition, string text)
     {
-        // Convert world position to screen position
+        // World -> Screen
         Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
 
-        // Convert screen position to Canvas local position
+        // Screen -> Local (Camera mode obligāti jāpadod kamera)
         Vector2 localPos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRectTransform, screenPos, null, out localPos);
+            canvasRectTransform,
+            screenPos,
+            canvasRectTransform.GetComponentInParent<Canvas>().worldCamera,
+            out localPos);
 
-        // Create new GameObject for popup
-        GameObject popupObj = new GameObject("ClickPopup", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        // Izveido popup
+        GameObject popupObj = new GameObject("ClickPopup",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(TextMeshProUGUI));
         popupObj.transform.SetParent(canvasRectTransform, false);
 
-        // Set position
+        // Pozīcija
         RectTransform rectTransform = popupObj.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = localPos;
         rectTransform.sizeDelta = new Vector2(100, 40);
 
-        // Configure TextMeshProUGUI
+        // Teksts
         TextMeshProUGUI tmpText = popupObj.GetComponent<TextMeshProUGUI>();
         tmpText.text = text;
         tmpText.fontSize = 36;
         tmpText.alignment = TextAlignmentOptions.Center;
-        tmpText.color = new Color(1f, 0.8f, 0.2f, 1f); // Gold-like color
+        tmpText.color = new Color(1f, 0.8f, 0.2f, 1f);
 
-        // Add animation script
+        // Animācija
         popupObj.AddComponent<ClickPopupAnimation>();
     }
 }
