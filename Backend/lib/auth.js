@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-
 // Load environment variables
 require('dotenv').config();
 
