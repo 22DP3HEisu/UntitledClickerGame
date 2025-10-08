@@ -10,6 +10,7 @@ public class PassiveClickerShopItemUI : MonoBehaviour
     [SerializeField] private TMP_Text priceText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private Button buyButton;
+    [SerializeField] private SpriteRenderer wall;
 
     private int clickerIndex;
     private ShopUIManager shopManager;

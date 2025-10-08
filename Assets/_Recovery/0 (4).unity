@@ -511,7 +511,7 @@ GameObject:
   - component: {fileID: 196623130}
   - component: {fileID: 196623129}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Centrs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1072,7 +1072,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 633679596}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
@@ -1127,7 +1127,6 @@ MonoBehaviour:
   horizontalScrollView: {fileID: 633679598}
   verticalScrollView: {fileID: 1254517226}
   swipeThreshold: 1
-  startDelay: 0
 --- !u!1 &657241278
 GameObject:
   m_ObjectHideFlags: 0
@@ -1537,7 +1536,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   shopPanel: {fileID: 2125892310}
   itemListParent: {fileID: 2125892311}
-  itemPrefab: {fileID: 124679141726304271, guid: f1c34d5b0d8bba34b8423b7a955a8a66, type: 3}
+  itemPrefab: {fileID: 2627836340088707327, guid: e77d1d863cd811f4eb2d68d2f00d87f4, type: 3}
 --- !u!114 &982820128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1797,7 +1796,7 @@ MonoBehaviour:
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
-  m_Inertia: 0
+  m_Inertia: 1
   m_DecelerationRate: 0.135
   m_ScrollSensitivity: 1
   m_Viewport: {fileID: 1656305114}
