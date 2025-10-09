@@ -11,9 +11,10 @@ public class LoginCheckManager : MonoBehaviour
     [Header("Auto Login Settings")]
     [SerializeField] private float delayBeforeCheck = 0.5f; // Small delay for smooth transition
     
-    void Start()
+    private void Start()
     {
-
+        // You can call CheckLoginStatus() here if you want automatic checking
+        // CheckLoginStatus();
     }
     
     public void CheckLoginStatus()
@@ -38,34 +39,23 @@ public class LoginCheckManager : MonoBehaviour
     {
         // Check if user is registered
         bool isRegistered = PlayerPrefs.GetInt("IsRegistered", 0) == 1;
-        
         if (!isRegistered)
         {
             Debug.Log("User is not registered.");
             return false;
         }
         
-        // Check if we have a valid auth token
-        string authToken = PlayerPrefs.GetString("AuthToken", "");
-        if (string.IsNullOrEmpty(authToken))
+        // Use ApiClient's centralized token validation
+        if (!ApiClient.IsTokenValid())
         {
-            Debug.Log("No auth token found.");
-            return false;
-        }
-        
-        // Check if token is expired
-        if (IsTokenExpired())
-        {
-            Debug.Log("Auth token is expired.");
+            Debug.Log("Auth token is invalid or expired.");
             ClearExpiredUserData();
             return false;
         }
         
         // Check if we have essential user data
         string username = PlayerPrefs.GetString("RegisteredUsername", "");
-        string email = PlayerPrefs.GetString("RegisteredEmail", "");
-        
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email))
+        if (string.IsNullOrEmpty(username))
         {
             Debug.Log("Essential user data is missing.");
             return false;
@@ -75,36 +65,10 @@ public class LoginCheckManager : MonoBehaviour
         return true;
     }
     
-    private bool IsTokenExpired()
-    {
-        string tokenExpiryString = PlayerPrefs.GetString("TokenExpiry", "");
-        
-        if (string.IsNullOrEmpty(tokenExpiryString))
-        {
-            return true; // No expiry data means expired
-        }
-        
-        try
-        {
-            long tokenExpiryBinary = Convert.ToInt64(tokenExpiryString);
-            DateTime tokenExpiry = DateTime.FromBinary(tokenExpiryBinary);
-            
-            return DateTime.Now > tokenExpiry;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error parsing token expiry: {e.Message}");
-            return true; // If we can't parse, consider it expired
-        }
-    }
-    
     private void ClearExpiredUserData()
     {
-        // Clear expired authentication data but keep registration info
-        PlayerPrefs.DeleteKey("AuthToken");
-        PlayerPrefs.DeleteKey("TokenExpiry");
-        PlayerPrefs.Save();
-        
+        // Use ApiClient's centralized token management
+        ApiClient.ClearAuthToken();
         Debug.Log("Cleared expired authentication data.");
     }
     
@@ -114,9 +78,10 @@ public class LoginCheckManager : MonoBehaviour
         PlayerPrefs.DeleteKey("RegisteredUsername");
         PlayerPrefs.DeleteKey("RegisteredEmail");
         PlayerPrefs.DeleteKey("IsRegistered");
-        PlayerPrefs.DeleteKey("AuthToken");
-        PlayerPrefs.DeleteKey("TokenExpiry");
         PlayerPrefs.Save();
+        
+        // Use ApiClient's centralized token management
+        ApiClient.ClearAuthToken();
         
         Debug.Log("User logged out. All data cleared.");
         
@@ -153,7 +118,7 @@ public class LoginCheckManager : MonoBehaviour
         {
             username = PlayerPrefs.GetString("RegisteredUsername", ""),
             email = PlayerPrefs.GetString("RegisteredEmail", ""),
-            authToken = PlayerPrefs.GetString("AuthToken", "")
+            authToken = AuthTokenManager.GetToken()
         };
     }
 }
