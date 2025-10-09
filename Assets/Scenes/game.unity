@@ -227,7 +227,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1374,6 +1374,7 @@ GameObject:
   - component: {fileID: 449760180}
   - component: {fileID: 449760183}
   - component: {fileID: 449760184}
+  - component: {fileID: 449760185}
   m_Layer: 5
   m_Name: Achievments
   m_TagString: Untagged
@@ -1493,6 +1494,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 512fc536319141e4cab6f22ddcbea32b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  Achievments: {fileID: 1681046771}
+  AchievmentsPanel: {fileID: 449760178}
+  Back: {fileID: 1730486381}
+--- !u!114 &449760185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 449760178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 512fc536319141e4cab6f22ddcbea32b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoToAchievments
   Achievments: {fileID: 1681046771}
   AchievmentsPanel: {fileID: 449760178}
   Back: {fileID: 1730486381}
@@ -3905,6 +3921,7 @@ GameObject:
   - component: {fileID: 1681046773}
   - component: {fileID: 1681046772}
   - component: {fileID: 1681046771}
+  - component: {fileID: 1681046774}
   m_Layer: 5
   m_Name: Achievments
   m_TagString: Untagged
@@ -4014,6 +4031,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1681046769}
   m_CullTransparentMesh: 1
+--- !u!114 &1681046774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681046769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 512fc536319141e4cab6f22ddcbea32b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoToAchievments
+  Achievments: {fileID: 1681046771}
+  AchievmentsPanel: {fileID: 449760178}
+  Back: {fileID: 1730486381}
 --- !u!1 &1730486379
 GameObject:
   m_ObjectHideFlags: 0
@@ -5371,3 +5403,4 @@ SceneRoots:
   - {fileID: 520189495}
   - {fileID: 255300767}
   - {fileID: 1281315010}
+  - {fileID: 857748191}
