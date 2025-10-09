@@ -177,6 +177,7 @@ public class RegisterManager : MonoBehaviour
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
 
         // Create UnityWebRequest
+        Debug.Log($"Sending registration request to: {backendUrl}/auth/register");
         using (UnityWebRequest request = new UnityWebRequest($"{backendUrl}/auth/register", "POST"))
         {
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);

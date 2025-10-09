@@ -1387,7 +1387,7 @@ MonoBehaviour:
   errorMessageText: {fileID: 1116788976}
   successMessageText: {fileID: 977314987}
   minPasswordLength: 6
-  backendUrl: http://localhost:3000
+  backendUrl: http://92.5.105.149:3000
   gameSceneName: game
   introSceneName: Intro
   registerSceneName: Register

@@ -1885,7 +1885,7 @@ MonoBehaviour:
   minUsernameLength: 3
   maxUsernameLength: 20
   minPasswordLength: 8
-  backendUrl: http://localhost:3000
+  backendUrl: http://92.5.105.149:3000
 --- !u!4 &1408111025
 Transform:
   m_ObjectHideFlags: 0
