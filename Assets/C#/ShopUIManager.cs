@@ -63,7 +63,8 @@ public class ShopUIManager : MonoBehaviour
     public void OnBuyClicker(int index)
     {
         var clicker = clickerManager.GetPassiveClickers()[index];
-        if (clickerManager.UpgradeClicker(index, ClickManager.Instance.ClickCount))
+        int currentCarrots = CurrencySyncManager.Instance != null ? CurrencySyncManager.Instance.Carrots : 0;
+        if (clickerManager.UpgradeClicker(index, currentCarrots))
         {
             var itemUI = itemListParent.GetChild(index).GetComponent<PassiveClickerShopItemUI>();
             itemUI.Setup(clicker, index, this);

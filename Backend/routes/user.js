@@ -64,6 +64,72 @@ router.get('/', authenticateToken, async function(req, res, next) {
     }
 });
 
+// Sync currency data with server (protected route)
+router.put('/sync-currency', authenticateToken, async function(req, res, next) {
+    try {
+        const { carrots, horseShoes, goldenCarrots } = req.body;
+
+        // Validate currency data
+        if (typeof carrots !== 'number' || typeof horseShoes !== 'number' || typeof goldenCarrots !== 'number') {
+            return res.status(400).json({
+                error: 'Invalid currency data',
+                message: 'Currency values must be numbers'
+            });
+        }
+
+        // Ensure non-negative values (basic anti-cheat)
+        if (carrots < 0 || horseShoes < 0 || goldenCarrots < 0) {
+            return res.status(400).json({
+                error: 'Invalid currency values',
+                message: 'Currency values cannot be negative'
+            });
+        }
+
+        // Get current server values for comparison/logging
+        const getCurrentQuery = 'SELECT Carrots, HorseShoes, G_Carrots FROM Users WHERE UserID = ?';
+        const currentData = await executeQuery(getCurrentQuery, [req.user.id]);
+
+        if (currentData.length === 0) {
+            return res.status(404).json({
+                error: 'User not found',
+                message: 'User account not found'
+            });
+        }
+
+        // Update currency in database
+        const updateQuery = `
+            UPDATE Users 
+            SET Carrots = ?, HorseShoes = ?, G_Carrots = ?, UpdatedAt = CURRENT_TIMESTAMP 
+            WHERE UserID = ?
+        `;
+        await executeQuery(updateQuery, [carrots, horseShoes, goldenCarrots, req.user.id]);
+
+        // Log the sync for debugging (optional)
+        console.log(`Currency sync for user ${req.user.id}: 
+            Carrots: ${currentData[0].Carrots} -> ${carrots}
+            HorseShoes: ${currentData[0].HorseShoes} -> ${horseShoes}
+            Golden Carrots: ${currentData[0].G_Carrots} -> ${goldenCarrots}`);
+
+        // Return updated currency data
+        res.json({
+            message: 'Currency synchronized successfully',
+            currency: {
+                carrots: carrots,
+                horseShoes: horseShoes,
+                goldenCarrots: goldenCarrots,
+                lastSyncAt: new Date().toISOString()
+            }
+        });
+
+    } catch (error) {
+        console.error('Currency sync error:', error);
+        res.status(500).json({
+            error: 'Internal server error',
+            message: 'Failed to sync currency data'
+        });
+    }
+});
+
 // Change password (protected route)
 router.put('/change-password', authenticateToken, async function(req, res, next) {
     try {
@@ -131,6 +197,8 @@ router.put('/change-password', authenticateToken, async function(req, res, next)
             message: 'Failed to change password'
         });
     }
+
+
 });
 
 module.exports = router;

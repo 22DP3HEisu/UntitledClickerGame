@@ -40,20 +40,19 @@ public class PassiveClickerManager : MonoBehaviour
             totalClicks = Mathf.RoundToInt(totalClicks * AchievementManager.Instance.GetCPSBoost());
         }
 
-        if (totalClicks > 0)
-            ClickManager.Instance.AddClicks(totalClicks);
+        if (totalClicks > 0 && CurrencySyncManager.Instance != null)
+            CurrencySyncManager.Instance.AddCurrency(totalClicks);
     }
 
     // Upgrade a clicker by index
-    public bool UpgradeClicker(int index, int currentClicks)
+    public bool UpgradeClicker(int index, int currentCarrots)
     {
-        if (index >= 0 && index < passiveClickers.Count)
+        if (index >= 0 && index < passiveClickers.Count && CurrencySyncManager.Instance != null)
         {
             var clicker = passiveClickers[index];
             int price = clicker.GetCurrentPrice();
-            if (currentClicks >= price)
+            if (CurrencySyncManager.Instance.SpendCurrency(price))
             {
-                ClickManager.Instance.AddClicks(-price);
                 clicker.level++;
                 return true;
             }

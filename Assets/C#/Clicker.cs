@@ -61,8 +61,11 @@ public class Clicker : MonoBehaviour
             clickValue = Mathf.RoundToInt(clickValue * AchievementManager.Instance.GetClickIncomeBoost());
         }
 
-        if (ClickManager.Instance != null)
-            ClickManager.Instance.AddClicks(clickValue);
+        // Add carrots to currency manager
+        if (CurrencySyncManager.Instance != null)
+        {
+            CurrencySyncManager.Instance.AddCurrency(clickValue);
+        }
 
         // Track click for achievements
         if (AchievementManager.Instance != null)
