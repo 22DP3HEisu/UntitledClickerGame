@@ -3666,6 +3666,11 @@ MonoBehaviour:
   Achievments: {fileID: 1681046771}
   achievementsSceneName: Achievments
   loadAdditively: 1
+  pauseGameWhenOpen: 0
+  navigationRoot: {fileID: 814252833}
+  navigationHideMode: 1
+  registerButton: {fileID: 1681046771}
+  secondButton: {fileID: 1775132904}
 --- !u!1 &1733022322
 GameObject:
   m_ObjectHideFlags: 0
