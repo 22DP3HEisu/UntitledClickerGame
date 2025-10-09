@@ -4,6 +4,7 @@ public class AchievmentListPopulator : MonoBehaviour
 {
     [SerializeField] private GameObject achievementPrefab; // prefab with Achievment_list_prefab component
     [SerializeField] private Transform parentTransform;    // content parent for instantiated prefabs
+    [SerializeField] private AchievementDetailPrefab detailPanel; // Reference to the detail panel
 
     private void Start()
     {
@@ -23,12 +24,12 @@ public class AchievmentListPopulator : MonoBehaviour
             if (prefabComponent != null)
             {
                 // Get up to 4 achievements for this prefab instance
-                Sprite sprite1 = i < achievements.Count ? achievements[i].icon : null;
-                Sprite sprite2 = i + 1 < achievements.Count ? achievements[i + 1].icon : null;
-                Sprite sprite3 = i + 2 < achievements.Count ? achievements[i + 2].icon : null;
-                Sprite sprite4 = i + 3 < achievements.Count ? achievements[i + 3].icon : null;
+                AchievementItem ach1 = i < achievements.Count ? achievements[i] : null;
+                AchievementItem ach2 = i + 1 < achievements.Count ? achievements[i + 1] : null;
+                AchievementItem ach3 = i + 2 < achievements.Count ? achievements[i + 2] : null;
+                AchievementItem ach4 = i + 3 < achievements.Count ? achievements[i + 3] : null;
 
-                prefabComponent.SetAchievementSprites(sprite1, sprite2, sprite3, sprite4);
+                prefabComponent.SetAchievements(ach1, ach2, ach3, ach4);
             }
         }
     }
