@@ -96,4 +96,5 @@ public class Clicker : MonoBehaviour
             targetTransform.localScale = originalScale;
         resetCoroutine = null;
     }
+
 }
