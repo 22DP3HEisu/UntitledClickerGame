@@ -92,24 +92,57 @@ router.get('/stats', authenticateToken, isAdmin, async function(req, res, next) 
 // GET /admin/users - list all users with pagination
 router.get('/users', authenticateToken, isAdmin, async function(req, res, next) {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50;
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit) || 50)); // Cap at 1000 users
         const offset = (page - 1) * limit;
+        
+        console.log(`Admin users request: page=${page}, limit=${limit}, offset=${offset}`);
 
-        // Get total count
-        const countQuery = 'SELECT COUNT(*) as total FROM Users';
-        const countResult = await executeQuery(countQuery);
-        const totalUsers = countResult[0].total;
+        // We'll get the total count from the full query result
 
         // Get users with pagination
-        const usersQuery = `
-            SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, 
-                   CreatedAt, UpdatedAt, COALESCE(IsBanned, 0) as IsBanned
-            FROM Users 
-            ORDER BY CreatedAt DESC 
-            LIMIT ? OFFSET ?
-        `;
-        const users = await executeQuery(usersQuery, [limit, offset]);
+        // Alternative approach: get all users and slice in JavaScript (for smaller datasets)
+        // This avoids MySQL parameter binding issues with LIMIT/OFFSET
+        let users;
+        let totalUsers = 0;
+        
+        try {
+            // Try with IsBanned column first
+            const allUsersQuery = `
+                SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, 
+                       CreatedAt, UpdatedAt, COALESCE(IsBanned, 0) as IsBanned
+                FROM Users 
+                ORDER BY CreatedAt DESC
+            `;
+            const allUsers = await executeQuery(allUsersQuery);
+            totalUsers = allUsers.length;
+            
+            // Apply pagination in JavaScript
+            const startIndex = offset;
+            const endIndex = offset + limit;
+            users = allUsers.slice(startIndex, endIndex);
+            
+        } catch (err) {
+            if (err.message && err.message.includes('IsBanned')) {
+                // Fallback without IsBanned column
+                console.log('IsBanned column not found, using fallback query');
+                const fallbackQuery = `
+                    SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, 
+                           CreatedAt, UpdatedAt, 0 as IsBanned
+                    FROM Users 
+                    ORDER BY CreatedAt DESC
+                `;
+                const allUsers = await executeQuery(fallbackQuery);
+                totalUsers = allUsers.length;
+                
+                // Apply pagination in JavaScript
+                const startIndex = offset;
+                const endIndex = offset + limit;
+                users = allUsers.slice(startIndex, endIndex);
+            } else {
+                throw err;
+            }
+        }
 
         res.json({
             message: 'Users retrieved successfully',
