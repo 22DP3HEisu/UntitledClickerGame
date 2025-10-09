@@ -10,7 +10,7 @@ public class PassiveClickerShopItemUI : MonoBehaviour
     [SerializeField] private TMP_Text priceText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private Button buyButton;
-    [SerializeField] private SpriteRenderer wall;
+    [SerializeField] private Image wall;
 
     private int clickerIndex;
     private ShopUIManager shopManager;
@@ -26,6 +26,7 @@ public class PassiveClickerShopItemUI : MonoBehaviour
         levelText.text = $"Level: {data.level}";
         clickerIndex = index;
         shopManager = manager;
+
 
         buyButton.onClick.RemoveAllListeners();
         buyButton.onClick.AddListener(() => {
