@@ -7,7 +7,7 @@ public class Clicker : MonoBehaviour
     [Header("References")]
     [SerializeField] private Button clickButton;
     [SerializeField] public Transform targetTransform;
-    [SerializeField] public Transform HorseSprite;
+    [SerializeField] public Transform Sprite;
     [SerializeField] public ClickPopupSpawner popupSpawner;
 
     [Header("Animation")]
@@ -19,15 +19,12 @@ public class Clicker : MonoBehaviour
 
     void Start()
     {
-        if (HorseSprite != null)
-            originalScale = HorseSprite.localScale;
+        if (Sprite != null)
+            originalScale = Sprite.localScale;
         else if (targetTransform != null)
             originalScale = targetTransform.localScale;
         else
             originalScale = transform.localScale;
-
-        if (clickButton != null)
-            clickButton.onClick.AddListener(OnClick);
     }
 
     void OnEnable()
@@ -44,10 +41,10 @@ public class Clicker : MonoBehaviour
 
     private void OnClick()
     {
-        if (HorseSprite != null)
+        if (Sprite != null)
         {
             if (resetCoroutine != null) StopCoroutine(resetCoroutine);
-            HorseSprite.localScale = originalScale * scaleUpFactor;
+            Sprite.localScale = originalScale * scaleUpFactor;
             resetCoroutine = StartCoroutine(ResetScale());
         }
         else if (targetTransform != null)
@@ -74,8 +71,8 @@ public class Clicker : MonoBehaviour
         Vector2 popupPos = Vector2.zero;
         if (targetTransform != null)
             popupPos = (Vector2)targetTransform.position;
-        else if (HorseSprite != null)
-            popupPos = (Vector2)HorseSprite.position;
+        else if (Sprite != null)
+            popupPos = (Vector2)Sprite.position;
         else if (clickButton != null)
         {
             var cam = Camera.main;
@@ -90,8 +87,8 @@ public class Clicker : MonoBehaviour
     private IEnumerator ResetScale()
     {
         yield return new WaitForSeconds(scaleDuration);
-        if (HorseSprite != null)
-            HorseSprite.localScale = originalScale;
+        if (Sprite != null)
+            Sprite.localScale = originalScale;
         else if (targetTransform != null)
             targetTransform.localScale = originalScale;
         resetCoroutine = null;
