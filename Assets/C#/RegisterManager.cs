@@ -25,7 +25,7 @@ public class RegisterManager : MonoBehaviour
     [SerializeField] private int minPasswordLength = 6;
     
     [Header("Backend Settings")]
-    [SerializeField] private string backendUrl = "http://localhost:3000"; // Adjust this to your backend URL
+    [SerializeField] private string backendUrl = "http://92.5.105.149:3000"; // Adjust this to your backend URL
     
     void Start()
     {
