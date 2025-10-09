@@ -21,9 +21,6 @@ public class LoginManager : MonoBehaviour
     [Header("Validation Settings")]
     [SerializeField] private int minPasswordLength = 6;
     
-    [Header("Backend Settings")]
-    [SerializeField] private string backendUrl = "http://92.5.105.149:3000"; // Adjust this to your backend URL
-    
     [Header("Scene Settings")]
     [SerializeField] private string gameSceneName = "game";
     [SerializeField] private string introSceneName = "Intro";
@@ -144,79 +141,54 @@ public class LoginManager : MonoBehaviour
 
         Debug.Log($"Processing login for user: {usernameOrEmail}");
 
-        // Send login data to backend
-        StartCoroutine(LoginWithBackend(usernameOrEmail, password));
+        // Send login data to backend (async)
+        _ = LoginWithApiAsync(usernameOrEmail, password);
     }
-
-    private IEnumerator LoginWithBackend(string usernameOrEmail, string password)
+    private async System.Threading.Tasks.Task LoginWithApiAsync(string usernameOrEmail, string password)
     {
-        // Disable the login button to prevent multiple submissions
         if (loginButton != null)
             loginButton.interactable = false;
 
         ShowSuccessMessage("Logging in...");
 
-        // Create login data
-        var loginData = new LoginData
+        var loginData = new LoginData { username = usernameOrEmail, password = password };
+
+        try
         {
-            username = usernameOrEmail, // Backend accepts username or email in username field
-            password = password
-        };
+            var response = await ApiClient.PostAsync<LoginData, LoginResponse>("/auth/login", loginData);
 
-        string jsonData = JsonUtility.ToJson(loginData);
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+            // On success
+            ShowSuccessMessage("Login successful! Loading game...");
 
-        // Create UnityWebRequest
-        using (UnityWebRequest request = new UnityWebRequest($"{backendUrl}/auth/login", "POST"))
+            // Save user data and token (persist expiry for 7 days)
+            DateTime expiry = DateTime.UtcNow.AddDays(7);
+            SaveUserData(response.user.username, response.user.email, response.token);
+            ApiClient.SetAuthToken(response.token, expiry);
+
+            // Small delay then load game
+            await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(1.5));
+            UnityMainThreadDispatcher.Enqueue(() => SceneManager.LoadScene(gameSceneName));
+        }
+        catch (System.Threading.Tasks.TaskCanceledException)
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            // Send the request
-            yield return request.SendWebRequest();
-
-            // Re-enable the login button
+            ShowErrorMessage("Login cancelled.");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage(ex.Message ?? "An error occurred during login.");
+            Debug.LogError($"Login error: {ex}");
+        }
+        finally
+        {
             if (loginButton != null)
                 loginButton.interactable = true;
-
-            // Handle response
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                bool parseSuccess = false;
-                try
-                {
-                    var response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
-                    
-                    ShowSuccessMessage("Login successful! Loading game...");
-                    
-                    // Save user data locally
-                    SaveUserData(response.user.username, response.user.email, response.token);
-                    
-                    parseSuccess = true;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Error parsing login response: {e.Message}");
-                    ShowErrorMessage("Login completed but there was an error processing the response.");
-                }
-                
-                // Only redirect if parsing was successful (yield outside try-catch)
-                if (parseSuccess)
-                {
-                    // Wait a moment then redirect
-                    yield return new WaitForSeconds(1.5f);
-                    
-                    // Redirect to game scene
-                    SceneManager.LoadScene(gameSceneName);
-                }
-            }
-            else
-            {
-                // Handle different error types
-                HandleLoginError(request);
-            }
         }
+    }
+
+    private IEnumerator DelayedSceneLoad(string sceneName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene(sceneName);
     }
 
     private void HandleLoginError(UnityWebRequest request)

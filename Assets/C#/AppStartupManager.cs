@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -55,8 +56,50 @@ public class AppStartupManager : MonoBehaviour
             splashScreenUI.SetActive(false);
         }
         
-        // Check login status
-        PerformLoginCheck();
+    // Check login status (use async Task instead of coroutine)
+    _ = PerformStartupLoginVerification();
+    }
+
+    private async System.Threading.Tasks.Task PerformStartupLoginVerification()
+    {
+        // If loginCheckManager says logged in based on local checks, attempt server verification
+        if (loginCheckManager.IsPlayerLoggedIn())
+        {
+            try
+            {
+                var resp = await ApiClient.GetAsync<UserProfileResponse>("/user");
+
+                if (resp != null && resp.user != null)
+                {
+                    // Update saved user info on main thread
+                    UnityMainThreadDispatcher.Enqueue(() =>
+                    {
+                        PlayerPrefs.SetString("RegisteredUsername", resp.user.username ?? PlayerPrefs.GetString("RegisteredUsername", ""));
+                        PlayerPrefs.SetString("RegisteredEmail", resp.user.email ?? PlayerPrefs.GetString("RegisteredEmail", ""));
+                        PlayerPrefs.Save();
+                    });
+                }
+
+                Debug.Log($"Server verification succeeded. Welcome back, {resp.user?.username}!");
+                // Continue with normal flow (show welcome and load game)
+                PerformLoginCheck();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"Token verification failed: {ex.Message}");
+                // Clear local auth data and go to intro
+                PlayerPrefs.DeleteKey("AuthToken");
+                PlayerPrefs.DeleteKey("TokenExpiry");
+                PlayerPrefs.Save();
+
+                PerformLoginCheck();
+            }
+        }
+        else
+        {
+            // Not logged in locally — proceed with normal check which will route to intro
+            PerformLoginCheck();
+        }
     }
     
     private void PerformLoginCheck()

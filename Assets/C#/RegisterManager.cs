@@ -24,9 +24,6 @@ public class RegisterManager : MonoBehaviour
     [SerializeField] private int maxUsernameLength = 30;
     [SerializeField] private int minPasswordLength = 6;
     
-    [Header("Backend Settings")]
-    [SerializeField] private string backendUrl = "http://92.5.105.149:3000"; // Adjust this to your backend URL
-    
     void Start()
     {
         SetupButtons();
@@ -153,82 +150,53 @@ public class RegisterManager : MonoBehaviour
 
         Debug.Log($"Processing registration for user: {username}");
 
-        // Send registration data to backend
-        StartCoroutine(RegisterWithBackend(username, email, password));
+        // Send registration data to backend (async)
+        _ = RegisterWithApiAsync(username, email, password);
     }
-
-    private IEnumerator RegisterWithBackend(string username, string email, string password)
+    private async System.Threading.Tasks.Task RegisterWithApiAsync(string username, string email, string password)
     {
-        // Disable the register button to prevent multiple submissions
         if (registerButton != null)
             registerButton.interactable = false;
 
         ShowSuccessMessage("Creating account...");
 
-        // Create registration data
-        var registrationData = new RegistrationData
+        var registrationData = new RegistrationData { username = username, email = email, password = password };
+
+        try
         {
-            username = username,
-            email = email,
-            password = password
-        };
+            var response = await ApiClient.PostAsync<RegistrationData, RegistrationResponse>("/auth/register", registrationData);
 
-        string jsonData = JsonUtility.ToJson(registrationData);
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+            // Persist user data and token on main thread
+            UnityMainThreadDispatcher.Enqueue(() =>
+            {
+                // Persist user data and token with expiry (7 days)
+                SaveUserData(response.user.username, response.user.email, response.token);
+                ApiClient.SetAuthToken(response.token, DateTime.UtcNow.AddDays(7));
+            });
 
-        // Create UnityWebRequest
-        Debug.Log($"Sending registration request to: {backendUrl}/auth/register");
-        using (UnityWebRequest request = new UnityWebRequest($"{backendUrl}/auth/register", "POST"))
+            ShowSuccessMessage("Account created successfully! Redirecting to game...");
+
+            // wait then load scene on main thread
+            await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(2));
+            UnityMainThreadDispatcher.Enqueue(() => SceneManager.LoadScene("game"));
+        }
+        catch (System.Threading.Tasks.TaskCanceledException)
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            // Send the request
-            yield return request.SendWebRequest();
-
-            // Re-enable the register button
+            ShowErrorMessage("Registration cancelled.");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorMessage(ex.Message ?? "An error occurred during registration.");
+            Debug.LogError($"Registration error: {ex}");
+        }
+        finally
+        {
             if (registerButton != null)
                 registerButton.interactable = true;
-
-            // Handle response
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                bool parseSuccess = false;
-                try
-                {
-                    var response = JsonUtility.FromJson<RegistrationResponse>(request.downloadHandler.text);
-                    
-                    ShowSuccessMessage("Account created successfully! Redirecting to game...");
-                    
-                    // Save user data locally
-                    SaveUserData(response.user.username, response.user.email, response.token);
-                    
-                    parseSuccess = true;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Error parsing registration response: {e.Message}");
-                    ShowErrorMessage("Registration completed but there was an error processing the response.");
-                }
-                
-                // Only redirect if parsing was successful (yield outside try-catch)
-                if (parseSuccess)
-                {
-                    // Wait a moment then redirect
-                    yield return new WaitForSeconds(2f);
-                    
-                    // Redirect to login scene or main game
-                    SceneManager.LoadScene("game");
-                }
-            }
-            else
-            {
-                // Handle different error types
-                HandleRegistrationError(request);
-            }
         }
     }
+
+    // ...existing code...
 
     private void HandleRegistrationError(UnityWebRequest request)
     {

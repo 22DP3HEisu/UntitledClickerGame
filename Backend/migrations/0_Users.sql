@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS Users (
     Username VARCHAR(50) NOT NULL UNIQUE,
     Email VARCHAR(100) NOT NULL UNIQUE,
     PasswordHash VARCHAR(255) NOT NULL,
+    Role ENUM('User', 'Admin') DEFAULT 'User',
+    IsBanned TINYINT(1) DEFAULT 0,
     Carrots INT DEFAULT 0,
     HorseShoes INT DEFAULT 0,
     G_Carrots INT DEFAULT 0,
