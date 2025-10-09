@@ -1,45 +1,88 @@
-using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Clicker : MonoBehaviour
 {
-    public Transform targetTransform;
-    public Transform HorseSprite;
-    public ClickPopupSpawner popupSpawner;
+    [Header("References")]
+    [SerializeField] private Button clickButton;
+    [SerializeField] public Transform targetTransform;
+    [SerializeField] public Transform HorseSprite;
+    [SerializeField] public ClickPopupSpawner popupSpawner;
+
+    [Header("Animation")]
+    [SerializeField] private float scaleUpFactor = 1.2f;
+    [SerializeField] private float scaleDuration = 0.1f;
 
     private Vector3 originalScale;
-    public float scaleUpFactor = 1.2f;
-    public float scaleDuration = 0.1f;
+    private Coroutine resetCoroutine;
 
     void Start()
     {
-        originalScale = HorseSprite.localScale;
+        if (HorseSprite != null)
+            originalScale = HorseSprite.localScale;
+        else if (targetTransform != null)
+            originalScale = targetTransform.localScale;
+        else
+            originalScale = transform.localScale;
+
+        if (clickButton != null)
+            clickButton.onClick.AddListener(OnClick);
     }
 
-    void Update()
+    void OnEnable()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            Collider2D hit = Physics2D.OverlapPoint(mousePos);
-
-            if (hit != null && hit.transform == targetTransform)
-            {
-                HorseSprite.localScale = originalScale * scaleUpFactor;
-                StartCoroutine(ResetScale());
-
-                if (ClickManager.Instance != null)
-                    ClickManager.Instance.AddClicks(1);
-
-                if (popupSpawner != null)
-                    popupSpawner.SpawnPopup(mousePos, "+1");
-            }
-        }
+        if (clickButton != null)
+            clickButton.onClick.AddListener(OnClick);
     }
-    private System.Collections.IEnumerator ResetScale()
+
+    void OnDisable()
+    {
+        if (clickButton != null)
+            clickButton.onClick.RemoveListener(OnClick);
+    }
+
+    private void OnClick()
+    {
+        if (HorseSprite != null)
+        {
+            if (resetCoroutine != null) StopCoroutine(resetCoroutine);
+            HorseSprite.localScale = originalScale * scaleUpFactor;
+            resetCoroutine = StartCoroutine(ResetScale());
+        }
+        else if (targetTransform != null)
+        {
+            if (resetCoroutine != null) StopCoroutine(resetCoroutine);
+            targetTransform.localScale = originalScale * scaleUpFactor;
+            resetCoroutine = StartCoroutine(ResetScale());
+        }
+
+        if (ClickManager.Instance != null)
+            ClickManager.Instance.AddClicks(1);
+
+        Vector2 popupPos = Vector2.zero;
+        if (targetTransform != null)
+            popupPos = (Vector2)targetTransform.position;
+        else if (HorseSprite != null)
+            popupPos = (Vector2)HorseSprite.position;
+        else if (clickButton != null)
+        {
+            var cam = Camera.main;
+            if (cam != null)
+                popupPos = cam.ScreenToWorldPoint(clickButton.transform.position);
+        }
+
+        if (popupSpawner != null)
+            popupSpawner.SpawnPopup(popupPos, "+1");
+    }
+
+    private IEnumerator ResetScale()
     {
         yield return new WaitForSeconds(scaleDuration);
-        HorseSprite.localScale = originalScale;
+        if (HorseSprite != null)
+            HorseSprite.localScale = originalScale;
+        else if (targetTransform != null)
+            targetTransform.localScale = originalScale;
+        resetCoroutine = null;
     }
 }
