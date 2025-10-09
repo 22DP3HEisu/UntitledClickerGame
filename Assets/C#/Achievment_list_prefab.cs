@@ -3,42 +3,36 @@ using UnityEngine.UI;
 
 public class Achievment_list_prefab : MonoBehaviour
 {
-    // Sprites assigned by populator or in the Inspector
-    [SerializeField] public Sprite image;
-    [SerializeField] public Sprite image2;
-    [SerializeField] public Sprite image3;
-    [SerializeField] public Sprite image4;
-
     // UI Image components inside the prefab to display the sprites
-    [SerializeField] private Image clickerImage;
-    [SerializeField] private Image clickerImage2;
-    [SerializeField] private Image clickerImage3;
-    [SerializeField] private Image clickerImage4;
+    [SerializeField] private Image achievementImage1;
+    [SerializeField] private Image achievementImage2;
+    [SerializeField] private Image achievementImage3;
+    [SerializeField] private Image achievementImage4;
 
-    // Apply the assigned Sprite fields to the Image components
-    public void ApplyAssignedSprites()
+    // Set individual achievement sprites (pass null to hide that slot)
+    public void SetAchievementSprites(Sprite sprite1, Sprite sprite2, Sprite sprite3, Sprite sprite4)
     {
-        if (clickerImage != null && image != null) clickerImage.sprite = image;
-        if (clickerImage2 != null && image2 != null) clickerImage2.sprite = image2;
-        if (clickerImage3 != null && image3 != null) clickerImage3.sprite = image3;
-        if (clickerImage4 != null && image4 != null) clickerImage4.sprite = image4;
+        SetImageSprite(achievementImage1, sprite1);
+        SetImageSprite(achievementImage2, sprite2);
+        SetImageSprite(achievementImage3, sprite3);
+        SetImageSprite(achievementImage4, sprite4);
     }
 
-    // Convenience: allow setting all images at once
-    public void SetAllSprites(Sprite s1, Sprite s2, Sprite s3, Sprite s4)
+    private void SetImageSprite(Image imageComponent, Sprite sprite)
     {
-        image = s1;
-        image2 = s2;
-        image3 = s3;
-        image4 = s4;
-        ApplyAssignedSprites();
+        if (imageComponent != null)
+        {
+            if (sprite != null)
+            {
+                imageComponent.sprite = sprite;
+                imageComponent.enabled = true;
+                imageComponent.gameObject.SetActive(true);
+            }
+            else
+            {
+                // Hide the image if no sprite is provided
+                imageComponent.gameObject.SetActive(false);
+            }
+        }
     }
-
-#if UNITY_EDITOR
-    // For inspector preview when you change sprite fields in editor
-    private void OnValidate()
-    {
-        ApplyAssignedSprites();
-    }
-#endif
 }
