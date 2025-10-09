@@ -169,7 +169,7 @@ public class AchievementManager : MonoBehaviour
                     break;
 
                 case AchievementType.TotalCarrots:
-                    currentValue = ClickManager.Instance != null ? ClickManager.Instance.ClickCount : 0;
+                    currentValue = CurrencySyncManager.Instance != null ? CurrencySyncManager.Instance.Carrots : 0;
                     break;
 
                 case AchievementType.CarrotsPerSecond:

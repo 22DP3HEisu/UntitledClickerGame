@@ -1,13 +1,14 @@
 using UnityEngine;
 using TMPro;
 
-public class ClickCountText : MonoBehaviour
+public class CarrotCountText : MonoBehaviour
 {
-public TMP_Text clickCountText;
+public TMP_Text carrotCountText;
 
 void Update()
 {
-    clickCountText.text = FormatNumber(ClickManager.Instance.ClickCount);
+    int carrots = CurrencySyncManager.Instance != null ? CurrencySyncManager.Instance.Carrots : 0;
+    carrotCountText.text = FormatNumber(carrots);
 }
 
 string FormatNumber(int num)
