@@ -7,7 +7,7 @@ public TMP_Text clickCountText;
 
 void Update()
 {
-    clickCountText.text = FormatNumber(ClickManager.Instance.ClickCount) + " Clicks";
+    clickCountText.text = FormatNumber(ClickManager.Instance.ClickCount);
 }
 
 string FormatNumber(int num)

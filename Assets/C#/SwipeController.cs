@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System; // vajadzīgs EventAction
 
 public class SwipeController : MonoBehaviour, IEndDragHandler
 {
@@ -13,6 +14,8 @@ public class SwipeController : MonoBehaviour, IEndDragHandler
     [SerializeField] LeanTweenType tweenType;
     private float dragThreshold;
 
+    public event Action<int> OnPageChanged; // jauna notikuma sistēma
+
     private void Awake()
     {
         currentPage = 2;
@@ -20,24 +23,15 @@ public class SwipeController : MonoBehaviour, IEndDragHandler
         dragThreshold = Screen.width / 4;
     }
 
-    public void Next()
+    public void GoToPage(int pageNumber)
     {
-        if (currentPage < maxPage)
-        {
-            currentPage++;
-            targetPos += pageStep;
-            MovePage();
-        }
-    }
+        if (pageNumber < 1 || pageNumber > maxPage) return;
 
-    public void Previous()
-    {
-        if (currentPage > 1)
-        {
-            currentPage--;
-            targetPos -= pageStep;
-            MovePage();
-        }
+        int diff = pageNumber - currentPage;
+        targetPos += pageStep * diff;
+        currentPage = pageNumber;
+        MovePage();
+        OnPageChanged?.Invoke(currentPage); // paziņo, ka lapa mainīta
     }
 
     void MovePage()
@@ -49,12 +43,14 @@ public class SwipeController : MonoBehaviour, IEndDragHandler
     {
         if (Mathf.Abs(eventData.position.x - eventData.pressPosition.x) > dragThreshold)
         {
-            if (eventData.position.x < eventData.pressPosition.x) Next();
-            else Previous();
+            if (eventData.position.x < eventData.pressPosition.x) GoToPage(currentPage + 1);
+            else GoToPage(currentPage - 1);
         }
         else 
         {
             MovePage();
         }
     }
+
+    public int CurrentPage => currentPage;
 }
