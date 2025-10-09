@@ -153,7 +153,7 @@ public class AchievementManager : MonoBehaviour
         // Update achievement progress
         UpdateAchievementProgress();
     }
-
+    
     private void UpdateAchievementProgress()
     {
         foreach (var achievement in achievements)
@@ -305,6 +305,7 @@ public class AchievementManager : MonoBehaviour
     public void OnPlayerClick()
     {
         totalClicks++;
+        Debug.Log("OnPlayerClick called: " + totalClicks);
     }
 
     public void OnDailyCompleted()
