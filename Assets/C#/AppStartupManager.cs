@@ -49,55 +49,52 @@ public class AppStartupManager : MonoBehaviour
         Invoke(nameof(StartLoginCheck), splashDuration);
     }
     
-    private void StartLoginCheck()
+    private async void StartLoginCheck()
     {
         if (splashScreenUI != null)
         {
             splashScreenUI.SetActive(false);
         }
         
-    // Check login status (use async Task instead of coroutine)
-    _ = PerformStartupLoginVerification();
+        // Perform startup verification
+        await PerformStartupLoginVerification();
     }
 
     private async System.Threading.Tasks.Task PerformStartupLoginVerification()
     {
-        // If loginCheckManager says logged in based on local checks, attempt server verification
+        // If user appears logged in locally, verify with server
         if (loginCheckManager.IsPlayerLoggedIn())
         {
             try
             {
-                var resp = await ApiClient.GetAsync<UserProfileResponse>("/user");
+                var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
 
-                if (resp != null && resp.user != null)
+                if (response?.user != null)
                 {
-                    // Update saved user info on main thread
-                    UnityMainThreadDispatcher.Enqueue(() =>
-                    {
-                        PlayerPrefs.SetString("RegisteredUsername", resp.user.username ?? PlayerPrefs.GetString("RegisteredUsername", ""));
-                        PlayerPrefs.SetString("RegisteredEmail", resp.user.email ?? PlayerPrefs.GetString("RegisteredEmail", ""));
-                        PlayerPrefs.Save();
-                    });
+                    // Update saved user info
+                    PlayerPrefs.SetString("RegisteredUsername", response.user.username ?? PlayerPrefs.GetString("RegisteredUsername", ""));
+                    PlayerPrefs.SetString("RegisteredEmail", response.user.email ?? PlayerPrefs.GetString("RegisteredEmail", ""));
+                    PlayerPrefs.Save();
+
+                    Debug.Log($"Server verification succeeded. Welcome back, {response.user.username}!");
                 }
 
-                Debug.Log($"Server verification succeeded. Welcome back, {resp.user?.username}!");
-                // Continue with normal flow (show welcome and load game)
+                PerformLoginCheck();
+            }
+            catch (ApiException ex)
+            {
+                Debug.LogWarning($"Token verification failed: {ex.Message}");
+                // ApiClient will handle token clearing automatically
                 PerformLoginCheck();
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Token verification failed: {ex.Message}");
-                // Clear local auth data and go to intro
-                PlayerPrefs.DeleteKey("AuthToken");
-                PlayerPrefs.DeleteKey("TokenExpiry");
-                PlayerPrefs.Save();
-
+                Debug.LogWarning($"Server verification failed: {ex.Message}");
                 PerformLoginCheck();
             }
         }
         else
         {
-            // Not logged in locally — proceed with normal check which will route to intro
             PerformLoginCheck();
         }
     }
@@ -105,7 +102,6 @@ public class AppStartupManager : MonoBehaviour
     private void PerformLoginCheck()
     {
         // Force show intro for testing
-        Debug.Log(forceShowIntro);
         if (forceShowIntro)
         {
             Debug.Log("Force show intro is enabled. Going to intro scene.");
@@ -117,10 +113,10 @@ public class AppStartupManager : MonoBehaviour
         if (loginCheckManager.IsPlayerLoggedIn())
         {
             UserInfo userInfo = loginCheckManager.GetCurrentUserInfo();
-            Debug.Log($"Welcome back, {userInfo.username}! Loading game...");
+            Debug.Log($"Welcome back, {userInfo?.username}! Loading game...");
             
-            // Optional: Show a "Welcome back" message briefly
-            ShowWelcomeBack(userInfo.username);
+            // Show welcome message briefly then load game
+            ShowWelcomeBack(userInfo?.username ?? "User");
         }
         else
         {
@@ -181,9 +177,10 @@ public class AppStartupManager : MonoBehaviour
         PlayerPrefs.DeleteKey("RegisteredUsername");
         PlayerPrefs.DeleteKey("RegisteredEmail");
         PlayerPrefs.DeleteKey("IsRegistered");
-        PlayerPrefs.DeleteKey("AuthToken");
-        PlayerPrefs.DeleteKey("TokenExpiry");
         PlayerPrefs.Save();
+        
+        // Use centralized token management
+        ApiClient.ClearAuthToken();
         
         Debug.Log("All user data cleared! You can now test registration/login again.");
     }
@@ -192,9 +189,8 @@ public class AppStartupManager : MonoBehaviour
     [ContextMenu("Clear Auth Token Only")]
     public void ClearAuthTokenOnly()
     {
-        PlayerPrefs.DeleteKey("AuthToken");
-        PlayerPrefs.DeleteKey("TokenExpiry");
-        PlayerPrefs.Save();
+        // Use centralized token management
+        ApiClient.ClearAuthToken();
         
         Debug.Log("Auth token cleared! User will need to login again but registration data is kept.");
     }

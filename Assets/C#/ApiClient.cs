@@ -1,31 +1,183 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
-/// Static API client that provides Task-based async methods for HTTP requests.
-/// Use ApiClient.PostAsync / ApiClient.GetAsync. These wrappers run UnityWebRequest
-/// and return Task&lt;TResponse&gt; suitable for async/await usage.
+/// Clean and maintainable API client for Unity with authentication support.
+/// Provides simple async HTTP methods with automatic token handling and refresh logic.
 /// </summary>
 public static class ApiClient
 {
     public static string BaseUrl = "http://92.5.105.149:3000";
+    
     /// <summary>
-    /// Optional async function that will be called to attempt refreshing the auth token when a request receives 401.
-    /// Should return true if refresh succeeded and a new token was stored (via SetAuthToken).
-    /// Application code should assign this at startup if refresh is supported by backend.
+    /// Optional callback for token refresh. Should return true if refresh succeeded.
     /// </summary>
-    public static Func<System.Threading.Tasks.Task<bool>> RefreshTokenAsync;
-
+    public static Func<Task<bool>> OnTokenRefresh;
+    
     /// <summary>
-    /// Optional callback invoked when token is determined to be expired/invalid and refresh failed.
-    /// Use this to navigate to login UI or clear sensitive state.
+    /// Optional callback when token expires and cannot be refreshed.
     /// </summary>
     public static Action OnTokenExpired;
 
+    // Public API Methods
+    public static Task<TResponse> GetAsync<TResponse>(string path, CancellationToken cancellationToken = default)
+        => SendRequestAsync<TResponse>("GET", path, null, cancellationToken);
 
-    // URL builder used by async wrappers
-    internal static string BuildUrl(string path)
+    public static Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken cancellationToken = default)
+        => SendRequestAsync<TResponse>("POST", path, body, cancellationToken);
+
+    public static Task<TResponse> PutAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken cancellationToken = default)
+        => SendRequestAsync<TResponse>("PUT", path, body, cancellationToken);
+
+    public static Task DeleteAsync(string path, CancellationToken cancellationToken = default)
+        => SendRequestAsync<object>("DELETE", path, null, cancellationToken);
+
+    // Token Management
+    public static void SetAuthToken(string token, DateTime? expiryUtc = null)
+    {
+        AuthTokenManager.SetToken(token, expiryUtc);
+    }
+
+    public static void ClearAuthToken()
+    {
+        AuthTokenManager.ClearToken();
+    }
+
+    public static bool IsTokenValid()
+    {
+        return AuthTokenManager.IsTokenValid();
+    }
+
+    // Core Request Logic
+    private static async Task<TResponse> SendRequestAsync<TResponse>(string method, string path, object body, CancellationToken cancellationToken)
+    {
+        const int maxRetries = 1;
+        bool hasAttemptedRefresh = false;
+
+        for (int attempt = 0; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                using (var request = CreateRequest(method, path, body))
+                {
+                    var response = await ExecuteRequestAsync<TResponse>(request, cancellationToken);
+                    return response;
+                }
+            }
+            catch (ApiException ex) when (ex.StatusCode == 401 && !hasAttemptedRefresh && OnTokenRefresh != null)
+            {
+                hasAttemptedRefresh = true;
+                
+                try
+                {
+                    bool refreshSuccess = await OnTokenRefresh();
+                    if (refreshSuccess)
+                    {
+                        continue; // Retry the request
+                    }
+                }
+                catch (Exception refreshEx)
+                {
+                    Debug.LogWarning($"Token refresh failed: {refreshEx.Message}");
+                }
+
+                // Refresh failed, clear token and notify
+                AuthTokenManager.ClearToken();
+                OnTokenExpired?.Invoke();
+                throw;
+            }
+        }
+
+        throw new InvalidOperationException("Should not reach here");
+    }
+
+    private static UnityWebRequest CreateRequest(string method, string path, object body)
+    {
+        string url = BuildUrl(path);
+        UnityWebRequest request;
+
+        if (method == "GET")
+        {
+            request = UnityWebRequest.Get(url);
+        }
+        else
+        {
+            request = new UnityWebRequest(url, method);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            if (body != null)
+            {
+                string jsonData = JsonUtility.ToJson(body);
+                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.SetRequestHeader("Content-Type", "application/json");
+            }
+        }
+
+        // Add auth header if token is valid
+        if (AuthTokenManager.IsTokenValid())
+        {
+            string token = AuthTokenManager.GetToken();
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.SetRequestHeader("Authorization", $"Bearer {token}");
+            }
+        }
+
+        return request;
+    }
+
+    private static async Task<TResponse> ExecuteRequestAsync<TResponse>(UnityWebRequest request, CancellationToken cancellationToken)
+    {
+        var tcs = new TaskCompletionSource<TResponse>();
+        
+        // Handle cancellation
+        cancellationToken.Register(() =>
+        {
+            if (!request.isDone)
+            {
+                request.Abort();
+            }
+            tcs.TrySetCanceled();
+        });
+
+        var operation = request.SendWebRequest();
+        
+        operation.completed += _ =>
+        {
+            try
+            {
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    if (typeof(TResponse) == typeof(object))
+                    {
+                        tcs.TrySetResult(default(TResponse)); // For DELETE requests that don't return data
+                    }
+                    else
+                    {
+                        var response = JsonUtility.FromJson<TResponse>(request.downloadHandler.text);
+                        tcs.TrySetResult(response);
+                    }
+                }
+                else
+                {
+                    var apiException = CreateApiException(request);
+                    tcs.TrySetException(apiException);
+                }
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        };
+
+        return await tcs.Task;
+    }
+
+    private static string BuildUrl(string path)
     {
         if (string.IsNullOrEmpty(path)) return BaseUrl;
         if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
@@ -33,75 +185,101 @@ public static class ApiClient
         return BaseUrl.TrimEnd('/') + "/" + path;
     }
 
-    internal static string ParseRequestError(UnityWebRequest request)
+    private static ApiException CreateApiException(UnityWebRequest request)
     {
+        string message = "Unknown error";
+        
         if (request.result == UnityWebRequest.Result.ConnectionError)
         {
-            Debug.LogError($"ApiClient: Connection error: {request.error}");
-            return "Cannot connect to server. Please check your internet connection.";
-        }
-
-        try
-        {
-            var text = request.downloadHandler?.text ?? "";
-            var err = JsonUtility.FromJson<ErrorResponse>(text);
-            if (!string.IsNullOrEmpty(err.message)) return err.message;
-            if (!string.IsNullOrEmpty(err.error)) return err.error;
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"ApiClient: Failed to parse error body: {e.Message}");
-        }
-
-        return $"Server error: {request.responseCode}";
-    }
-
-    /// <summary>
-    /// Save or clear the auth token. Optionally persist an expiry time (UTC binary string).
-    /// If expiry is null the token will be saved without an expiry (caller assumes responsibility).
-    /// </summary>
-    public static void SetAuthToken(string token, DateTime? expiryUtc = null)
-    {
-        if (!string.IsNullOrEmpty(token))
-        {
-            PlayerPrefs.SetString("AuthToken", token);
-            if (expiryUtc.HasValue)
-            {
-                PlayerPrefs.SetString("TokenExpiry", expiryUtc.Value.ToBinary().ToString());
-            }
+            message = "Cannot connect to server. Please check your internet connection.";
         }
         else
         {
-            PlayerPrefs.DeleteKey("AuthToken");
-            PlayerPrefs.DeleteKey("TokenExpiry");
+            try
+            {
+                var errorResponse = JsonUtility.FromJson<ErrorResponse>(request.downloadHandler?.text ?? "");
+                message = errorResponse?.message ?? errorResponse?.error ?? $"Server error: {request.responseCode}";
+            }
+            catch
+            {
+                message = $"Server error: {request.responseCode}";
+            }
         }
 
-        PlayerPrefs.Save();
+        return new ApiException(message, (int)request.responseCode);
     }
 
-    /// <summary>
-    /// Clear stored auth token and expiry.
-    /// </summary>
-    public static void ClearAuthToken()
+    // Helper Classes
+    [Serializable]
+    private class ErrorResponse
     {
-        PlayerPrefs.DeleteKey("AuthToken");
-        PlayerPrefs.DeleteKey("TokenExpiry");
-        PlayerPrefs.Save();
+        public string error;
+        public string message;
+    }
+}
+
+/// <summary>
+/// Handles authentication token storage and validation.
+/// </summary>
+public static class AuthTokenManager
+{
+    private const string TokenKey = "AuthToken";
+    private const string ExpiryKey = "TokenExpiry";
+
+    public static void SetToken(string token, DateTime? expiryUtc = null)
+    {
+        ExecuteOnMainThread(() =>
+        {
+            if (!string.IsNullOrEmpty(token))
+            {
+                PlayerPrefs.SetString(TokenKey, token);
+                if (expiryUtc.HasValue)
+                {
+                    PlayerPrefs.SetString(ExpiryKey, expiryUtc.Value.ToBinary().ToString());
+                }
+            }
+            else
+            {
+                ClearTokenInternal();
+            }
+            PlayerPrefs.Save();
+        });
     }
 
-    /// <summary>
-    /// Get the stored token expiry in UTC if present. Returns null if missing or unparsable.
-    /// </summary>
-    public static DateTime? GetTokenExpiry()
+    public static void ClearToken()
     {
-        string raw = PlayerPrefs.GetString("TokenExpiry", "");
+        ExecuteOnMainThread(() =>
+        {
+            ClearTokenInternal();
+            PlayerPrefs.Save();
+        });
+    }
+
+    public static string GetToken()
+    {
+        return PlayerPrefs.GetString(TokenKey, "");
+    }
+
+    public static bool IsTokenValid()
+    {
+        string token = GetToken();
+        if (string.IsNullOrEmpty(token)) return false;
+
+        var expiry = GetTokenExpiry();
+        if (!expiry.HasValue) return true; // No expiry set
+
+        return DateTime.UtcNow < expiry.Value;
+    }
+
+    private static DateTime? GetTokenExpiry()
+    {
+        string raw = PlayerPrefs.GetString(ExpiryKey, "");
         if (string.IsNullOrEmpty(raw)) return null;
 
         try
         {
-            long bin = Convert.ToInt64(raw);
-            DateTime dt = DateTime.FromBinary(bin);
-            return dt.ToUniversalTime();
+            long binary = Convert.ToInt64(raw);
+            return DateTime.FromBinary(binary).ToUniversalTime();
         }
         catch
         {
@@ -109,207 +287,35 @@ public static class ApiClient
         }
     }
 
-    /// <summary>
-    /// Returns true if an auth token exists and the expiry (if set) is still in the future.
-    /// If no expiry is set the token is considered valid (caller responsibility to refresh when needed).
-    /// </summary>
-    public static bool IsTokenValid()
+    private static void ClearTokenInternal()
     {
-        string token = PlayerPrefs.GetString("AuthToken", "");
-        if (string.IsNullOrEmpty(token)) return false;
-
-        var expiry = GetTokenExpiry();
-        if (!expiry.HasValue) return true;
-
-        // Compare in UTC
-        return DateTime.UtcNow < expiry.Value;
+        PlayerPrefs.DeleteKey(TokenKey);
+        PlayerPrefs.DeleteKey(ExpiryKey);
     }
 
-    [Serializable]
-    private class ErrorResponse
+    private static void ExecuteOnMainThread(System.Action action)
     {
-        public string error;
-        public string message;
-    }
-
-    public class ApiUnauthorizedException : Exception
-    {
-        public ApiUnauthorizedException(string message) : base(message) { }
-    }
-
-    // -------------------- Async wrappers --------------------
-    public static System.Threading.Tasks.Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, System.Threading.CancellationToken cancellationToken = default)
-    {
-        return SendWithRefreshAsync(async () =>
+        try
         {
-            var tcs = new System.Threading.Tasks.TaskCompletionSource<TResponse>(System.Threading.Tasks.TaskCreationOptions.RunContinuationsAsynchronously);
-
-            string url = BuildUrl(path);
-            string jsonData = JsonUtility.ToJson(body);
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-
-            UnityWebRequest request = new UnityWebRequest(url, "POST");
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            // Only attach token if present and not expired
-            if (IsTokenValid())
-            {
-                string token = PlayerPrefs.GetString("AuthToken", "");
-                if (!string.IsNullOrEmpty(token))
-                    request.SetRequestHeader("Authorization", $"Bearer {token}");
-            }
-
-            var operation = request.SendWebRequest();
-
-            if (cancellationToken != default)
-            {
-                cancellationToken.Register(() =>
-                {
-                    if (!operation.isDone)
-                        request.Abort();
-                    tcs.TrySetCanceled();
-                });
-            }
-
-            operation.completed += _ =>
-            {
-                try
-                {
-                    if (request.result == UnityWebRequest.Result.Success)
-                    {
-                        var resp = JsonUtility.FromJson<TResponse>(request.downloadHandler.text);
-                        tcs.TrySetResult(resp);
-                    }
-                    else
-                    {
-                        var msg = ParseRequestError(request);
-                        tcs.TrySetException(new Exception(msg));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    tcs.TrySetException(ex);
-                }
-                finally
-                {
-                    request.Dispose();
-                }
-            };
-
-            return await tcs.Task.ConfigureAwait(false);
-        }, cancellationToken);
-    }
-
-    public static System.Threading.Tasks.Task<TResponse> GetAsync<TResponse>(string path, System.Threading.CancellationToken cancellationToken = default)
-    {
-        return SendWithRefreshAsync(async () =>
-        {
-            var tcs = new System.Threading.Tasks.TaskCompletionSource<TResponse>(System.Threading.Tasks.TaskCreationOptions.RunContinuationsAsynchronously);
-
-            string url = BuildUrl(path);
-            UnityWebRequest request = UnityWebRequest.Get(url);
-            request.downloadHandler = new DownloadHandlerBuffer();
-
-            // Only attach token if present and not expired
-            if (IsTokenValid())
-            {
-                string token = PlayerPrefs.GetString("AuthToken", "");
-                if (!string.IsNullOrEmpty(token))
-                    request.SetRequestHeader("Authorization", $"Bearer {token}");
-            }
-
-            var operation = request.SendWebRequest();
-
-            if (cancellationToken != default)
-            {
-                cancellationToken.Register(() =>
-                {
-                    if (!operation.isDone)
-                        request.Abort();
-                    tcs.TrySetCanceled();
-                });
-            }
-
-            operation.completed += _ =>
-            {
-                try
-                {
-                    if (request.result == UnityWebRequest.Result.Success)
-                    {
-                        var resp = JsonUtility.FromJson<TResponse>(request.downloadHandler.text);
-                        tcs.TrySetResult(resp);
-                    }
-                    else
-                    {
-                        var msg = ParseRequestError(request);
-                        tcs.TrySetException(new Exception(msg));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    tcs.TrySetException(ex);
-                }
-                finally
-                {
-                    request.Dispose();
-                }
-            };
-
-            return await tcs.Task.ConfigureAwait(false);
-        }, cancellationToken);
-    }
-
-    // Generic helper that runs the request factory, and on 401 attempts a refresh via RefreshTokenAsync once
-    private static async System.Threading.Tasks.Task<TResult> SendWithRefreshAsync<TResult>(Func<System.Threading.Tasks.Task<TResult>> requestFactory, System.Threading.CancellationToken cancellationToken)
-    {
-        bool attemptedRefresh = false;
-
-        while (true)
-        {
-            try
-            {
-                return await requestFactory().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                // If we can detect a 401, attempt refresh. UnityWebRequest errors are wrapped as Exception with message from ParseRequestError.
-                // Since ParseRequestError returns a message string, we need a more robust way: detect "401" text in the message or specialized exception.
-                string msg = ex.Message ?? "";
-                bool is401 = msg.Contains("401") || msg.ToLowerInvariant().Contains("unauthorized");
-
-                if (is401 && !attemptedRefresh && RefreshTokenAsync != null)
-                {
-                    attemptedRefresh = true;
-                    try
-                    {
-                        bool refreshed = await RefreshTokenAsync().ConfigureAwait(false);
-                        if (refreshed)
-                        {
-                            // retry the request
-                            continue;
-                        }
-                    }
-                    catch (Exception refreshEx)
-                    {
-                        Debug.LogWarning($"ApiClient: Refresh attempt failed: {refreshEx}");
-                    }
-                }
-
-                // If we reach here, refresh either not attempted, failed, or not supported. Clear token and notify.
-                ClearAuthToken();
-                try
-                {
-                    OnTokenExpired?.Invoke();
-                }
-                catch (Exception cbEx)
-                {
-                    Debug.LogError($"ApiClient: OnTokenExpired callback threw: {cbEx}");
-                }
-
-                throw new ApiUnauthorizedException("Unauthorized - token expired or invalid.");
-            }
+            action();
         }
+        catch (UnityException ex) when (ex.Message.Contains("main thread"))
+        {
+            // Marshal to main thread if needed
+            UnityMainThreadDispatcher.Enqueue(action);
+        }
+    }
+}
+
+/// <summary>
+/// Exception thrown by API operations.
+/// </summary>
+public class ApiException : Exception
+{
+    public int StatusCode { get; }
+
+    public ApiException(string message, int statusCode = 0) : base(message)
+    {
+        StatusCode = statusCode;
     }
 }
