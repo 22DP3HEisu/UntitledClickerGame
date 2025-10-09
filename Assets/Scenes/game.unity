@@ -3449,6 +3449,19 @@ MonoBehaviour:
     temporaryDuration: 0
     isCompleted: 0
     currentProgress: 0
+  - id: 4
+    achievementName: Farm Master
+    description: Have 10000 Total Carrots
+    icon: {fileID: -5299341983969237341, guid: b30e18834b3d7cb4d85d92125c43039e, type: 3}
+    type: 1
+    targetValue: 10000
+    targetBuildingName: 
+    rewardType: 0
+    boostTarget: 0
+    rewardValue: 5
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
 --- !u!4 &1281315010
 Transform:
   m_ObjectHideFlags: 0
