@@ -11,20 +11,24 @@ public class AchievmentListPopulator : MonoBehaviour
         if (AchievementManager.Instance == null) return;
 
         var achievements = AchievementManager.Instance.GetAllAchievements();
-        for (int i = 0; i < achievements.Count; i++)
+
+        if (achievements == null || achievements.Count == 0) return;
+
+        // Group achievements into sets of 4
+        for (int i = 0; i < achievements.Count; i += 4)
         {
             var go = Instantiate(achievementPrefab, parentTransform);
-            var dataHolder = go.GetComponent<Achievment_list_prefab>();
-            if (dataHolder != null)
-            {
-                // populate sprite fields (you can assign different sprites if AchievementItem exposes them)
-                dataHolder.image = achievements[i].icon;
-                dataHolder.image2 = achievements[i].icon;
-                dataHolder.image3 = achievements[i].icon;
-                dataHolder.image4 = achievements[i].icon;
+            var prefabComponent = go.GetComponent<Achievment_list_prefab>();
 
-                // ensure UI Images inside prefab are updated
-                dataHolder.ApplyAssignedSprites();
+            if (prefabComponent != null)
+            {
+                // Get up to 4 achievements for this prefab instance
+                Sprite sprite1 = i < achievements.Count ? achievements[i].icon : null;
+                Sprite sprite2 = i + 1 < achievements.Count ? achievements[i + 1].icon : null;
+                Sprite sprite3 = i + 2 < achievements.Count ? achievements[i + 2].icon : null;
+                Sprite sprite4 = i + 3 < achievements.Count ? achievements[i + 3].icon : null;
+
+                prefabComponent.SetAchievementSprites(sprite1, sprite2, sprite3, sprite4);
             }
         }
     }
