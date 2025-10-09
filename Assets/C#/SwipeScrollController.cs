@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
-using System.Reflection;
 
 public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -17,15 +16,8 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
     private bool swipeDetected;
     private bool isReady = false;
 
-    private FieldInfo pointerStartLocalCursorField;
-    private FieldInfo contentStartPositionField;
-
     void Awake()
     {
-        // Prepare reflection to patch ScrollRect private fields
-        pointerStartLocalCursorField = typeof(ScrollRect).GetField("m_PointerStartLocalCursor", BindingFlags.NonPublic | BindingFlags.Instance);
-        contentStartPositionField = typeof(ScrollRect).GetField("m_ContentStartPosition", BindingFlags.NonPublic | BindingFlags.Instance);
-
         StartCoroutine(InitializeAfterDelay());
     }
 
@@ -33,20 +25,11 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
     {
         yield return new WaitForEndOfFrame();
 
-        if (horizontalScrollView != null)
-        {
-            horizontalScrollView.StopMovement();
-            horizontalScrollView.enabled = false;
-        }
-        if (verticalScrollView != null)
-        {
-            verticalScrollView.StopMovement();
-            verticalScrollView.enabled = false;
-        }
+        SafeStopAndDisable(horizontalScrollView, "horizontal (init)");
+        SafeStopAndDisable(verticalScrollView, "vertical (init)");
 
         yield return new WaitForSeconds(startDelay);
         isReady = true;
-        Debug.Log("[SwipeController] Ready for input");
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -58,11 +41,8 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
         isHorizontalSwipe = false;
         isVerticalSwipe = false;
 
-        horizontalScrollView?.StopMovement();
-        verticalScrollView?.StopMovement();
-
-        horizontalScrollView.enabled = false;
-        verticalScrollView.enabled = false;
+        SafeStopAndDisable(horizontalScrollView, "horizontal (begin)");
+        SafeStopAndDisable(verticalScrollView, "vertical (begin)");
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -71,10 +51,14 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
 
         if (swipeDetected)
         {
-            if (isHorizontalSwipe && horizontalScrollView.enabled)
+            if (isHorizontalSwipe && horizontalScrollView != null && horizontalScrollView.enabled)
+            {
                 horizontalScrollView.OnDrag(eventData);
-            else if (isVerticalSwipe && verticalScrollView.enabled)
+            }
+            else if (isVerticalSwipe && verticalScrollView != null && verticalScrollView.enabled)
+            {
                 verticalScrollView.OnDrag(eventData);
+            }
             return;
         }
 
@@ -89,49 +73,39 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
             if (horizontalDistance > verticalDistance)
             {
                 isHorizontalSwipe = true;
-                EnableScroll(horizontalScrollView, eventData);
+                if (horizontalScrollView != null)
+                {
+                    horizontalScrollView.StopMovement();
+                    horizontalScrollView.velocity = Vector2.zero;
+                    horizontalScrollView.enabled = true;
+                    horizontalScrollView.OnBeginDrag(eventData);
+                }
             }
             else
             {
                 isVerticalSwipe = true;
-                EnableScroll(verticalScrollView, eventData);
+                if (verticalScrollView != null)
+                {
+                    verticalScrollView.StopMovement();
+                    verticalScrollView.velocity = Vector2.zero;
+                    verticalScrollView.enabled = true;
+                    verticalScrollView.OnBeginDrag(eventData);
+                }
             }
         }
-    }
-
-    private void EnableScroll(ScrollRect scroll, PointerEventData eventData)
-    {
-        if (scroll == null) return;
-
-        scroll.StopMovement();
-        scroll.velocity = Vector2.zero;
-        scroll.enabled = true;
-
-        // --- Fix snap: manually set starting drag data ---
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            scroll.viewport ?? scroll.GetComponent<RectTransform>(),
-            eventData.position,
-            eventData.pressEventCamera,
-            out Vector2 localCursor);
-
-        pointerStartLocalCursorField?.SetValue(scroll, localCursor);
-        contentStartPositionField?.SetValue(scroll, scroll.content.anchoredPosition);
-        // --------------------------------------------------
-
-        scroll.OnBeginDrag(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!isReady) return;
 
-        if (isHorizontalSwipe && horizontalScrollView.enabled)
+        if (isHorizontalSwipe && horizontalScrollView != null && horizontalScrollView.enabled)
         {
             horizontalScrollView.OnEndDrag(eventData);
             horizontalScrollView.StopMovement();
             horizontalScrollView.enabled = false;
         }
-        else if (isVerticalSwipe && verticalScrollView.enabled)
+        else if (isVerticalSwipe && verticalScrollView != null && verticalScrollView.enabled)
         {
             verticalScrollView.OnEndDrag(eventData);
             verticalScrollView.StopMovement();
@@ -141,5 +115,14 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
         swipeDetected = false;
         isHorizontalSwipe = false;
         isVerticalSwipe = false;
+    }
+
+    private void SafeStopAndDisable(ScrollRect sr, string tag)
+    {
+        if (sr == null) return;
+
+        sr.StopMovement();
+        sr.velocity = Vector2.zero;
+        sr.enabled = false;
     }
 }
