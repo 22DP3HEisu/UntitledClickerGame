@@ -227,8 +227,9 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.99999994
+
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3389,25 +3390,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PassiveClickerManager
   passiveClickers:
-  - name: Skibid 1
-    description: Herbis
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 10
+  - name: Carrot farm
+    description: A small farm of carrots
+    image: {fileID: -4427432344427554974, guid: f63cf079c9377494da550ae65d97c857, type: 3}
+    startPrice: 1000
     level: 0
-    clicksPerSecond: 1
-  - name: Skibid 2
-    description: Herbis 2
+    clicksPerSecond: 10
+  - name: Dancers
+    description: Devoted dancers to carrot god
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
     startPrice: 100
     level: 0
-    clicksPerSecond: 10
-  - name: Skibid 3
-    description: Herbis 3
+    clicksPerSecond: 1
+  - name: City ruins
+    description: A once Famous city for its carrot aguculture
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 200
+    startPrice: 5000
     level: 0
-    clicksPerSecond: 15
-  - name: Skibid 4
+    clicksPerSecond: 25
+  - name: City hall
     description: Herbis 4
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
     startPrice: 300
