@@ -227,9 +227,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2225,6 +2224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 657079931}
   - component: {fileID: 657079932}
+  - component: {fileID: 657079933}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
@@ -2279,6 +2279,29 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!223 &657079933
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 657079930}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 100
+  m_TargetDisplay: 0
 --- !u!1 &742896127
 GameObject:
   m_ObjectHideFlags: 0
@@ -3390,18 +3413,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PassiveClickerManager
   passiveClickers:
-  - name: Carrot farm
-    description: A small farm of carrots
-    image: {fileID: -4427432344427554974, guid: f63cf079c9377494da550ae65d97c857, type: 3}
-    startPrice: 1000
-    level: 0
-    clicksPerSecond: 10
   - name: Dancers
     description: Devoted dancers to carrot god
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
     startPrice: 100
     level: 0
     clicksPerSecond: 1
+  - name: Carrot farm
+    description: A small farm of carrots
+    image: {fileID: -4427432344427554974, guid: f63cf079c9377494da550ae65d97c857, type: 3}
+    startPrice: 1000
+    level: 0
+    clicksPerSecond: 10
   - name: City ruins
     description: A once Famous city for its carrot aguculture
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
@@ -3411,31 +3434,31 @@ MonoBehaviour:
   - name: City hall
     description: Herbis 4
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 300
+    startPrice: 30000
     level: 0
     clicksPerSecond: 20
   - name: Skibid 5
     description: Herbis 5
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 500
+    startPrice: 50000
     level: 0
     clicksPerSecond: 35
   - name: Skibid 6
     description: Herbis 6
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 700
+    startPrice: 70000
     level: 0
     clicksPerSecond: 50
   - name: Skibid 7
     description: Herbis 7
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 2000
+    startPrice: 200000
     level: 0
     clicksPerSecond: 150
   - name: Skibid 8
     description: Herbis 8
     image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
-    startPrice: 5000
+    startPrice: 500000
     level: 0
     clicksPerSecond: 150
   tickInterval: 1
