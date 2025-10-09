@@ -1,141 +1,161 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Collections;
 
 public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private Button Achievments;
     [SerializeField] private Transform SettingsPanel;
-
     [SerializeField] private int pageNumber;
-    [SerializeField] private Sprite activeSprite;
-    [SerializeField] private Sprite inactiveSprite;
 
     // msg controls whether clicking opens the settings panel (1 = enabled)
     [SerializeField] private int msg = 0;
 
     private Vector3 startScale;
-    private Image image;
+
+    private Sprite originalSprite;
+    private Color originalColor;
+
+    // canvas/raycaster used to keep popup above the panel without changing hierarchy
+    private Canvas popupCanvas;
+    private bool hadCanvas;
+    private bool createdCanvas;
+    private int originalSortingOrder;
+    private bool originalOverrideSorting;
+
+    private GraphicRaycaster popupGraphicRaycaster;
+    private bool createdGraphicRaycaster;
 
     private void Awake()
     {
         startScale = transform.localScale;
-        image = GetComponent<Image>();
 
-        Debug.Log($"[SettingsPopUp] Awake - msg={msg}, startScale={startScale}, image={(image != null ? "found" : "null")}");
 
-        // If there's no Image (so Unity UI can't receive pointer events), add a transparent Image so UI raycasts work.
-        if (image == null)
-        {
-            // Ensure a CanvasRenderer exists (required by UI Graphic components)
-            if (GetComponent<CanvasRenderer>() == null)
-                gameObject.AddComponent<CanvasRenderer>();
-
-            image = gameObject.AddComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0f); // fully transparent, visible to raycasts
-            image.raycastTarget = true;
-
-            Debug.Log("[SettingsPopUp] Awake - Image was missing. Added transparent Image so clicks register.");
-        }
-
-        if (SettingsPanel == null)
-        {
-            Debug.LogWarning("[SettingsPopUp] Awake - SettingsPanel reference is NULL. Assign it in the inspector.");
-        }
-        else
-        {
-            bool wasActive = SettingsPanel.gameObject.activeSelf;
+        // Ensure settings panel starts closed
+        if (SettingsPanel != null)
             SettingsPanel.gameObject.SetActive(false);
-            Debug.Log($"[SettingsPopUp] Awake - SettingsPanel wasActive={wasActive} -> forcibly set to false");
+
+        // cache canvas state so we can restore it on close
+        popupCanvas = GetComponent<Canvas>();
+        hadCanvas = popupCanvas != null;
+        if (hadCanvas)
+        {
+            originalSortingOrder = popupCanvas.sortingOrder;
+            originalOverrideSorting = popupCanvas.overrideSorting;
         }
-
-        // Check for EventSystem and Canvas GraphicRaycaster presence (common causes of non-clickable UI)
-        if (FindObjectOfType<EventSystem>() == null)
-            Debug.LogWarning("[SettingsPopUp] Awake - No EventSystem found in scene. Add one via GameObject -> UI -> Event System.");
-
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-            Debug.LogWarning("[SettingsPopUp] Awake - No parent Canvas found. UI must be inside a Canvas to receive pointer events.");
-        else if (canvas.GetComponent<GraphicRaycaster>() == null)
-            Debug.LogWarning("[SettingsPopUp] Awake - Parent Canvas has no GraphicRaycaster. Add one to enable UI raycasts.");
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"[SettingsPopUp] OnPointerClick - eventData={(eventData != null ? "present" : "null")}, msg={msg}");
-
         float duration = 0.1f;
 
         LeanTween.scale(gameObject, startScale * 0.9f, duration)
-        .setEaseOutQuad()
-        .setOnComplete(() =>
-        {
-            Debug.Log("[SettingsPopUp] click shrink complete - starting restore scale");
-            LeanTween.scale(gameObject, startScale, duration).setEaseInQuad();
+            .setEaseOutQuad()
+            .setOnComplete(() =>
+            {
+                LeanTween.scale(gameObject, startScale, duration).setEaseInQuad();
 
-            // Toggle settings panel only when msg == 1
-            if (msg == 1)
-            {
-                ToggleSettingsPanel();
-            }
-            else
-            {
-                Debug.Log($"[SettingsPopUp] OnPointerClick - msg != 1 (msg={msg}), will not toggle SettingsPanel.");
-            }
-        });
+                if (msg == 1)
+                    ToggleSettingsPanel();
+            });
     }
 
     private void ToggleSettingsPanel()
     {
         if (SettingsPanel == null)
-        {
-            Debug.LogWarning("[SettingsPopUp] ToggleSettingsPanel - SettingsPanel reference is null.");
             return;
-        }
 
         bool isActive = SettingsPanel.gameObject.activeSelf;
         if (isActive)
         {
+            // Close panel
             SettingsPanel.gameObject.SetActive(false);
-            Debug.Log("[SettingsPopUp] ToggleSettingsPanel - SettingsPanel closed.");
+
+            // Destroy raycaster we created (GraphicRaycaster depends on Canvas)
+            if (createdGraphicRaycaster && popupGraphicRaycaster != null)
+            {
+                Destroy(popupGraphicRaycaster);
+                popupGraphicRaycaster = null;
+                createdGraphicRaycaster = false;
+            }
+
+            // If we created the Canvas, destroy it; otherwise restore original settings
+            if (createdCanvas && popupCanvas != null)
+            {
+                Destroy(popupCanvas);
+                popupCanvas = null;
+                createdCanvas = false;
+            }
+            else if (popupCanvas != null && hadCanvas)
+            {
+                popupCanvas.overrideSorting = originalOverrideSorting;
+                popupCanvas.sortingOrder = originalSortingOrder;
+            }
         }
         else
         {
-            // Activate panel
+            // Open panel
             SettingsPanel.gameObject.SetActive(true);
 
-            // Ensure this popup stays on top so it remains clickable even when the panel is shown.
-            // This helps if the panel covers the popup area and blocks further clicks.
-            transform.SetAsLastSibling();
+            // Determine a sorting order that ensures popup renders above the panel
+            int targetOrder = 1000;
+            Canvas panelCanvas = SettingsPanel.GetComponentInParent<Canvas>();
+            if (panelCanvas != null)
+                targetOrder = panelCanvas.sortingOrder + 1;
 
-            Debug.Log("[SettingsPopUp] ToggleSettingsPanel - SettingsPanel opened. Popup brought to front to remain clickable.");
+            // Ensure we have a Canvas on the popup and set it to render above the panel.
+            popupCanvas = GetComponent<Canvas>();
+            if (popupCanvas == null)
+            {
+                popupCanvas = gameObject.AddComponent<Canvas>();
+                createdCanvas = true;
+                // if popup had no canvas before, no need to restore previous values
+                originalSortingOrder = 0;
+                originalOverrideSorting = false;
+            }
+            else
+            {
+                createdCanvas = false;
+                // if it existed, originalSortingOrder/originalOverrideSorting were cached in Awake
+            }
+
+            popupCanvas.overrideSorting = true;
+            popupCanvas.sortingOrder = targetOrder;
+
+            // Ensure there's a GraphicRaycaster so this Canvas can receive clicks.
+            popupGraphicRaycaster = GetComponent<GraphicRaycaster>();
+            if (popupGraphicRaycaster == null)
+            {
+                popupGraphicRaycaster = gameObject.AddComponent<GraphicRaycaster>();
+                createdGraphicRaycaster = true;
+            }
+            else
+            {
+                createdGraphicRaycaster = false;
+            }
         }
+
     }
 
-    private void OnPageChanged(int currentPage)
+    private void OnDisable()
     {
-        SetActiveState(currentPage == pageNumber);
-    }
-
-    private void SetActiveState(bool isActive)
-    {
-        if (image == null)
+        // Clean up any components we created
+        if (createdGraphicRaycaster && popupGraphicRaycaster != null)
         {
-            Debug.LogWarning("[SettingsPopUp] SetActiveState - image is null, skipping visual change.");
-            return;
+            Destroy(popupGraphicRaycaster);
+            popupGraphicRaycaster = null;
+            createdGraphicRaycaster = false;
         }
 
-        Debug.Log($"[SettingsPopUp] SetActiveState - isActive={isActive}");
-
-        if (activeSprite != null && inactiveSprite != null)
+        if (createdCanvas && popupCanvas != null)
         {
-            image.sprite = isActive ? activeSprite : inactiveSprite;
+            Destroy(popupCanvas);
+            popupCanvas = null;
+            createdCanvas = false;
         }
-        else
+        else if (popupCanvas != null && hadCanvas)
         {
-            // ja nav sprite, mainâm krâsu kâ alternatîvu
-            image.color = isActive ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+            popupCanvas.overrideSorting = originalOverrideSorting;
+            popupCanvas.sortingOrder = originalSortingOrder;
         }
     }
 }
