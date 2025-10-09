@@ -89,6 +89,56 @@ router.get('/stats', authenticateToken, isAdmin, async function(req, res, next) 
     }
 });
 
+// GET /admin/users - list all users with pagination
+router.get('/users', authenticateToken, isAdmin, async function(req, res, next) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = (page - 1) * limit;
+
+        // Get total count
+        const countQuery = 'SELECT COUNT(*) as total FROM Users';
+        const countResult = await executeQuery(countQuery);
+        const totalUsers = countResult[0].total;
+
+        // Get users with pagination
+        const usersQuery = `
+            SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, 
+                   CreatedAt, UpdatedAt, COALESCE(IsBanned, 0) as IsBanned
+            FROM Users 
+            ORDER BY CreatedAt DESC 
+            LIMIT ? OFFSET ?
+        `;
+        const users = await executeQuery(usersQuery, [limit, offset]);
+
+        res.json({
+            message: 'Users retrieved successfully',
+            users: users.map(user => ({
+                id: user.UserID,
+                username: user.Username,
+                email: user.Email,
+                role: user.Role,
+                carrots: user.Carrots,
+                horseShoes: user.HorseShoes,
+                goldenCarrots: user.G_Carrots,
+                createdAt: user.CreatedAt,
+                updatedAt: user.UpdatedAt,
+                isBanned: Boolean(user.IsBanned)
+            })),
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalUsers / limit),
+                totalUsers: totalUsers,
+                usersPerPage: limit
+            }
+        });
+
+    } catch (err) {
+        console.error('Admin users list error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // POST /admin/user/:id/promote - make user an admin
 router.post('/user/:id/promote', authenticateToken, isAdmin, async function(req, res, next) {
     try {

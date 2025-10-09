@@ -68,8 +68,15 @@ public class CurrencySyncManager : MonoBehaviour
         LoadLocalCurrency();
     }
     
-    private void Start()
+    private async void Start()
     {
+        // If user is already logged in, load currency from server on startup
+        if (ApiClient.IsTokenValid())
+        {
+            LogDebug("User already logged in - loading currency from server");
+            await LoadCurrencyFromServer();
+        }
+        
         // Start sync timer if auto sync is enabled and user is logged in
         if (enableAutoSync && ApiClient.IsTokenValid())
         {
@@ -83,6 +90,7 @@ public class CurrencySyncManager : MonoBehaviour
         // Sync when app is paused (going to background)
         if (syncOnApplicationPause && pauseStatus && ApiClient.IsTokenValid())
         {
+            LogDebug("App paused - syncing currency");
             _ = SyncCurrencyAsync();
         }
     }
@@ -92,6 +100,7 @@ public class CurrencySyncManager : MonoBehaviour
         // Sync when app loses focus
         if (syncOnApplicationPause && !hasFocus && ApiClient.IsTokenValid())
         {
+            LogDebug("App lost focus - syncing currency");
             _ = SyncCurrencyAsync();
         }
     }
@@ -99,6 +108,12 @@ public class CurrencySyncManager : MonoBehaviour
     private void OnDestroy()
     {
         SaveLocalCurrency();
+        
+        // Try to sync to server before shutdown (fire and forget)
+        if (ApiClient.IsTokenValid() && isDirty)
+        {
+            _ = SyncCurrencyAsync();
+        }
     }
     
     private void TriggerSync()
@@ -299,10 +314,26 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Call this method after successful login to load currency from server
+    /// </summary>
+    public async Task InitializeAfterLogin()
+    {
+        LogDebug("Initializing currency after login");
+        await LoadCurrencyFromServer();
+    }
+    
     public void DisableAutoSync()
     {
         enableAutoSync = false;
         CancelInvoke(nameof(TriggerSync));
+    }
+    
+    [ContextMenu("Test Server Load")]
+    public async void TestServerLoad()
+    {
+        LogDebug("Testing currency load from server...");
+        await LoadCurrencyFromServer();
     }
 }
 
