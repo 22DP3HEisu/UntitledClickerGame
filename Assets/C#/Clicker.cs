@@ -57,8 +57,19 @@ public class Clicker : MonoBehaviour
             resetCoroutine = StartCoroutine(ResetScale());
         }
 
+        // Apply click income boost from achievements
+        int clickValue = 1;
+        if (AchievementManager.Instance != null)
+        {
+            clickValue = Mathf.RoundToInt(clickValue * AchievementManager.Instance.GetClickIncomeBoost());
+        }
+
         if (ClickManager.Instance != null)
-            ClickManager.Instance.AddClicks(1);
+            ClickManager.Instance.AddClicks(clickValue);
+
+        // Track click for achievements
+        if (AchievementManager.Instance != null)
+            AchievementManager.Instance.OnPlayerClick();
 
         Vector2 popupPos = Vector2.zero;
         if (targetTransform != null)
@@ -73,7 +84,7 @@ public class Clicker : MonoBehaviour
         }
 
         if (popupSpawner != null)
-            popupSpawner.SpawnPopup(popupPos, "+1");
+            popupSpawner.SpawnPopup(popupPos, $"+{clickValue}");
     }
 
     private IEnumerator ResetScale()

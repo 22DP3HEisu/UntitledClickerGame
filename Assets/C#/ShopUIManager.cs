@@ -18,7 +18,7 @@ public class ShopUIManager : MonoBehaviour
             template.gameObject.SetActive(false);
         }
 
-        clickerManager = FindObjectOfType<PassiveClickerManager>();
+        clickerManager = FindFirstObjectByType<PassiveClickerManager>();
         GenerateShopItems();
     }
 

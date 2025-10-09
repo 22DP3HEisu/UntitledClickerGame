@@ -25,9 +25,21 @@ public class PassiveClickerManager : MonoBehaviour
         int totalClicks = 0;
         foreach (var clicker in passiveClickers)
         {
-            int clicks = Mathf.RoundToInt(clicker.clicksPerSecond * clicker.level * tickInterval);
+            // Apply achievement boosts
+            float boost = AchievementManager.Instance != null
+                ? AchievementManager.Instance.GetBuildingBoost(clicker.name)
+                : 1f;
+
+            int clicks = Mathf.RoundToInt(clicker.clicksPerSecond * clicker.level * tickInterval * boost);
             totalClicks += clicks;
         }
+
+        // Apply CPS boost
+        if (AchievementManager.Instance != null)
+        {
+            totalClicks = Mathf.RoundToInt(totalClicks * AchievementManager.Instance.GetCPSBoost());
+        }
+
         if (totalClicks > 0)
             ClickManager.Instance.AddClicks(totalClicks);
     }
