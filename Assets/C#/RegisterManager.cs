@@ -25,7 +25,7 @@ public class RegisterManager : MonoBehaviour
     [SerializeField] private int minPasswordLength = 6;
     
     [Header("Backend Settings")]
-    [SerializeField] private string backendUrl = "http://localhost:3000"; // Adjust this to your backend URL
+    [SerializeField] private string backendUrl = "http://92.5.105.149:3000"; // Adjust this to your backend URL
     
     void Start()
     {
@@ -177,6 +177,7 @@ public class RegisterManager : MonoBehaviour
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
 
         // Create UnityWebRequest
+        Debug.Log($"Sending registration request to: {backendUrl}/auth/register");
         using (UnityWebRequest request = new UnityWebRequest($"{backendUrl}/auth/register", "POST"))
         {
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
