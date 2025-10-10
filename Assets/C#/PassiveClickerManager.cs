@@ -26,11 +26,29 @@ public class PassiveClickerManager : MonoBehaviour
         foreach (var clicker in passiveClickers)
         {
             // Apply achievement boosts
-            float boost = AchievementManager.Instance != null
+            float achievementBoost = AchievementManager.Instance != null
                 ? AchievementManager.Instance.GetBuildingBoost(clicker.name)
                 : 1f;
 
-            int clicks = Mathf.RoundToInt(clicker.clicksPerSecond * clicker.level * tickInterval * boost);
+            // Apply upgrade percent multiplier (from one-time upgrades)
+            float upgradePercentMultiplier = PassiveUpgradeManager.Instance != null
+                ? PassiveUpgradeManager.Instance.GetBuildingPercentMultiplier(clicker.name)
+                : 1f;
+
+            // Calculate base clicks from clicker (levels still supported for clickers)
+            float baseClicks = clicker.clicksPerSecond * clicker.level * tickInterval;
+
+            // Apply multipliers
+            float multiplied = baseClicks * achievementBoost * upgradePercentMultiplier;
+
+            // Add flat clicks/sec from upgrades (converted for this tick interval)
+            // IMPORTANT: flat upgrades are applied per generator instance, so multiply by level
+            float flatClicksPerSec = PassiveUpgradeManager.Instance != null
+                ? PassiveUpgradeManager.Instance.GetBuildingFlatClicksPerSecond(clicker.name)
+                : 0f;
+            float flatForTick = flatClicksPerSec * clicker.level * tickInterval;
+
+            int clicks = Mathf.RoundToInt(multiplied + flatForTick);
             totalClicks += clicks;
         }
 
@@ -44,7 +62,7 @@ public class PassiveClickerManager : MonoBehaviour
             CurrencySyncManager.Instance.AddCurrency(totalClicks);
     }
 
-    // Upgrade a clicker by index
+    // Upgrade a clicker by index (keeps existing behavior)
     public bool UpgradeClicker(int index, int currentCarrots)
     {
         if (index >= 0 && index < passiveClickers.Count && CurrencySyncManager.Instance != null)
