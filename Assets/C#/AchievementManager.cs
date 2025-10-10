@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 // Achievement Types
@@ -138,6 +139,28 @@ public class AchievementManager : MonoBehaviour
         cachedPassiveManager = FindFirstObjectByType<PassiveClickerManager>();
     }
 
+    async void Start()
+    {
+        // Subscribe to game data loaded event for server sync
+        CurrencySyncManager.OnGameDataLoaded += HandleGameDataLoaded;
+        
+        // Load achievements from server on startup
+        await LoadAchievementsFromServerAsync();
+    }
+
+    private void OnDestroy()
+    {
+        // Unsubscribe from events to prevent memory leaks
+        CurrencySyncManager.OnGameDataLoaded -= HandleGameDataLoaded;
+    }
+
+    private void HandleGameDataLoaded()
+    {
+        // Reload achievements when game data is loaded from server
+        Debug.Log("[AchievementManager] Game data loaded - refreshing achievements from server");
+        _ = LoadAchievementsFromServerAsync();
+    }
+
     void Update()
     {
         // Update temporary boosts
@@ -216,6 +239,9 @@ public class AchievementManager : MonoBehaviour
         ApplyReward(achievement);
         OnAchievementCompleted?.Invoke(achievement);
         Debug.Log($"Achievement Completed: {achievement.achievementName} - Reward: {achievement.rewardValue}");
+        
+        // Sync achievement completion with server
+        _ = SaveAchievementToServerAsync(achievement);
     }
 
     private void ApplyReward(AchievementItem achievement)
@@ -416,4 +442,147 @@ public class AchievementManager : MonoBehaviour
     {
         return achievements.FindAll(a => !a.IsCompleted);
     }
+
+    #region Server Synchronization
+
+    /// <summary>
+    /// Loads completed achievements from server and applies them locally
+    /// </summary>
+    private async Task LoadAchievementsFromServerAsync()
+    {
+        if (!ApiClient.IsTokenValid())
+        {
+            Debug.LogWarning("[AchievementManager] Cannot load achievements - not logged in");
+            return;
+        }
+
+        try
+        {
+            Debug.Log("[AchievementManager] Loading achievements from server...");
+
+            var response = await ApiClient.GetAsync<AchievementListResponse>("/user/achievements");
+
+            if (response?.achievements != null)
+            {
+                ApplyServerAchievements(response.achievements);
+                Debug.Log($"[AchievementManager] Loaded {response.achievements.Count} achievements from server");
+            }
+        }
+        catch (ApiException ex)
+        {
+            Debug.LogWarning($"[AchievementManager] Failed to load achievements from server: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[AchievementManager] Error loading achievements from server: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Saves a completed achievement to the server
+    /// </summary>
+    /// <param name="achievement">The completed achievement to save</param>
+    private async Task SaveAchievementToServerAsync(AchievementItem achievement)
+    {
+        if (!ApiClient.IsTokenValid())
+        {
+            Debug.LogWarning("[AchievementManager] Cannot save achievement - not logged in");
+            return;
+        }
+
+        try
+        {
+            Debug.Log($"[AchievementManager] Saving achievement to server: {achievement.id}");
+
+            var achievementData = new AchievementCompletionRequest
+            {
+                achievementId = achievement.id,
+                completedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+            };
+
+            var response = await ApiClient.PostAsync<AchievementCompletionRequest, AchievementCompletionResponse>(
+                "/user/achievements", achievementData);
+
+            if (response != null)
+            {
+                Debug.Log($"[AchievementManager] Achievement saved successfully: {achievement.id}");
+            }
+        }
+        catch (ApiException ex)
+        {
+            if (ex.StatusCode == 400 && ex.Message.Contains("already completed"))
+            {
+                Debug.Log($"[AchievementManager] Achievement already completed on server: {achievement.id}");
+            }
+            else
+            {
+                Debug.LogWarning($"[AchievementManager] Failed to save achievement to server: {ex.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[AchievementManager] Error saving achievement to server: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Applies achievements from server data to local achievements
+    /// </summary>
+    /// <param name="serverAchievements">List of completed achievements from server</param>
+    private void ApplyServerAchievements(List<ServerAchievementData> serverAchievements)
+    {
+        foreach (var serverAchievement in serverAchievements)
+        {
+            var localAchievement = achievements.Find(a => a.id.Equals(serverAchievement.achievementId, StringComparison.OrdinalIgnoreCase));
+            
+            if (localAchievement != null && !localAchievement.IsCompleted)
+            {
+                Debug.Log($"[AchievementManager] Applying server achievement: {localAchievement.achievementName}");
+                
+                // Set as completed without triggering server sync again
+                localAchievement.SetCompleted(true);
+                localAchievement.SetProgress(localAchievement.targetValue);
+                
+                // Apply the reward
+                ApplyReward(localAchievement);
+                
+                // Notify listeners (but don't save to server again)
+                OnAchievementCompleted?.Invoke(localAchievement);
+            }
+            else if (localAchievement == null)
+            {
+                Debug.LogWarning($"[AchievementManager] Server achievement '{serverAchievement.achievementId}' not found in local achievements");
+            }
+        }
+    }
+
+    #endregion
+}
+
+// Data structures for achievement API requests and responses
+[Serializable]
+public class AchievementListResponse
+{
+    public List<ServerAchievementData> achievements;
+}
+
+[Serializable]
+public class ServerAchievementData
+{
+    public string achievementId;
+    public string completedAt;
+}
+
+[Serializable]
+public class AchievementCompletionRequest
+{
+    public string achievementId;
+    public string completedAt;
+}
+
+[Serializable]
+public class AchievementCompletionResponse
+{
+    public string message;
+    public ServerAchievementData achievement;
 }
