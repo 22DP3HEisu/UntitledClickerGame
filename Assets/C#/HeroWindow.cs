@@ -4,6 +4,7 @@ using System;
 using UnityEngine.UI;
 using TMPro;
 
+
 public class ModalWindowTrigger : MonoBehaviour
 {
     public float timeRemaining = 120;
@@ -15,6 +16,8 @@ public class ModalWindowTrigger : MonoBehaviour
     public string confirmMessage;
     public string declineMessage;
     public string alternateMessage;
+    public int addCarrots;
+    public int removeCarrots;
 
     public UnityEvent onContinueCallBack;
     public UnityEvent onCancelCallBack;
