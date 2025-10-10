@@ -494,14 +494,9 @@ public class AchievementManager : MonoBehaviour
         {
             Debug.Log($"[AchievementManager] Saving achievement to server: {achievement.id}");
 
-            var achievementData = new AchievementCompletionRequest
-            {
-                achievementId = achievement.id,
-                completedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
-            };
-
-            var response = await ApiClient.PostAsync<AchievementCompletionRequest, AchievementCompletionResponse>(
-                "/user/achievements", achievementData);
+            // Use the existing server endpoint format: POST /user/achievement/:achievementName
+            var response = await ApiClient.PostAsync<object, AchievementCompletionResponse>(
+                $"/user/achievement/{achievement.id}", null);
 
             if (response != null)
             {
@@ -510,7 +505,7 @@ public class AchievementManager : MonoBehaviour
         }
         catch (ApiException ex)
         {
-            if (ex.StatusCode == 400 && ex.Message.Contains("already completed"))
+            if (ex.StatusCode == 400 && ex.Message.Contains("already unlocked"))
             {
                 Debug.Log($"[AchievementManager] Achievement already completed on server: {achievement.id}");
             }
@@ -533,7 +528,7 @@ public class AchievementManager : MonoBehaviour
     {
         foreach (var serverAchievement in serverAchievements)
         {
-            var localAchievement = achievements.Find(a => a.id.Equals(serverAchievement.achievementId, StringComparison.OrdinalIgnoreCase));
+            var localAchievement = achievements.Find(a => a.id.Equals(serverAchievement.name, StringComparison.OrdinalIgnoreCase));
             
             if (localAchievement != null && !localAchievement.IsCompleted)
             {
@@ -551,7 +546,7 @@ public class AchievementManager : MonoBehaviour
             }
             else if (localAchievement == null)
             {
-                Debug.LogWarning($"[AchievementManager] Server achievement '{serverAchievement.achievementId}' not found in local achievements");
+                Debug.LogWarning($"[AchievementManager] Server achievement '{serverAchievement.name}' not found in local achievements");
             }
         }
     }
@@ -563,26 +558,27 @@ public class AchievementManager : MonoBehaviour
 [Serializable]
 public class AchievementListResponse
 {
+    public string message;
     public List<ServerAchievementData> achievements;
 }
 
 [Serializable]
 public class ServerAchievementData
 {
-    public string achievementId;
-    public string completedAt;
-}
-
-[Serializable]
-public class AchievementCompletionRequest
-{
-    public string achievementId;
-    public string completedAt;
+    public string name;           // Server uses 'name' not 'achievementId'
+    public string unlockedAt;     // Server uses 'unlockedAt' not 'completedAt'
 }
 
 [Serializable]
 public class AchievementCompletionResponse
 {
     public string message;
-    public ServerAchievementData achievement;
+    public AchievementUnlockData achievement;
+}
+
+[Serializable]
+public class AchievementUnlockData
+{
+    public string name;
+    public string unlockedAt;
 }
