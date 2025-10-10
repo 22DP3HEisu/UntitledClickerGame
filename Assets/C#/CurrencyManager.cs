@@ -24,6 +24,7 @@ public class CurrencySyncManager : MonoBehaviour
     // Events for other systems to listen to
     public static event Action<CurrencyData> OnCurrencySynced;
     public static event Action<string> OnSyncFailed;
+    public static event Action OnGameDataLoaded; // New event for when all game data is loaded
     
     // Properties for accessing currency
     public int Carrots 
@@ -70,11 +71,17 @@ public class CurrencySyncManager : MonoBehaviour
     
     private async void Start()
     {
-        // If user is already logged in, load currency from server on startup
+        // If user is already logged in, load all game data from server on startup
         if (ApiClient.IsTokenValid())
         {
-            LogDebug("User already logged in - loading currency from server");
+            LogDebug("User already logged in - loading game data from server");
             await LoadCurrencyFromServer();
+            await LoadUpgradesFromServer();
+            await LoadBuildingsFromServer();
+            
+            // Notify other systems that all game data has been loaded
+            LogDebug("All game data loaded - notifying other systems");
+            OnGameDataLoaded?.Invoke();
         }
         
         // Start sync timer if auto sync is enabled and user is logged in
@@ -262,6 +269,84 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Load upgrades from server and apply them locally
+    /// </summary>
+    public async Task LoadUpgradesFromServer()
+    {
+        if (!ApiClient.IsTokenValid()) return;
+        
+        try
+        {
+            LogDebug("Loading upgrades from server...");
+            var upgradesResponse = await ApiClient.GetAsync<UpgradesResponse>("/user/upgrades");
+            
+            if (upgradesResponse?.upgrades != null)
+            {
+                LogDebug($"Loaded {upgradesResponse.upgrades.Length} upgrades from server");
+                
+                // Find PassiveUpgradeManager and apply upgrades
+                var upgradeManager = FindFirstObjectByType<PassiveUpgradeManager>();
+                if (upgradeManager != null)
+                {
+                    foreach (var upgrade in upgradesResponse.upgrades)
+                    {
+                        // Apply the upgrade locally without triggering server sync
+                        upgradeManager.ApplyUpgradeFromServer(upgrade.name);
+                        LogDebug($"Applied upgrade from server: {upgrade.name}");
+                    }
+                }
+                else
+                {
+                    LogDebug("PassiveUpgradeManager not found - upgrades will be applied when available");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogDebug($"Failed to load upgrades from server: {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Load buildings from server and apply them locally
+    /// </summary>
+    public async Task LoadBuildingsFromServer()
+    {
+        if (!ApiClient.IsTokenValid()) return;
+        
+        try
+        {
+            LogDebug("Loading buildings from server...");
+            var buildingsResponse = await ApiClient.GetAsync<BuildingsResponse>("/user/buildings");
+            
+            if (buildingsResponse?.buildings != null)
+            {
+                LogDebug($"Loaded {buildingsResponse.buildings.Length} buildings from server");
+                
+                // Find PassiveClickerManager and apply building levels
+                var clickerManager = FindFirstObjectByType<PassiveClickerManager>();
+                if (clickerManager != null)
+                {
+                    foreach (var building in buildingsResponse.buildings)
+                    {
+                        // Apply the building level locally without triggering server sync
+                        clickerManager.SetBuildingLevelFromServer(building.name, building.count);
+                        LogDebug($"Set building level from server: {building.name} = {building.count}");
+                    }
+                }
+                else
+                {
+                    LogDebug("PassiveClickerManager not found - buildings will be applied when available");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogDebug($"Failed to load buildings from server: {ex.Message}");
+        }
+    }
+    
     private void MarkDirty()
     {
         isDirty = true;
@@ -360,4 +445,35 @@ public class CurrencyData
     public int horseShoes;
     public int goldenCarrots;
     public string lastSyncAt;
+}
+
+// Data structures for upgrades loading
+[Serializable]
+public class UpgradesResponse
+{
+    public string message;
+    public ServerUpgrade[] upgrades;
+}
+
+[Serializable]
+public class ServerUpgrade
+{
+    public string name;
+    public string unlockedAt;
+}
+
+// Data structures for buildings loading
+[Serializable]
+public class BuildingsResponse
+{
+    public string message;
+    public ServerBuilding[] buildings;
+}
+
+[Serializable]
+public class ServerBuilding
+{
+    public string name;
+    public int count;
+    public string firstPurchased;
 }
