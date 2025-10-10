@@ -636,4 +636,73 @@ router.delete('/:clanId/members/:userId', authenticateToken, async function(req,
     }
 });
 
+// Get leaderboard (public route with pagination)
+router.get('/leaderboard', async function(req, res, next) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 50, 100); // Max 100 per page
+        const offset = (page - 1) * limit;
+
+        console.log(`Leaderboard request: page=${page}, limit=${limit}, offset=${offset}`);
+
+        // Get users ordered by carrots with their clan information
+        const leaderboardQuery = `
+            SELECT 
+                u.UserID,
+                u.Username,
+                u.Carrots,
+                u.HorseShoes,
+                u.G_Carrots,
+                u.CreatedAt,
+                c.ClanName,
+                c.ClanTag,
+                cu.ClanRank
+            FROM Users u
+            LEFT JOIN Clan_users cu ON u.UserID = cu.UserID
+            LEFT JOIN Clans c ON cu.ClanID = c.ClanID
+            ORDER BY u.Carrots DESC, u.CreatedAt ASC
+            LIMIT ${limit} OFFSET ${offset}
+        `;
+
+        const leaderboardUsers = await executeQuery(leaderboardQuery);
+
+        // Get total count for pagination
+        const countQuery = 'SELECT COUNT(*) as total FROM Users';
+        const countResult = await executeQuery(countQuery);
+        const totalUsers = countResult[0].total;
+
+        res.json({
+            message: 'Leaderboard retrieved successfully',
+            leaderboard: leaderboardUsers.map((user, index) => ({
+                rank: offset + index + 1,
+                userId: user.UserID,
+                username: user.Username,
+                carrots: user.Carrots,
+                horseShoes: user.HorseShoes,
+                goldenCarrots: user.G_Carrots,
+                clan: user.ClanName ? {
+                    name: user.ClanName,
+                    tag: user.ClanTag,
+                    rank: user.ClanRank
+                } : null,
+                joinDate: user.CreatedAt
+            })),
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalUsers / limit),
+                totalUsers: totalUsers,
+                hasNext: page * limit < totalUsers,
+                hasPrev: page > 1
+            }
+        });
+
+    } catch (error) {
+        console.error('Get leaderboard error:', error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            message: 'Failed to retrieve leaderboard'
+        });
+    }
+});
+
 module.exports = router;
