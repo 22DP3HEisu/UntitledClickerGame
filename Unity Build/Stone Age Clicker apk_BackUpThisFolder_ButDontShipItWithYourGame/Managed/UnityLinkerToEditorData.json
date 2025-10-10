@@ -40,6 +40,8 @@
           {
             "name": "AudioBehaviour",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -60,6 +62,8 @@
           {
             "name": "AudioListener",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -117,6 +121,8 @@
           {
             "name": "Camera",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -134,13 +140,17 @@
           },
           {
             "name": "ComputeShader",
-            "scenes": [],
+            "scenes": [
+              "Assets/Scenes/StartUp.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
           {
             "name": "Cubemap",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -165,6 +175,8 @@
           {
             "name": "EditorExtension",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -183,6 +195,8 @@
           {
             "name": "GameObject",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -219,6 +233,8 @@
           {
             "name": "LevelGameManager",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -255,6 +271,8 @@
           {
             "name": "LightmapSettings",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -273,6 +291,7 @@
           {
             "name": "Material",
             "scenes": [
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -303,6 +322,8 @@
           {
             "name": "MonoBehaviour",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -321,6 +342,8 @@
           {
             "name": "MonoScript",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -333,6 +356,8 @@
           {
             "name": "NamedObject",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -375,6 +400,8 @@
           {
             "name": "RectTransform",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -393,6 +420,8 @@
           {
             "name": "RenderSettings",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -432,6 +461,7 @@
           {
             "name": "Shader",
             "scenes": [
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -445,6 +475,12 @@
             "name": "ShaderNameRegistry",
             "scenes": [],
             "dependencyType": 1,
+            "icon": null
+          },
+          {
+            "name": "ShaderVariantCollection",
+            "scenes": [],
+            "dependencyType": 0,
             "icon": null
           },
           {
@@ -462,6 +498,8 @@
           {
             "name": "Sprite",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -1511,6 +1549,8 @@
           {
             "name": "Canvas",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",
@@ -1529,6 +1569,8 @@
           {
             "name": "CanvasRenderer",
             "scenes": [
+              "Assets/Scenes/Achievments.unity",
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
               "Assets/Scenes/Login.unity",

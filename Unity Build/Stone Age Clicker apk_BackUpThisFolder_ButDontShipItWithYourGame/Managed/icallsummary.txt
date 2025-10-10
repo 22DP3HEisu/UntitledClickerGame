@@ -311,6 +311,7 @@ UnityEngine.Application::OpenURL_Injected
 UnityEngine.Application::get_streamingAssetsPath_Injected
 UnityEngine.Application::set_targetFrameRate
 UnityEngine.Application::get_platform
+UnityEngine.AsyncOperation::get_isDone_Injected
 UnityEngine.AsyncOperation::InternalDestroy
 UnityEngine.AsyncOperation::InternalSetManagedObject
 UnityEngine.AudioClip::GetData_Injected
@@ -424,7 +425,9 @@ UnityEngine.CanvasGroup::get_ignoreParentGroups_Injected
 UnityEngine.CanvasGroup::get_interactable_Injected
 UnityEngine.CanvasGroup::get_alpha_Injected
 UnityEngine.CanvasGroup::set_alpha_Injected
+UnityEngine.CanvasGroup::set_blocksRaycasts_Injected
 UnityEngine.CanvasGroup::set_ignoreParentGroups_Injected
+UnityEngine.CanvasGroup::set_interactable_Injected
 UnityEngine.CanvasRenderer::get_cullTransparentMesh_Injected
 UnityEngine.CanvasRenderer::get_cull_Injected
 UnityEngine.CanvasRenderer::get_hasMoved_Injected
@@ -541,12 +544,16 @@ UnityEngine.Event::get_delta_Injected
 UnityEngine.Event::get_mousePosition_Injected
 UnityEngine.Event::get_tilt_Injected
 UnityEngine.Event::set_Internal_keyCode_Injected
+UnityEngine.Event::set_button_Injected
 UnityEngine.Event::set_character_Injected
+UnityEngine.Event::set_clickCount_Injected
 UnityEngine.Event::set_commandName_Injected
 UnityEngine.Event::set_delta_Injected
 UnityEngine.Event::set_displayIndex_Injected
 UnityEngine.Event::set_modifiers_Injected
 UnityEngine.Event::set_mousePosition_Injected
+UnityEngine.Event::set_pointerType_Injected
+UnityEngine.Event::set_pressure_Injected
 UnityEngine.Event::set_type_Injected
 UnityEngine.Event::get_modifiers_Injected
 UnityEngine.Event::get_rawType_Injected
@@ -656,6 +663,7 @@ UnityEngine.Graphics::ClearRandomWriteTargets
 UnityEngine.Graphics::CopyTexture_Region_Injected
 UnityEngine.Graphics::CopyTexture_Slice_Injected
 UnityEngine.Graphics::ExecuteCommandBuffer_Injected
+UnityEngine.Graphics::Internal_BlitMaterial5_Injected
 UnityEngine.Graphics::Internal_DrawMeshInstanced_Injected
 UnityEngine.Graphics::Internal_DrawMesh_Injected
 UnityEngine.Graphics::Internal_DrawTexture
@@ -880,6 +888,7 @@ UnityEngine.Material::DisableLocalKeyword_Injected
 UnityEngine.Material::EnableKeyword_Injected
 UnityEngine.Material::EnableLocalKeyword_Injected
 UnityEngine.Material::GetColorImpl_Injected
+UnityEngine.Material::SetColorArrayImpl_Injected
 UnityEngine.Material::SetColorImpl_Injected
 UnityEngine.Material::SetConstantBufferImpl_Injected
 UnityEngine.Material::SetEnabledKeywords_Injected
@@ -987,11 +996,9 @@ UnityEngine.Networking.UnityWebRequest::get_responseCode_Injected
 UnityEngine.Networking.UnityWebRequest::BeginWebRequest_Injected
 UnityEngine.Networking.UnityWebRequest::Create
 UnityEngine.Networking.UnityWebRequest::Abort_Injected
-UnityEngine.Networking.UnityWebRequest::GetHTTPStatusString_Injected
 UnityEngine.Networking.UnityWebRequest::GetWebErrorString_Injected
 UnityEngine.Networking.UnityWebRequest::Release_Injected
 UnityEngine.Networking.UnityWebRequest::get_result_Injected
-UnityEngine.Networking.UnityWebRequest::GetError_Injected
 UnityEngine.Networking.UnityWebRequest::InternalSetRequestHeader_Injected
 UnityEngine.Networking.UnityWebRequest::SetCustomMethod_Injected
 UnityEngine.Networking.UnityWebRequest::SetDownloadHandler_Injected
@@ -1088,6 +1095,7 @@ UnityEngine.Random::get_value
 UnityEngine.Random::InitState
 UnityEngine.Random::get_state_Injected
 UnityEngine.Random::set_state_Injected
+UnityEngine.RaycastHit::CalculateRaycastTexCoord_Injected
 UnityEngine.RectOffset::get_bottom_Injected
 UnityEngine.RectOffset::get_horizontal_Injected
 UnityEngine.RectOffset::get_left_Injected

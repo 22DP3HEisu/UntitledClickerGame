@@ -1,0 +1,105 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m0BB65C4D76D0C5F88D7B198A7C9BC96E4FB0D121 (void);
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m0E107CBDD614DFDAA4162E7D798BEB1F17B54D31 (void);
+extern void EventBaseExtensionsBridge_SetPropagation_mEB3730972CD98AC34D92AC5DE23E4DD31E5072A8 (void);
+extern void EventBaseExtensionsBridge_GetPropagation_m7FBE7738343E7FAB37B4517941FA2D50B0B39E4F (void);
+extern void EventBaseExtensionsBridge__cctor_m7CF564C931511165190F8D69C06A0ADBAEC6120E (void);
+extern void FocusControllerExtensionsBridge_FocusNextInDirection_mEA1EE26A03CAF78FBB8DE90B1F4BC1F3F168F447 (void);
+extern void FocusControllerExtensionsBridge__cctor_m5B49B397C00C971BDD211D64A2659312A9DC0DD5 (void);
+extern void PanelExtensionsBridge_GetPanelSettings_mABC1484A2BE8370E11C0F0D8F588468437FEDF6A (void);
+extern void PointerMoveEventExtensionsBridge_SetIsHandledByDraggable_m82E772FC6D4C7D8AB9D73A71C9ED20B85D7CCE1B (void);
+extern void PointerMoveEventExtensionsBridge_GetIsHandledByDraggable_m1CDD475BB9E3CBB7C0ACC0A1DABC516D44515CEC (void);
+extern void PointerMoveEventExtensionsBridge__cctor_mADA8758CCC6904FD59A3E92B0834A3B07F7AE0F7 (void);
+extern void ValueAnimationExtensionsBridge_IsRecycled_m402B45A420499E3267FC88242FBB521A5893214C (void);
+extern void ValueAnimationExtensionsBridge__cctor_mC647237061B45AB31148D99CDFA6A45C2024F998 (void);
+extern void VisualElementExtensionsBridge_SetPseudoStates_mCF37E226FA2FDB7E0DBEDCD8737926BF02370016 (void);
+extern void VisualElementExtensionsBridge_GetPseudoStates_m44D3FE15094B6110018520BA3DC8D97BD3042830 (void);
+extern void VisualElementExtensionsBridge_GetWorldBoundingBox_mB321D165223442C8B07F2AA03EE7290E41678C0F (void);
+extern void VisualElementExtensionsBridge_SetIsCompositeRoot_mB26B975C697A8A65C35A2DF1080942D8E18DFD6F (void);
+extern void VisualElementExtensionsBridge_GetIsCompositeRoot_mAE7361D0D7839F7F01CB07CE0A114F4E8CE1E337 (void);
+extern void VisualElementExtensionsBridge_SetExcludeFromFocusRing_mFA8C05137AEDB7355D2C5FBE18029725733A10F7 (void);
+extern void VisualElementExtensionsBridge_GetExcludeFromFocusRing_mD20E646915FF72EB5E10A92B75EAD17D42C79A4F (void);
+extern void VisualElementExtensionsBridge_SetDisableClipping_mBAF548987E36BE57ABE60077E16A0764D994CD3C (void);
+extern void VisualElementExtensionsBridge_GetDisableClipping_mF02CAF21B2EDEF8C73CFF5F09E6198C811B9D9BC (void);
+extern void VisualElementExtensionsBridge__cctor_m463544A52631A3A64384FE737522E1F48AB9B7C2 (void);
+static Il2CppMethodPointer s_methodPointers[23] = 
+{
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m0BB65C4D76D0C5F88D7B198A7C9BC96E4FB0D121,
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m0E107CBDD614DFDAA4162E7D798BEB1F17B54D31,
+	EventBaseExtensionsBridge_SetPropagation_mEB3730972CD98AC34D92AC5DE23E4DD31E5072A8,
+	EventBaseExtensionsBridge_GetPropagation_m7FBE7738343E7FAB37B4517941FA2D50B0B39E4F,
+	EventBaseExtensionsBridge__cctor_m7CF564C931511165190F8D69C06A0ADBAEC6120E,
+	FocusControllerExtensionsBridge_FocusNextInDirection_mEA1EE26A03CAF78FBB8DE90B1F4BC1F3F168F447,
+	FocusControllerExtensionsBridge__cctor_m5B49B397C00C971BDD211D64A2659312A9DC0DD5,
+	PanelExtensionsBridge_GetPanelSettings_mABC1484A2BE8370E11C0F0D8F588468437FEDF6A,
+	PointerMoveEventExtensionsBridge_SetIsHandledByDraggable_m82E772FC6D4C7D8AB9D73A71C9ED20B85D7CCE1B,
+	PointerMoveEventExtensionsBridge_GetIsHandledByDraggable_m1CDD475BB9E3CBB7C0ACC0A1DABC516D44515CEC,
+	PointerMoveEventExtensionsBridge__cctor_mADA8758CCC6904FD59A3E92B0834A3B07F7AE0F7,
+	ValueAnimationExtensionsBridge_IsRecycled_m402B45A420499E3267FC88242FBB521A5893214C,
+	ValueAnimationExtensionsBridge__cctor_mC647237061B45AB31148D99CDFA6A45C2024F998,
+	VisualElementExtensionsBridge_SetPseudoStates_mCF37E226FA2FDB7E0DBEDCD8737926BF02370016,
+	VisualElementExtensionsBridge_GetPseudoStates_m44D3FE15094B6110018520BA3DC8D97BD3042830,
+	VisualElementExtensionsBridge_GetWorldBoundingBox_mB321D165223442C8B07F2AA03EE7290E41678C0F,
+	VisualElementExtensionsBridge_SetIsCompositeRoot_mB26B975C697A8A65C35A2DF1080942D8E18DFD6F,
+	VisualElementExtensionsBridge_GetIsCompositeRoot_mAE7361D0D7839F7F01CB07CE0A114F4E8CE1E337,
+	VisualElementExtensionsBridge_SetExcludeFromFocusRing_mFA8C05137AEDB7355D2C5FBE18029725733A10F7,
+	VisualElementExtensionsBridge_GetExcludeFromFocusRing_mD20E646915FF72EB5E10A92B75EAD17D42C79A4F,
+	VisualElementExtensionsBridge_SetDisableClipping_mBAF548987E36BE57ABE60077E16A0764D994CD3C,
+	VisualElementExtensionsBridge_GetDisableClipping_mF02CAF21B2EDEF8C73CFF5F09E6198C811B9D9BC,
+	VisualElementExtensionsBridge__cctor_m463544A52631A3A64384FE737522E1F48AB9B7C2,
+};
+static const int32_t s_InvokerIndices[23] = 
+{
+	25534,
+	14605,
+	21477,
+	23726,
+	25505,
+	18431,
+	25505,
+	23877,
+	21467,
+	23552,
+	25505,
+	23552,
+	25505,
+	21477,
+	23726,
+	23936,
+	21467,
+	23552,
+	21467,
+	23552,
+	21467,
+	23552,
+	25505,
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Unity_AppUI_InternalAPIBridge_CodeGenModule;
+const Il2CppCodeGenModule g_Unity_AppUI_InternalAPIBridge_CodeGenModule = 
+{
+	"Unity.AppUI.InternalAPIBridge.dll",
+	23,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
