@@ -42122,7 +42122,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void EventBase_set_elementTarget_
 		return;
 	}
 }
-// Method Definition Index: 72580
+// Method Definition Index: 72583
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool TextSelectingUtilities_get_revealCursor_mD9502AE79AB9AC44496008153F267CBB4A9B3C16_inline (TextSelectingUtilities_tD0369D75359211EA5F31B1B5FC9410359A2A4DB7* __this, const RuntimeMethod* method) 
 {
 	{
@@ -42354,7 +42354,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void UITKTextHandle_set_RoundedWi
 		return;
 	}
 }
-// Method Definition Index: 67275
+// Method Definition Index: 67278
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FontAsset_t61A6446D934E582651044E33D250EA8D306AB958* TextSettings_get_defaultFontAsset_mC6280464BFEE081DB23243BB94E49C72A0885A1F_inline (TextSettings_tB7F55685AFFD4A96F714427BCACFD6958E357D64* __this, const RuntimeMethod* method) 
 {
 	{
@@ -42476,7 +42476,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Color_tD001788D726C3A7F1379BEED02
 		return L_0;
 	}
 }
-// Method Definition Index: 67264
+// Method Definition Index: 67267
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* TextAsset_get_material_m4B9C02D34426436FDB01F1963A9FDC11D75604EF_inline (TextAsset_tB28F1843A877CCA74B89DC4F63EA532618B049B8* __this, const RuntimeMethod* method) 
 {
 	{
@@ -42499,7 +42499,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_m3786F0D6E510D9C
 		return;
 	}
 }
-// Method Definition Index: 67362
+// Method Definition Index: 67365
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void TextGenerator_set_IsExecutingJob_m876815F0F8AC65A3B9521C9691BFC452357F0D5C_inline (bool ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -43031,7 +43031,7 @@ IL_0061:
 		return L_29;
 	}
 }
-// Method Definition Index: 75314
+// Method Definition Index: 75317
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Canvas_set_externBeginRenderOverlays_m15382EED4DE4FD270EEAF103F066105E59ACAB03_inline (Action_1_tD69A6DC9FBE94131E52F5A73B2A9D4AB51EEC404* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -43047,7 +43047,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Canvas_set_externBeginRender
 		return;
 	}
 }
-// Method Definition Index: 75316
+// Method Definition Index: 75319
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Canvas_set_externRenderOverlaysBefore_mFE0A5C7FCDB2AA8FFE6D8CFDE128A5C3F6E19735_inline (Action_2_tD7438462601D3939500ED67463331FE00CFFBDB8* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -43063,7 +43063,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Canvas_set_externRenderOverl
 		return;
 	}
 }
-// Method Definition Index: 75318
+// Method Definition Index: 75321
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Canvas_set_externEndRenderOverlays_mA48664910ECE4995245902DDE755C5C18BEF8E32_inline (Action_1_tD69A6DC9FBE94131E52F5A73B2A9D4AB51EEC404* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -43085,7 +43085,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BaseRuntimePanel_tEDFA512CC669208
 	typedef BaseRuntimePanel_tEDFA512CC6692082EBBB87E5DC446A88D2E75DC4* (*FunctionPointerType) (RuntimeObject*, ScriptableObject_tB3BFDB921A1B1795B38A5417D3B97A89A140436A*, const RuntimeMethod*);
 	return ((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, ___0_ownerObject, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 72126
+// Method Definition Index: 72129
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void EventInterests_set_wantsMouseMove_mFEA33E053185D63A19F60AA69E385C05CE795F0F_inline (EventInterests_tF375F3296A6689BC4B016F237123DB5457515EC8* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -43094,7 +43094,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void EventInterests_set_wantsMous
 		return;
 	}
 }
-// Method Definition Index: 72128
+// Method Definition Index: 72131
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void EventInterests_set_wantsMouseEnterLeaveWindow_m5D73B54F5855E5BB5FE54AA2366A83A33982D313_inline (EventInterests_tF375F3296A6689BC4B016F237123DB5457515EC8* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{

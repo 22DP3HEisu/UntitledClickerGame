@@ -25132,7 +25132,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void UnityAction_Invoke_m5CB9EE17
 	typedef void (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
 	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 65805
+// Method Definition Index: 65808
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool MaskableGraphic_get_maskable_m34B87CD87CFF73FF4E09D892ADB316E412F22660_inline (MaskableGraphic_tFC5B6BE351C90DE53744DF2A70940242774B361E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25185,7 +25185,7 @@ IL_0029:
 		return L_9;
 	}
 }
-// Method Definition Index: 65803
+// Method Definition Index: 65806
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR CullStateChangedEvent_t6073CD0D951EC1256BF74B8F9107D68FC89B99B8* MaskableGraphic_get_onCullStateChanged_m8452945E93AF20B975D85E61999B51039CAF6538_inline (MaskableGraphic_tFC5B6BE351C90DE53744DF2A70940242774B361E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25501,7 +25501,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Rect__ctor_m503705FE0E4E4130
 		return;
 	}
 }
-// Method Definition Index: 70492
+// Method Definition Index: 70495
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR LinkedListNode_1_t293BB098D459DDAE6A26977D0731A997186D1D4C* LinkedList_1_get_First_mF743AE65DDD0324290E33D3F433F37AC83216E18_gshared_inline (LinkedList_1_t49DC5CF34D4D642E6417F1245CDEC26A32F60C76* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25509,7 +25509,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR LinkedListNode_1_t293BB098D459DDA
 		return L_0;
 	}
 }
-// Method Definition Index: 70531
+// Method Definition Index: 70534
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* LinkedListNode_1_get_Value_m8F67264DC98EF442B34CE4947044BCE18BF26053_gshared_inline (LinkedListNode_1_t293BB098D459DDAE6A26977D0731A997186D1D4C* __this, const RuntimeMethod* method) 
 {
 	{

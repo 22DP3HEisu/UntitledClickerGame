@@ -30635,7 +30635,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool UIState_get_open_mE6A0A2EC6E
 		return L_0;
 	}
 }
-// Method Definition Index: 65571
+// Method Definition Index: 65574
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void CanvasScaler_set_uiScaleMode_m064C83FFA35E2AED4E9FA7D5EC1AD19630D8FC2A_inline (CanvasScaler_t3BC095205EAD308CF3EAC27136A73387AC32FC3B* __this, int32_t ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -31506,7 +31506,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Widget_get_order_mACD9192
 		return L_0;
 	}
 }
-// Method Definition Index: 66651
+// Method Definition Index: 66654
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BaseInputModule_tF3B7C22AF1419B2AC9ECE6589357DC1B88ED96B1* EventSystem_get_currentInputModule_m30559FCECCCE1AAD97D801968B8BD1C483FBF7AC_inline (EventSystem_t61C51380B105BE9D2C39C4F15B7E655659957707* __this, const RuntimeMethod* method) 
 {
 	{

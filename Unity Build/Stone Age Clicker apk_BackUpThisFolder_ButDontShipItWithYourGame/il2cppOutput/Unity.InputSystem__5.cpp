@@ -37112,7 +37112,7 @@ IL_0034:
 		return;
 	}
 }
-// Method Definition Index: 74553
+// Method Definition Index: 74556
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Enumerator_get_Current_m5FB849BD27E36D48FF75A612369B19AE25ED429C_gshared_inline (Enumerator_t28FAA6D38864A25718956AF2B8AFCB3B8CCF4376* __this, const RuntimeMethod* method) 
 {
 	{

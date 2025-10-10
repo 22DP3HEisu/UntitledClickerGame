@@ -551,6 +551,9 @@ extern void UpgradeShopManager_CreateSingleUpgradeItem_m362DE3B6B83D7179FB82C0E8
 extern void UpgradeShopManager_UpdateUpgradeItemsVisibility_mCC23BE16C996ADAD1895B14AE56BC8D8A1B90D29 (void);
 extern void UpgradeShopManager_ShouldUpgradeBeVisible_m73EA66BAFA4F588FB399A8EC1EEAD7EC0A537B66 (void);
 extern void UpgradeShopManager__ctor_m2D6A7050769808B1F5A29CA48128B0BC85BDB0C1 (void);
+extern void UserLogoutController_Awake_m356B6FB58EA0F03F805EC42F99CC2F2AB8D7BF83 (void);
+extern void UserLogoutController_OnLogoutClicked_mD6E821333E5640D779D3610FA05C402CC1CF8423 (void);
+extern void UserLogoutController__ctor_m70178A1A1DCA6502AD0729C13BD9F708F7EE00D8 (void);
 extern void UserProfileResponse__ctor_mE9E3BBD1621E4F6BAB57FEE1367261138BCE66E4 (void);
 extern void UserProfile__ctor_m8DE7B9877050022E590D6A88E29C83126827B834 (void);
 extern void GameData__ctor_mEE2C6A7826FB6A9D86518C0011BD166CECE2F9C8 (void);
@@ -2009,7 +2012,7 @@ extern void U3CtimeBasedTestingU3Ed__24_MoveNext_m360F24A4AA8133F3D63C678E4292EC
 extern void U3CtimeBasedTestingU3Ed__24_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m86016DF1CDA96FEB572B90DB54FDE5509A8AF772 (void);
 extern void U3CtimeBasedTestingU3Ed__24_System_Collections_IEnumerator_Reset_m383923EFB4218742F8C7F7123089DA65AC39815C (void);
 extern void U3CtimeBasedTestingU3Ed__24_System_Collections_IEnumerator_get_Current_m8E7679D5BCBA0A24290C8886607D9FA648CC78E3 (void);
-static Il2CppMethodPointer s_methodPointers[2014] = 
+static Il2CppMethodPointer s_methodPointers[2017] = 
 {
 	AchievementData__ctor_m50EBFEB02CD4D2717130F5020F1C163D43B48ABC,
 	AchievementDetailPrefab_get_Instance_m7DCFF081B93AE4AACB9C2FDB7E7FEA93183D86C3,
@@ -2567,6 +2570,9 @@ static Il2CppMethodPointer s_methodPointers[2014] =
 	UpgradeShopManager_UpdateUpgradeItemsVisibility_mCC23BE16C996ADAD1895B14AE56BC8D8A1B90D29,
 	UpgradeShopManager_ShouldUpgradeBeVisible_m73EA66BAFA4F588FB399A8EC1EEAD7EC0A537B66,
 	UpgradeShopManager__ctor_m2D6A7050769808B1F5A29CA48128B0BC85BDB0C1,
+	UserLogoutController_Awake_m356B6FB58EA0F03F805EC42F99CC2F2AB8D7BF83,
+	UserLogoutController_OnLogoutClicked_mD6E821333E5640D779D3610FA05C402CC1CF8423,
+	UserLogoutController__ctor_m70178A1A1DCA6502AD0729C13BD9F708F7EE00D8,
 	UserProfileResponse__ctor_mE9E3BBD1621E4F6BAB57FEE1367261138BCE66E4,
 	UserProfile__ctor_m8DE7B9877050022E590D6A88E29C83126827B834,
 	GameData__ctor_mEE2C6A7826FB6A9D86518C0011BD166CECE2F9C8,
@@ -4149,7 +4155,7 @@ static Il2CppTokenAdjustorThunkPair s_adjustorThunks[60] =
 	{ 0x0600020F, U3CSyncUpgradePurchaseAsyncU3Ed__17_MoveNext_m634C803D1F587C6A63E9D7A4F908A9976645ABC3_AdjustorThunk },
 	{ 0x06000210, U3CSyncUpgradePurchaseAsyncU3Ed__17_SetStateMachine_mFB1B8210D9DF905052C7CA53891D70F680A036AA_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[2014] = 
+static const int32_t s_InvokerIndices[2017] = 
 {
 	14605,
 	25418,
@@ -4706,6 +4712,9 @@ static const int32_t s_InvokerIndices[2014] =
 	5489,
 	11019,
 	7693,
+	14605,
+	14605,
+	14605,
 	14605,
 	14605,
 	14605,
@@ -6330,7 +6339,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule;
 const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule = 
 {
 	"Assembly-CSharp.dll",
-	2014,
+	2017,
 	s_methodPointers,
 	60,
 	s_adjustorThunks,

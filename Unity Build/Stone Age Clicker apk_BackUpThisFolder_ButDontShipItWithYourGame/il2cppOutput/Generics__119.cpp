@@ -20135,7 +20135,7 @@ IL_013b:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m8B47ECD2E605C04B87E2F14E6FACE1016421C728_gshared (NativeSlice_1_tF599C35E48F73DA5FECDC93CA74104F90A87AF36 ___0_dst, SpriteShapeGeometryInfoU5BU5D_t93A60FFF9BCC46DB84DC01BD90F292CFD7038D38* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tF599C35E48F73DA5FECDC93CA74104F90A87AF36 V_0;
@@ -20152,7 +20152,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m8B47ECD2E
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m03392CD5E3BCEAD2163C12FC5E298808B15580E3_gshared (SpriteShapeGeometryInfoU5BU5D_t93A60FFF9BCC46DB84DC01BD90F292CFD7038D38* ___0_dst, NativeSlice_1_tF599C35E48F73DA5FECDC93CA74104F90A87AF36 ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tF599C35E48F73DA5FECDC93CA74104F90A87AF36 V_0;
@@ -20169,7 +20169,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m03392CD5E
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m409452B2E5E938CF3337D69805986A3FDC638CFE_gshared (SpriteShapeCopyUtility_1_t25DE87F84CA92E21B279839160385EDDFBB149DC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20185,7 +20185,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m409452B2
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mFF08BA537D2BAA3BAD4D8AB2E1481325D7C21096_gshared (NativeSlice_1_t0D1A1AB7A9C4768B84EB7420D04A90920533C78A ___0_dst, UInt16U5BU5D_tEB7C42D811D999D2AA815BADC3FCCDD9C67B3F83* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_t0D1A1AB7A9C4768B84EB7420D04A90920533C78A V_0;
@@ -20202,7 +20202,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mFF08BA537
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m6CCDC357918543E382097E163B9328553E6498CE_gshared (UInt16U5BU5D_tEB7C42D811D999D2AA815BADC3FCCDD9C67B3F83* ___0_dst, NativeSlice_1_t0D1A1AB7A9C4768B84EB7420D04A90920533C78A ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_t0D1A1AB7A9C4768B84EB7420D04A90920533C78A V_0;
@@ -20219,7 +20219,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m6CCDC3579
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_mE4B850049A26A5B9F0C0318DAE86E4F7FCD298D0_gshared (SpriteShapeCopyUtility_1_t0672083287E9504377ACFF3DCAD683546FD0C7E9* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20235,7 +20235,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_mE4B85004
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mF73BB8C147864779ECF89DD61A93CD5377185B5B_gshared (NativeSlice_1_tBDD0B6C963222DE23BD34911416213E058F9FBAF ___0_dst, Vector2U5BU5D_tFEBBC94BCC6C9C88277BA04047D2B3FDB6ED7FDA* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tBDD0B6C963222DE23BD34911416213E058F9FBAF V_0;
@@ -20252,7 +20252,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mF73BB8C14
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mB97CDAD1418FD929282D34F5D4F041D16AEE81AD_gshared (Vector2U5BU5D_tFEBBC94BCC6C9C88277BA04047D2B3FDB6ED7FDA* ___0_dst, NativeSlice_1_tBDD0B6C963222DE23BD34911416213E058F9FBAF ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tBDD0B6C963222DE23BD34911416213E058F9FBAF V_0;
@@ -20269,7 +20269,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_mB97CDAD14
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m333A5EF2C59A0CB79A722245F66A7A9FC91D5CAB_gshared (SpriteShapeCopyUtility_1_t4A0CECA9562CBFF2EE7A8CB59AD163E304A71068* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20285,7 +20285,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m333A5EF2
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m48CD8E7E8B9E330350EF75FB36F0639FF9501B74_gshared (NativeSlice_1_t4B5C42A704ED060AB92A8716135FE435B1E6C23A ___0_dst, Vector3U5BU5D_tFF1859CCE176131B909E2044F76443064254679C* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_t4B5C42A704ED060AB92A8716135FE435B1E6C23A V_0;
@@ -20302,7 +20302,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m48CD8E7E8
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m010B8FAE1F68471D9E7BF6D37E7B67CAC22B7494_gshared (Vector3U5BU5D_tFF1859CCE176131B909E2044F76443064254679C* ___0_dst, NativeSlice_1_t4B5C42A704ED060AB92A8716135FE435B1E6C23A ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_t4B5C42A704ED060AB92A8716135FE435B1E6C23A V_0;
@@ -20319,7 +20319,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m010B8FAE1
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_mEC58B0C7EBC8869A0E669ED8DF6FEF15BFEA1A44_gshared (SpriteShapeCopyUtility_1_t2127414EC909894FA2D7F4E666056D05F4BF63A6* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20335,7 +20335,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_mEC58B0C7
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m1764D9BD0336134367717BFD45D4320499B21865_gshared (NativeSlice_1_tA687F314957178F2A299D03D59B960DDC218680F ___0_dst, Vector4U5BU5D_tC0F3A7115F85007510F6D173968200CD31BCF7AD* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tA687F314957178F2A299D03D59B960DDC218680F V_0;
@@ -20352,7 +20352,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m1764D9BD0
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m75B72E31247CCF9D3E7F3446FC26022B161A481A_gshared (Vector4U5BU5D_tC0F3A7115F85007510F6D173968200CD31BCF7AD* ___0_dst, NativeSlice_1_tA687F314957178F2A299D03D59B960DDC218680F ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tA687F314957178F2A299D03D59B960DDC218680F V_0;
@@ -20369,7 +20369,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m75B72E312
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m4CC4ABCB4B059F20FBFDB5422E21B59DBA5F8112_gshared (SpriteShapeCopyUtility_1_tAA592BAC5759EFCEEADF86EE2C2DCFA3606957C1* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20385,7 +20385,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m4CC4ABCB
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71753
+// Method Definition Index: 71756
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m61A9911D0972CFE161A7FE0BB8AC81CC89461841_gshared (NativeSlice_1_tA54E5D259EBCC7CD8512AA352C6F3709EB237B52 ___0_dst, __Il2CppFullySharedGenericStructTypeU5BU5D_tF3B929B6E80D0A8C109178E11CE8FF9957B014C1* ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tA54E5D259EBCC7CD8512AA352C6F3709EB237B52 V_0;
@@ -20402,7 +20402,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m61A9911D0
 		return;
 	}
 }
-// Method Definition Index: 71754
+// Method Definition Index: 71757
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m7B29A9665D225FA3DA710F053ADD5DE491994024_gshared (__Il2CppFullySharedGenericStructTypeU5BU5D_tF3B929B6E80D0A8C109178E11CE8FF9957B014C1* ___0_dst, NativeSlice_1_tA54E5D259EBCC7CD8512AA352C6F3709EB237B52 ___1_src, int32_t ___2_length, const RuntimeMethod* method) 
 {
 	NativeSlice_1_tA54E5D259EBCC7CD8512AA352C6F3709EB237B52 V_0;
@@ -20419,7 +20419,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1_Copy_m7B29A9665
 		return;
 	}
 }
-// Method Definition Index: 71755
+// Method Definition Index: 71758
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m00E862D444A03664E8330220E9A7A13B38A67C63_gshared (SpriteShapeCopyUtility_1_t54AEC93D9A0A739D4F9215685DD4CD1E022F0658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20443,7 +20443,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpriteShapeCopyUtility_1__ctor_m00E862D4
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71648
+// Method Definition Index: 71651
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void StackItem__ctor_mB942593ABDB2F15BAFF95B9393AFA7E9BA2202AF_gshared (StackItem_t607E21627AE35B30D30A90563F6497F62C9CF1CD* __this, const RuntimeMethod* method) 
 {
 	{

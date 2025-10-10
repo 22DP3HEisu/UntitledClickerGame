@@ -147,7 +147,7 @@ struct BurstCompilerOptions_t5F93118F305E1B0C950C6F9AF8BCA74033DA01C9_StaticFiel
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 68756
+// Method Definition Index: 68759
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U24BurstDirectCallInitializer_Initialize_m15347CE4997B95D8D58B24CEC10BDB0ACB562281 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
