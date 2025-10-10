@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS User_achievements (
+    UserAchievementID INT PRIMARY KEY AUTO_INCREMENT,
+    AchievementName VARCHAR(100) NOT NULL,
+    UserID INT,
+    EarnDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
