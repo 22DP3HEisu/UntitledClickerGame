@@ -29,10 +29,10 @@ public class ModalWindowTrigger : MonoBehaviour
         {
             timeRemaining -= Time.deltaTime;
         }
-        else
+        else if (timeRemaining > -1)
         {
-            timeRemaining = 0;
             ShowModalWindow();
+            timeRemaining = -1;
         }
     }
     
@@ -43,17 +43,14 @@ public class ModalWindowTrigger : MonoBehaviour
         Action cancelCallback = null;
         Action alternateCallback = null;
 
-        if (onContinueCallBack.GetPersistentEventCount() > 0)
-        {
-            continueCallback = onContinueCallBack.Invoke;
-        }
-        if (onCancelCallBack.GetPersistentEventCount() > 0)
-        {
-            cancelCallback = onCancelCallBack.Invoke;
-        }
+
+            continueCallback = () => AddCurrency();
+
+            cancelCallback = () => RemoveCurrency();
+        
         if (onAlternateCallBack.GetPersistentEventCount() > 0)
         {
-            alternateCallback = onAlternateCallBack.Invoke;
+            alternateCallback = () => onAlternateCallBack.Invoke();
         }
 
         UIController.instance.modalWindow.ShowAsHero(
@@ -65,8 +62,28 @@ public class ModalWindowTrigger : MonoBehaviour
             alternateMessage,
             continueCallback,
             cancelCallback,
-            alternateCallback
+            alternateCallback,
+            addCarrots, 
+            removeCarrots,
+            confirmMessage,
+            declineMessage,
+            alternateMessage
         );
+    }
+    void AddCurrency()
+    {
+        if (CurrencySyncManager.Instance != null && addCarrots > 0)
+        {
+            CurrencySyncManager.Instance.AddCurrency(addCarrots);
+
+        }
+    }
+    void RemoveCurrency()
+    {
+        if (CurrencySyncManager.Instance != null && removeCarrots > 0)
+        {
+            CurrencySyncManager.Instance.SpendCurrency(removeCarrots);
+        }
     }
 }
 

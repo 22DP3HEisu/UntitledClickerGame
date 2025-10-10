@@ -65,24 +65,22 @@ public class ModalWindowPanel: MonoBehaviour
     private Action onDeclineAction;
     private Action onAlternateAction;
 
-    public void Confirm()
+    public void Confirm(int addCarrots, string confirmMessage)
     {
-        onConfirmAction?.Invoke();
+        _confirmText.text = confirmMessage;
+        CurrencySyncManager.Instance.AddCurrency(addCarrots);
         Close();
     }
-    public void Decline()
+    public void Decline(int removeCarrots, string declineMessage)
     {
-        onDeclineAction?.Invoke();
+        _declineText.text = declineMessage;
+        CurrencySyncManager.Instance.SpendCurrency(removeCarrots);
         Close();
     }
     public void Alternate()
     {
         onAlternateAction?.Invoke();
         Close();
-    }
-    public void Close()
-    {
-        gameObject.SetActive(false);
     }
 
     public void ShowAsHero(
@@ -94,10 +92,15 @@ public class ModalWindowPanel: MonoBehaviour
         string alternateMessage,
         Action confirmAction,
         Action declineAction = null,
-        Action alternateAction = null)
+        Action alternateAction = null,
+        int addCarrots = 0,
+        int removeCarrots = 0,
+        string confirmButtonText = "Confirm",
+        string declineButtonText = "Decline",
+        string alternateButtonText = "Alternate"
+        )
     {
-        // Remove or replace this line if you don't use LeanTween or _box
-        // LeanTween.cancel(_box.gameObject);
+        LeanTween.cancel(gameObject);
 
         _horizontalLayoutArea.gameObject.SetActive(false);
         _verticalLayoutArea.gameObject.SetActive(true);
@@ -110,19 +113,18 @@ public class ModalWindowPanel: MonoBehaviour
         _heroImage.sprite = imageToShow;
         _heroText.text = message;
 
-        
-        onConfirmCallback = confirmAction; 
-        _confirmText.text = confirmMessage;
-        
-        bool hasDecline = (declineAction != null); 
-        _declineButton.gameObject.SetActive(hasDecline);
-        _declineText.text = declineMessage;
-        onDeclineCallback = declineAction;
-        
-        bool hasAlternate = (alternateAction != null); 
-        _alternateButton.gameObject.SetActive(hasAlternate);
-        _alternateText.text = alternateMessage;
-        onAlternateCallback = alternateAction;
+        // Set button texts here
+        _confirmText.text = confirmButtonText;
+        _declineText.text = declineButtonText;
+        _alternateText.text = alternateButtonText;
+
+        _confirmButton.onClick.RemoveAllListeners();
+        _declineButton.onClick.RemoveAllListeners();
+        _alternateButton.onClick.RemoveAllListeners();
+
+        _confirmButton.onClick.AddListener(() => Confirm(addCarrots, confirmMessage));
+        _declineButton.onClick.AddListener(() => Decline(removeCarrots, declineMessage));
+        _alternateButton.onClick.AddListener(Alternate);
 
         Show();
     }
@@ -131,6 +133,12 @@ public class ModalWindowPanel: MonoBehaviour
     {
         gameObject.SetActive(true);
     }
+
+    private void Close()
+    {
+        gameObject.SetActive(false);
+    }
+
 
     
 }
