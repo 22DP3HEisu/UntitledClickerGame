@@ -25,6 +25,19 @@ public class AdminUserItem : MonoBehaviour
     
     private AdminUser userData;
     
+    /// <summary>
+    /// Check if the current logged-in user is viewing their own profile
+    /// </summary>
+    /// <returns>True if current user is viewing themselves</returns>
+    private bool IsCurrentUser()
+    {
+        if (userData == null) return false;
+        
+        string currentUsername = UserManager.GetCurrentUsername();
+        return !string.IsNullOrEmpty(currentUsername) && 
+               currentUsername.Equals(userData.username, System.StringComparison.OrdinalIgnoreCase);
+    }
+    
     public void SetupUser(AdminUser user)
     {
         userData = user;
@@ -61,6 +74,8 @@ public class AdminUserItem : MonoBehaviour
     {
         if (userData == null) return;
         
+        bool isCurrentUser = IsCurrentUser();
+        
         if (banButton != null)
         {
             var banButtonText = banButton.GetComponentInChildren<TMP_Text>();
@@ -68,11 +83,42 @@ public class AdminUserItem : MonoBehaviour
             {
                 banButtonText.text = userData.isBanned ? "Unban" : "Ban";
             }
+            
+            // Disable ban button if user is trying to ban themselves
+            banButton.interactable = !isCurrentUser;
+            
+            // Visual feedback for disabled state
+            if (isCurrentUser && banButtonText != null)
+            {
+                banButtonText.color = Color.gray;
+                banButtonText.text = "Can't Ban Self";
+            }
+        }
+        
+        if (deleteButton != null)
+        {
+            // Disable delete button if user is trying to delete themselves
+            deleteButton.interactable = !isCurrentUser;
+            
+            // Visual feedback for disabled state
+            var deleteButtonText = deleteButton.GetComponentInChildren<TMP_Text>();
+            if (isCurrentUser && deleteButtonText != null)
+            {
+                deleteButtonText.color = Color.gray;
+                deleteButtonText.text = "Can't Delete Self";
+            }
         }
     }
     
     private async void ToggleBanUser()
     {
+        // Prevent users from banning themselves
+        if (IsCurrentUser())
+        {
+            Debug.LogWarning("Cannot ban yourself!");
+            return;
+        }
+        
         Debug.Log($"Toggling ban status for user {userData.username}...");
         try
         {
@@ -91,6 +137,13 @@ public class AdminUserItem : MonoBehaviour
 
     private async void DeleteUser()
     {
+        // Prevent users from deleting themselves
+        if (IsCurrentUser())
+        {
+            Debug.LogWarning("Cannot delete yourself!");
+            return;
+        }
+        
         // Show confirmation dialog (you might want to implement a proper confirmation UI)
         // if (Application.isEditor || Debug.isDebugBuild)
         // {
