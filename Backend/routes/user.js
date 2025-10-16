@@ -25,16 +25,6 @@ router.get('/', authenticateToken, async function(req, res, next) {
 
         const user = users[0];
 
-        // Debug: Log the user data from database
-        console.log('[DEBUG] User data from database:', {
-            UserID: user.UserID,
-            Username: user.Username,
-            Email: user.Email,
-            Role: user.Role,
-            RoleType: typeof user.Role,
-            RoleLength: user.Role ? user.Role.length : 'null'
-        });
-
         // Get user upgrades from the new table structure
         const upgradesQuery = `
             SELECT UpgradeName 

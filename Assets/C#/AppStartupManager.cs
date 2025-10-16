@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class AppStartupManager : MonoBehaviour
 {
+    #region Inspector Settings
+    
     [Header("Scene Configuration")]
     [SerializeField] private string gameSceneName = "game";
     [SerializeField] private string introSceneName = "Intro";
@@ -21,12 +23,14 @@ public class AppStartupManager : MonoBehaviour
     [Header("Debug Options")]
     [SerializeField] private bool forceShowIntro = false; // For testing purposes
     
-    private LoginCheckManager loginCheckManager;
+    #endregion
+    
+    #region Unity Lifecycle
     
     void Start()
     {
-        // Initialize login check manager
-        loginCheckManager = gameObject.AddComponent<LoginCheckManager>();
+        // Configure UserManager with scene names
+        UserManager.SetSceneNames(gameSceneName, introSceneName);
         
         if (showSplashScreen && splashScreenUI != null)
         {
@@ -59,11 +63,15 @@ public class AppStartupManager : MonoBehaviour
         // Perform startup verification
         await PerformStartupLoginVerification();
     }
+    
+    #endregion
+    
+    #region Startup Logic
 
     private async System.Threading.Tasks.Task PerformStartupLoginVerification()
     {
         // If user appears logged in locally, verify with server
-        if (loginCheckManager.IsPlayerLoggedIn())
+        if (UserManager.IsPlayerLoggedIn())
         {
             try
             {
@@ -105,23 +113,21 @@ public class AppStartupManager : MonoBehaviour
         if (forceShowIntro)
         {
             Debug.Log("Force show intro is enabled. Going to intro scene.");
-            LoadIntroScene();
+            UserManager.LoadIntroScene();
             return;
         }
         
-        // Check if user is logged in
-        if (loginCheckManager.IsPlayerLoggedIn())
+        // Check if user is logged in and navigate accordingly
+        if (UserManager.IsPlayerLoggedIn())
         {
-            UserInfo userInfo = loginCheckManager.GetCurrentUserInfo();
-            Debug.Log($"Welcome back, {userInfo?.username}! Loading game...");
-            
-            // Show welcome message briefly then load game
-            ShowWelcomeBack(userInfo?.username ?? "User");
+            string username = UserManager.GetCurrentUsername();
+            Debug.Log($"Welcome back, {username}! Loading game...");
+            ShowWelcomeBack(username);
         }
         else
         {
             Debug.Log("No valid login found. Showing intro scene.");
-            LoadIntroScene();
+            UserManager.LoadIntroScene();
         }
     }
     
@@ -131,37 +137,17 @@ public class AppStartupManager : MonoBehaviour
         Debug.Log($"Welcome back, {username}!");
         
         // Small delay then load game
-        Invoke(nameof(LoadGameScene), 1f);
+        Invoke(nameof(LoadGameSceneDelayed), 1f);
     }
     
-    private void LoadGameScene()
+    private void LoadGameSceneDelayed()
     {
-        SceneManager.LoadScene(gameSceneName);
+        UserManager.LoadGameScene();
     }
     
-    private void LoadIntroScene()
-    {
-        SceneManager.LoadScene(introSceneName);
-    }
+    #endregion
     
-    // Public methods for manual control
-    public void ForceGoToIntro()
-    {
-        LoadIntroScene();
-    }
-    
-    public void ForceGoToGame()
-    {
-        LoadGameScene();
-    }
-    
-    public void ForceLogout()
-    {
-        if (loginCheckManager != null)
-        {
-            loginCheckManager.ForceLogout();
-        }
-    }
+    #region Public Interface
     
     // Debug method accessible from inspector
     [ContextMenu("Test Login Check")]
@@ -170,18 +156,15 @@ public class AppStartupManager : MonoBehaviour
         PerformLoginCheck();
     }
     
+    #endregion
+    
+    #region Debug Methods
+    
     // Debug method to clear all user data
     [ContextMenu("Clear All User Data")]
     public void ClearAllUserData()
     {
-        PlayerPrefs.DeleteKey("RegisteredUsername");
-        PlayerPrefs.DeleteKey("RegisteredEmail");
-        PlayerPrefs.DeleteKey("IsRegistered");
-        PlayerPrefs.Save();
-        
-        // Use centralized token management
-        ApiClient.ClearAuthToken();
-        
+        UserManager.ForceLogout(); // This handles all the clearing logic
         Debug.Log("All user data cleared! You can now test registration/login again.");
     }
     
@@ -189,9 +172,9 @@ public class AppStartupManager : MonoBehaviour
     [ContextMenu("Clear Auth Token Only")]
     public void ClearAuthTokenOnly()
     {
-        // Use centralized token management
         ApiClient.ClearAuthToken();
-        
         Debug.Log("Auth token cleared! User will need to login again but registration data is kept.");
     }
+    
+    #endregion
 }

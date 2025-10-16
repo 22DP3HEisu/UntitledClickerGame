@@ -51,6 +51,11 @@ public static class ApiClient
         return AuthTokenManager.IsTokenValid();
     }
 
+    public static string GetAuthToken()
+    {
+        return AuthTokenManager.GetToken();
+    }
+
     // Core Request Logic
     private static async Task<TResponse> SendRequestAsync<TResponse>(string method, string path, object body, CancellationToken cancellationToken)
     {

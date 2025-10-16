@@ -12,6 +12,7 @@ public class UserProfileResponse
         public int id;
         public string username;
         public string email;
+        public string role;
         public string createdAt;
         public GameData gameData;
     }

@@ -77,22 +77,10 @@ public class LoginManager : MonoBehaviour
             ShowMessage("Username or email is required.", isError: true);
             return false;
         }
-        
-        if (username.Length < 3)
-        {
-            ShowMessage("Username or email is too short.", isError: true);
-            return false;
-        }
 
         if (string.IsNullOrEmpty(password))
         {
             ShowMessage("Password is required.", isError: true);
-            return false;
-        }
-        
-        if (password.Length < minPasswordLength)
-        {
-            ShowMessage($"Password must be at least {minPasswordLength} characters long.", isError: true);
             return false;
         }
 

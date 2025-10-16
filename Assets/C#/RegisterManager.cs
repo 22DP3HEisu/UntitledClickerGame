@@ -20,7 +20,7 @@ public class RegisterManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private int minUsernameLength = 3;
     [SerializeField] private int maxUsernameLength = 30;
-    [SerializeField] private int minPasswordLength = 6;
+    [SerializeField] private int minPasswordLength = 8; // Increased from 6 for better security
     [SerializeField] private string gameSceneName = "game";
     [SerializeField] private string introSceneName = "Intro";
     
@@ -93,15 +93,10 @@ public class RegisterManager : MonoBehaviour
             return false;
         }
         
-        if (password.Length < minPasswordLength)
+        // Enhanced password validation with stronger requirements
+        if (!IsValidPassword(password))
         {
-            ShowMessage($"Password must be at least {minPasswordLength} characters long.", isError: true);
-            return false;
-        }
-        
-        if (!Regex.IsMatch(password, @"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$"))
-        {
-            ShowMessage("Password must contain at least one letter and one number.", isError: true);
+            ShowMessage("Password must contain at least:\n• 1 uppercase letter (A-Z)\n• 1 lowercase letter (a-z)\n• 1 number (0-9)\n• 1 special character (!@#$%^&*)\n• Minimum 8 characters\n• No common sequences", isError: true);
             return false;
         }
 
@@ -116,6 +111,159 @@ public class RegisterManager : MonoBehaviour
     private bool IsValidEmail(string email)
     {
         return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+    }
+
+    /// <summary>
+    /// Comprehensive password validation with strong security requirements
+    /// </summary>
+    /// <param name="password">Password to validate</param>
+    /// <returns>True if password meets all security criteria</returns>
+    private bool IsValidPassword(string password)
+    {
+        // Check minimum length
+        if (password.Length < minPasswordLength)
+            return false;
+
+        // Check maximum length (prevent extremely long passwords that could cause DoS)
+        if (password.Length > 128)
+            return false;
+
+        // Must contain at least one uppercase letter
+        if (!Regex.IsMatch(password, @"(?=.*[A-Z])"))
+            return false;
+
+        // Must contain at least one lowercase letter
+        if (!Regex.IsMatch(password, @"(?=.*[a-z])"))
+            return false;
+
+        // Must contain at least one digit
+        if (!Regex.IsMatch(password, @"(?=.*\d)"))
+            return false;
+
+        // Must contain at least one special character
+        if (!Regex.IsMatch(password, @"(?=.*[!@#$%^&*()_+\-=\[\]{}|;':"",./<>?`~])"))
+            return false;
+
+        // Prevent common weak patterns
+        if (ContainsWeakPatterns(password))
+            return false;
+
+        // Prevent common dictionary words (basic check)
+        if (ContainsCommonWords(password.ToLower()))
+            return false;
+
+        // Check for repetitive characters (e.g., "aaa", "111")
+        if (HasExcessiveRepetition(password))
+            return false;
+
+        // Check for sequential characters (e.g., "123", "abc")
+        if (HasSequentialCharacters(password))
+            return false;
+
+        // All checks passed
+        return true;
+    }
+
+    /// <summary>
+    /// Check for weak password patterns
+    /// </summary>
+    private bool ContainsWeakPatterns(string password)
+    {
+        string lowerPassword = password.ToLower();
+        
+        // Check for keyboard patterns
+        string[] keyboardPatterns = {
+            "qwerty", "asdf", "zxcv", "qwer", "asdfgh", "zxcvbn",
+            "123456", "abcdef", "password", "admin", "user", "guest",
+            "12345", "54321", "098765", "987654"
+        };
+
+        foreach (string pattern in keyboardPatterns)
+        {
+            if (lowerPassword.Contains(pattern))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Check for common dictionary words
+    /// </summary>
+    private bool ContainsCommonWords(string password)
+    {
+        string[] commonWords = {
+            "password", "admin", "user", "guest", "login", "welcome",
+            "hello", "world", "test", "demo", "sample", "example",
+            "qwerty", "abc123", "letmein", "monkey", "dragon",
+            "sunshine", "princess", "football", "baseball", "superman"
+        };
+
+        foreach (string word in commonWords)
+        {
+            if (password.Contains(word))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Check for excessive character repetition
+    /// </summary>
+    private bool HasExcessiveRepetition(string password)
+    {
+        int maxRepeats = 2; // Allow maximum 2 consecutive identical characters
+        
+        for (int i = 0; i < password.Length - maxRepeats; i++)
+        {
+            char currentChar = password[i];
+            int consecutiveCount = 1;
+            
+            for (int j = i + 1; j < password.Length && password[j] == currentChar; j++)
+            {
+                consecutiveCount++;
+                if (consecutiveCount > maxRepeats)
+                    return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// Check for sequential characters (ascending or descending)
+    /// </summary>
+    private bool HasSequentialCharacters(string password)
+    {
+        int maxSequential = 2; // Allow maximum 2 sequential characters
+        
+        for (int i = 0; i < password.Length - maxSequential; i++)
+        {
+            // Check ascending sequence
+            bool isAscending = true;
+            bool isDescending = true;
+            
+            for (int j = 1; j <= maxSequential; j++)
+            {
+                if (i + j >= password.Length)
+                    break;
+                    
+                char current = password[i + j - 1];
+                char next = password[i + j];
+                
+                if (next != current + 1)
+                    isAscending = false;
+                    
+                if (next != current - 1)
+                    isDescending = false;
+            }
+            
+            if (isAscending || isDescending)
+                return true;
+        }
+        
+        return false;
     }
 
     private async Task ProcessRegistrationAsync()

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,24 +9,27 @@ public class PopUpButtonsHandler : MonoBehaviour
     [SerializeField] private Button adminButton;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    async Task Start()
     {
-        SetupButtons();
+        await SetupButtons();
     }
     
-    private void SetupButtons()
+    private async Task SetupButtons()
     {
-        // Setup admin button
-        if (adminButton != null)
+        try
         {
-            adminButton.onClick.AddListener(GoToAdminScene);
-        }
-    }
+            var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            if (response != null && response.user.role == "Admin" && adminButton != null)
+            {
+                adminButton.gameObject.SetActive(true);
+                adminButton.onClick.AddListener(GoToAdminScene);
+            }
+        }
+        catch (ApiException ex)
+        {
+            Debug.LogError($"[PopUpButtonsHandler] API error loading user profile: {ex.Message}");
+        }
     }
 
     /// <summary>
