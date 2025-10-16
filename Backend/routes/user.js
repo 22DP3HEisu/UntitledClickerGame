@@ -10,7 +10,7 @@ router.get('/', authenticateToken, async function(req, res, next) {
     try {
         // Get user basic info and game data
         const userQuery = `
-            SELECT UserID, Username, Email, Carrots, HorseShoes, G_Carrots, CreatedAt
+            SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, CreatedAt
             FROM Users 
             WHERE UserID = ?
         `;
@@ -24,6 +24,16 @@ router.get('/', authenticateToken, async function(req, res, next) {
         }
 
         const user = users[0];
+
+        // Debug: Log the user data from database
+        console.log('[DEBUG] User data from database:', {
+            UserID: user.UserID,
+            Username: user.Username,
+            Email: user.Email,
+            Role: user.Role,
+            RoleType: typeof user.Role,
+            RoleLength: user.Role ? user.Role.length : 'null'
+        });
 
         // Get user upgrades from the new table structure
         const upgradesQuery = `
@@ -45,6 +55,7 @@ router.get('/', authenticateToken, async function(req, res, next) {
                 id: user.UserID,
                 username: user.Username,
                 email: user.Email,
+                role: user.Role,
                 createdAt: user.CreatedAt,
                 gameData: {
                     carrots: user.Carrots,
