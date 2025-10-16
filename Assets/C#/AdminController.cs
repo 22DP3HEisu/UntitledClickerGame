@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ public class AdminController : MonoBehaviour
     [SerializeField] private TMP_Text userStatsText;
     [SerializeField] private TMP_Text clanStatsText;
     [SerializeField] private TMP_Text statusText;
+    [SerializeField] private Button backButton;
     
     [Header("User List")]
     [SerializeField] private Transform userListParent; // The Content transform of the scroll view
@@ -35,7 +37,11 @@ public class AdminController : MonoBehaviour
     
     private void SetupUI()
     {
-        
+        if (backButton != null)
+        {
+            backButton?.onClick.AddListener(OnBackClicked);
+        }
+
         // Initialize display
         if (userStatsText != null)
         {
@@ -47,7 +53,7 @@ public class AdminController : MonoBehaviour
             clanStatsText.text = "Loading clan statistics...";
         }
     }
-    
+
     /// <summary>
     /// Load admin statistics from server
     /// </summary>
@@ -58,14 +64,14 @@ public class AdminController : MonoBehaviour
             ShowStatus("Authentication required", true);
             return;
         }
-        
+
         ShowStatus("Loading admin statistics...", false);
         LogDebug("Fetching admin stats from server");
-        
+
         try
         {
             var response = await ApiClient.GetAsync<AdminStatsResponse>("/admin/stats");
-            
+
             if (response != null)
             {
                 currentStats = response;
@@ -88,7 +94,7 @@ public class AdminController : MonoBehaviour
                 404 => "Admin endpoint not found.",
                 _ => $"Server error: {ex.Message}"
             };
-            
+
             ShowStatus(errorMessage, true);
             LogDebug($"Admin stats API error: {ex.StatusCode} - {ex.Message}");
         }
@@ -100,6 +106,11 @@ public class AdminController : MonoBehaviour
         finally
         {
         }
+    }
+    
+    private void OnBackClicked()
+    {
+        SceneManager.LoadScene("game");
     }
     
     private void DisplayStats()

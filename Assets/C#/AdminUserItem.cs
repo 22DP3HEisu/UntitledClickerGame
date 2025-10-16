@@ -21,6 +21,7 @@ public class AdminUserItem : MonoBehaviour
     [Header("Actions")]
     [SerializeField] private Button banButton;
     [SerializeField] private Button editButton;
+    [SerializeField] private Button deleteButton;
     
     private AdminUser userData;
     
@@ -50,6 +51,7 @@ public class AdminUserItem : MonoBehaviour
         // Setup button listeners
         banButton?.onClick.AddListener(() => ToggleBanUser());
         editButton?.onClick.AddListener(() => EditUser());
+        deleteButton?.onClick.AddListener(() => DeleteUser());
         
         // Update button states based on user data
         UpdateButtonStates();
@@ -90,11 +92,11 @@ public class AdminUserItem : MonoBehaviour
     private async void DeleteUser()
     {
         // Show confirmation dialog (you might want to implement a proper confirmation UI)
-        if (Application.isEditor || Debug.isDebugBuild)
-        {
-            Debug.LogWarning($"Delete user {userData.username} requested - implement confirmation dialog");
-            return;
-        }
+        // if (Application.isEditor || Debug.isDebugBuild)
+        // {
+        //     Debug.LogWarning($"Delete user {userData.username} requested - implement confirmation dialog");
+        //     return;
+        // }
 
         try
         {
