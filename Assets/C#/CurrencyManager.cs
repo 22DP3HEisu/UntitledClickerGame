@@ -58,15 +58,12 @@ public class CurrencySyncManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
             return;
-        }
-        
-        LoadLocalCurrency();
+        }        
     }
     
     private async void Start()

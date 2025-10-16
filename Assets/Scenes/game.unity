@@ -4441,6 +4441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   adminButton: {fileID: 1434061462}
+  logoutButton: {fileID: 1775132904}
 --- !u!1 &859964347
 GameObject:
   m_ObjectHideFlags: 0
@@ -9196,7 +9197,6 @@ GameObject:
   - component: {fileID: 1775132906}
   - component: {fileID: 1775132905}
   - component: {fileID: 1775132904}
-  - component: {fileID: 1775132907}
   m_Layer: 5
   m_Name: Exit
   m_TagString: Untagged
@@ -9306,20 +9306,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1775132902}
   m_CullTransparentMesh: 1
---- !u!114 &1775132907
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1775132902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7720a0d6326b9f34fb6f97cfaf17ed14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UserLogoutController
-  logoutButton: {fileID: 1775132904}
-  introSceneName: Intro
 --- !u!1 &1783818747
 GameObject:
   m_ObjectHideFlags: 0

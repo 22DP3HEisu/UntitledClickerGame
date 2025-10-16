@@ -19,10 +19,8 @@ public class AdminUserItem : MonoBehaviour
     [SerializeField] private TMP_Text bannedStatusText;
     
     [Header("Actions")]
-    [SerializeField] private Button promoteButton;
-    [SerializeField] private Button demoteButton;
     [SerializeField] private Button banButton;
-    [SerializeField] private Button deleteButton;
+    [SerializeField] private Button editButton;
     
     private AdminUser userData;
     
@@ -39,47 +37,19 @@ public class AdminUserItem : MonoBehaviour
         
         // Set text fields
         if (usernameText != null) usernameText.text = userData.username;
-        if (emailText != null) emailText.text = userData.email;
         if (roleText != null) 
         {
             roleText.text = userData.role;
             // Color code roles
             roleText.color = userData.role == "Admin" ? Color.red : Color.white;
         }
-        
-        // Currency display
-        if (carrotsText != null) carrotsText.text = userData.carrots.ToString("N0");
-        if (horseShoesText != null) horseShoesText.text = userData.horseShoes.ToString("N0");
-        if (goldenCarrotsText != null) goldenCarrotsText.text = userData.goldenCarrots.ToString("N0");
-        
-        // Dates
-        if (createdAtText != null) 
-        {
-            if (System.DateTime.TryParse(userData.createdAt, out System.DateTime createdDate))
-            {
-                createdAtText.text = createdDate.ToString("MM/dd/yyyy");
-            }
-            else
-            {
-                createdAtText.text = userData.createdAt;
-            }
-        }
-        
-        // Ban status
-        if (bannedStatusText != null)
-        {
-            bannedStatusText.text = userData.isBanned ? "BANNED" : "Active";
-            bannedStatusText.color = userData.isBanned ? Color.red : Color.green;
-        }
     }
     
     private void SetupButtons()
     {
         // Setup button listeners
-        promoteButton?.onClick.AddListener(() => PromoteUser());
-        demoteButton?.onClick.AddListener(() => DemoteUser());
         banButton?.onClick.AddListener(() => ToggleBanUser());
-        deleteButton?.onClick.AddListener(() => DeleteUser());
+        editButton?.onClick.AddListener(() => EditUser());
         
         // Update button states based on user data
         UpdateButtonStates();
@@ -88,13 +58,6 @@ public class AdminUserItem : MonoBehaviour
     private void UpdateButtonStates()
     {
         if (userData == null) return;
-        
-        // Show/hide buttons based on current role and status
-        if (promoteButton != null) 
-            promoteButton.gameObject.SetActive(userData.role != "Admin");
-        
-        if (demoteButton != null) 
-            demoteButton.gameObject.SetActive(userData.role == "Admin");
         
         if (banButton != null)
         {
@@ -106,40 +69,9 @@ public class AdminUserItem : MonoBehaviour
         }
     }
     
-    private async void PromoteUser()
-    {
-        try
-        {
-            await ApiClient.PostAsync<object, object>($"/admin/user/{userData.id}/promote", null);
-            userData.role = "Admin";
-            UpdateDisplay();
-            UpdateButtonStates();
-            Debug.Log($"User {userData.username} promoted to Admin");
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Failed to promote user: {ex.Message}");
-        }
-    }
-    
-    private async void DemoteUser()
-    {
-        try
-        {
-            await ApiClient.PostAsync<object, object>($"/admin/user/{userData.id}/demote", null);
-            userData.role = "User";
-            UpdateDisplay();
-            UpdateButtonStates();
-            Debug.Log($"User {userData.username} demoted to User");
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Failed to demote user: {ex.Message}");
-        }
-    }
-    
     private async void ToggleBanUser()
     {
+        Debug.Log($"Toggling ban status for user {userData.username}...");
         try
         {
             string endpoint = userData.isBanned ? "unban" : "ban";
@@ -154,7 +86,7 @@ public class AdminUserItem : MonoBehaviour
             Debug.LogError($"Failed to toggle ban status: {ex.Message}");
         }
     }
-    
+
     private async void DeleteUser()
     {
         // Show confirmation dialog (you might want to implement a proper confirmation UI)
@@ -163,7 +95,7 @@ public class AdminUserItem : MonoBehaviour
             Debug.LogWarning($"Delete user {userData.username} requested - implement confirmation dialog");
             return;
         }
-        
+
         try
         {
             await ApiClient.DeleteAsync($"/admin/user/{userData.id}");
@@ -174,6 +106,12 @@ public class AdminUserItem : MonoBehaviour
         {
             Debug.LogError($"Failed to delete user: {ex.Message}");
         }
+    }
+    
+    private void EditUser()
+    {
+        // Open edit user dialog or scene
+        Debug.Log($"Edit user {userData.username} requested - implement edit functionality");
     }
     
     // Public method to get user data

@@ -10,7 +10,7 @@ router.get('/', authenticateToken, async function(req, res, next) {
     try {
         // Get user basic info and game data
         const userQuery = `
-            SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, CreatedAt
+            SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, CreatedAt, IsBanned
             FROM Users 
             WHERE UserID = ?
         `;
@@ -46,6 +46,7 @@ router.get('/', authenticateToken, async function(req, res, next) {
                 username: user.Username,
                 email: user.Email,
                 role: user.Role,
+                isBanned: !!user.IsBanned, // Convert to boolean
                 createdAt: user.CreatedAt,
                 gameData: {
                     carrots: user.Carrots,

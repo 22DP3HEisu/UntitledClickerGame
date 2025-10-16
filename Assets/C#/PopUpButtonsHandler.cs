@@ -7,15 +7,21 @@ public class PopUpButtonsHandler : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private Button adminButton;
+    [SerializeField] private Button logoutButton;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     async Task Start()
     {
         await SetupButtons();
     }
-    
+
     private async Task SetupButtons()
     {
+        if (logoutButton != null)
+        {
+            logoutButton.onClick.AddListener(OnLogoutClicked);
+        }
+
         try
         {
             var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
@@ -31,13 +37,15 @@ public class PopUpButtonsHandler : MonoBehaviour
             Debug.LogError($"[PopUpButtonsHandler] API error loading user profile: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// Navigate to the admin scene
-    /// </summary>
-    public void GoToAdminScene()
+    
+    private void GoToAdminScene()
     {
         Debug.Log("Navigating to admin scene...");
         SceneManager.LoadScene("Admin");
+    }
+
+    private void OnLogoutClicked()
+    {
+        UserManager.ForceLogout();
     }
 }

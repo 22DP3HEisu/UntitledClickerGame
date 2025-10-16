@@ -14,6 +14,7 @@ public class UserProfileResponse
         public string email;
         public string role;
         public string createdAt;
+        public bool isBanned; // Added ban status field
         public GameData gameData;
     }
 

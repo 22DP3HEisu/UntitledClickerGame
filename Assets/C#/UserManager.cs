@@ -108,6 +108,10 @@ public static class UserManager
         PlayerPrefs.DeleteKey("RegisteredUsername");
         PlayerPrefs.DeleteKey("RegisteredEmail");
         PlayerPrefs.DeleteKey("IsRegistered");
+
+        PlayerPrefs.DeleteKey("LocalCarrots");
+        PlayerPrefs.DeleteKey("LocalHorseShoes");
+        PlayerPrefs.DeleteKey("LocalGoldenCarrots");
         PlayerPrefs.Save();
         
         // Use ApiClient's centralized token management

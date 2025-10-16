@@ -16,7 +16,6 @@ public class LoginManager : MonoBehaviour
     [SerializeField] private TMP_Text successMessageText;
     
     [Header("Settings")]
-    [SerializeField] private int minPasswordLength = 6;
     [SerializeField] private string gameSceneName = "game";
     [SerializeField] private string introSceneName = "Intro";
     
@@ -102,6 +101,15 @@ public class LoginManager : MonoBehaviour
         {
             var response = await ApiClient.PostAsync<LoginData, LoginResponse>("/auth/login", loginData);
 
+            Debug.Log(response.user.isBanned);
+            // Check if user is banned before proceeding
+            if (response.user.isBanned)
+            {
+                ShowMessage("Your account has been banned. Please contact support.", isError: true);
+                Debug.LogWarning($"Banned user {response.user.username} attempted to login.");
+                return;
+            }
+
             ShowMessage("Login successful! Loading game...", isError: false);
 
             // Save user data and set auth token with 7-day expiry
@@ -117,6 +125,7 @@ public class LoginManager : MonoBehaviour
             string message = ex.StatusCode switch
             {
                 401 => "Invalid username/email or password.",
+                403 => "Your account has been banned. Please contact support.",
                 404 => "Account not found. Please check your credentials.",
                 _ => ex.Message
             };
@@ -177,29 +186,4 @@ public class LoginManager : MonoBehaviour
         backButton?.onClick.RemoveListener(OnBackClicked);
         passwordField?.onEndEdit.RemoveListener(OnPasswordSubmit);
     }
-}
-
-// Data classes for JSON serialization/deserialization
-[System.Serializable]
-public class LoginData
-{
-    public string username; // Can be username or email
-    public string password;
-}
-
-[System.Serializable]
-public class LoginResponse
-{
-    public string message;
-    public UserData user;
-    public string token;
-    public string expiresIn;
-}
-
-[System.Serializable]
-public class UserData
-{
-    public int id;
-    public string username;
-    public string email;
 }

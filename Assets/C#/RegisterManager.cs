@@ -371,7 +371,7 @@ public class RegistrationData
 public class RegistrationResponse
 {
     public string message;
-    public UserData user;
+    public LoginUserData user; // Use the shared LoginUserData class
     public string token;
     public string expiresIn;
 }

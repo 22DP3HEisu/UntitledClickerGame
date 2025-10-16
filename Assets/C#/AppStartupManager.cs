@@ -79,6 +79,14 @@ public class AppStartupManager : MonoBehaviour
 
                 if (response?.user != null)
                 {
+                    // Check if user is banned
+                    if (response.user.isBanned)
+                    {
+                        Debug.LogWarning($"User {response.user.username} is banned. Logging out and redirecting to intro.");
+                        HandleBannedUser(response.user.username);
+                        return;
+                    }
+                    
                     // Update saved user info
                     PlayerPrefs.SetString("RegisteredUsername", response.user.username ?? PlayerPrefs.GetString("RegisteredUsername", ""));
                     PlayerPrefs.SetString("RegisteredEmail", response.user.email ?? PlayerPrefs.GetString("RegisteredEmail", ""));
@@ -143,6 +151,21 @@ public class AppStartupManager : MonoBehaviour
     private void LoadGameSceneDelayed()
     {
         UserManager.LoadGameScene();
+    }
+    
+    /// <summary>
+    /// Handle banned user by clearing their data and redirecting to intro
+    /// </summary>
+    /// <param name="username">Username of the banned user</param>
+    private void HandleBannedUser(string username)
+    {
+        Debug.LogWarning($"[AppStartupManager] User {username} is banned. Clearing session and redirecting.");
+        
+        // Show a banned message (you might want to implement a proper UI for this)
+        Debug.LogError($"Account '{username}' has been banned. You have been logged out.");
+        
+        // Clear all user data and log them out (this also redirects to intro scene)
+        UserManager.ForceLogout();
     }
     
     #endregion

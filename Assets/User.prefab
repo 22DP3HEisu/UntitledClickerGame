@@ -540,6 +540,7 @@ GameObject:
   - component: {fileID: 2924606667132203440}
   - component: {fileID: 4219491273012902845}
   - component: {fileID: 7392036511517679001}
+  - component: {fileID: 5621868329627542303}
   m_Layer: 5
   m_Name: User
   m_TagString: Untagged
@@ -608,6 +609,28 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5621868329627542303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3501152263535674179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e4aefb889d8cf74da0b4ccf46de54fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AdminUserItem
+  usernameText: {fileID: 1993062337470088184}
+  emailText: {fileID: 0}
+  roleText: {fileID: 3287078561750995343}
+  carrotsText: {fileID: 0}
+  horseShoesText: {fileID: 0}
+  goldenCarrotsText: {fileID: 0}
+  createdAtText: {fileID: 0}
+  bannedStatusText: {fileID: 0}
+  banButton: {fileID: 7274514637865529919}
+  editButton: {fileID: 9126774700251192218}
 --- !u!1 &5489232385251714432
 GameObject:
   m_ObjectHideFlags: 0

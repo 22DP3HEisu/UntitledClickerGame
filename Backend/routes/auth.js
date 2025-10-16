@@ -21,8 +21,8 @@ router.post('/login', async function(req, res, next) {
     const { username: sanitizedUsername, password: sanitizedPassword } = validation.sanitizedData;
 
     try {
-        // Find user by username or email
-        const query = 'SELECT UserID, Username, Email, PasswordHash FROM Users WHERE Username = ? OR Email = ?';
+        // Find user by username or email (include ban status)
+        const query = 'SELECT UserID, Username, Email, PasswordHash, Role, IsBanned, CreatedAt FROM Users WHERE Username = ? OR Email = ?';
         const users = await executeQuery(query, [sanitizedUsername, sanitizedUsername]);
 
         if (users.length === 0) {
@@ -33,6 +33,14 @@ router.post('/login', async function(req, res, next) {
         }
 
         const user = users[0];
+
+        // Check if user is banned before proceeding
+        if (user.IsBanned) {
+            return res.status(403).json({
+                error: 'Account banned',
+                message: 'Your account has been banned. Please contact support.'
+            });
+        }
 
         // Verify password
         const isValidPassword = await bcrypt.compare(sanitizedPassword, user.PasswordHash);
@@ -52,7 +60,10 @@ router.post('/login', async function(req, res, next) {
             user: {
                 id: user.UserID,
                 username: user.Username,
-                email: user.Email
+                email: user.Email,
+                role: user.Role,
+                isBanned: !!user.IsBanned, // Convert to boolean
+                createdAt: user.CreatedAt
             },
             token,
             expiresIn: '7d'
