@@ -852,8 +852,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 224.94995, y: -400}
-  m_SizeDelta: {x: 449.9, y: 800}
+  m_AnchoredPosition: {x: 199.99997, y: -400}
+  m_SizeDelta: {x: 400, y: 800}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &182111394
 MonoBehaviour:
@@ -5367,43 +5367,43 @@ MonoBehaviour:
     clicksPerSecond: 1
   - name: Carrot farm
     description: A small farm of carrots
-    image: {fileID: -4427432344427554974, guid: f63cf079c9377494da550ae65d97c857, type: 3}
+    image: {fileID: -8045196638492830976, guid: dc36b43ccf26b644aaf5327bfbde401b, type: 3}
     startPrice: 1000
     level: 0
     clicksPerSecond: 10
-  - name: City ruins
-    description: A once Famous city for its carrot aguculture
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+  - name: Better tools
+    description: You upgrade your farming tools
+    image: {fileID: 4848043262717589262, guid: c4a22e0a05b48b34991c8dc7a71c30f4, type: 3}
     startPrice: 5000
     level: 0
     clicksPerSecond: 25
   - name: City hall
     description: Herbis 4
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+    image: {fileID: -1609391156313892090, guid: 099599e9635add94fa027110c404a0b8, type: 3}
     startPrice: 30000
     level: 0
     clicksPerSecond: 20
-  - name: Skibid 5
-    description: Herbis 5
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+  - name: City ruins
+    description: A once Famous city for its carrot aguculture
+    image: {fileID: -7384141503730564083, guid: 174597a424352ea4d9be5c7bbb424183, type: 3}
     startPrice: 50000
     level: 0
     clicksPerSecond: 35
-  - name: Skibid 6
-    description: Herbis 6
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+  - name: Small castle
+    description: A small castle of carrot warriors
+    image: {fileID: 2677112284155109981, guid: cbf30fd800648ac429a21109513ad076, type: 3}
     startPrice: 70000
     level: 0
     clicksPerSecond: 50
   - name: Skibid 7
     description: Herbis 7
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+    image: {fileID: 6553614671408346271, guid: e307f0b70180283429a9577debc0ded4, type: 3}
     startPrice: 200000
     level: 0
     clicksPerSecond: 150
-  - name: Skibid 8
-    description: Herbis 8
-    image: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+  - name: Stonks
+    description: You caught the best opportunity to dominate the carrot market
+    image: {fileID: 5206160732605069558, guid: 45607a0662861934e848f9687e765259, type: 3}
     startPrice: 500000
     level: 0
     clicksPerSecond: 150
@@ -8764,8 +8764,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -25.049988, y: -25}
-  m_SizeDelta: {x: 65, y: 65}
+  m_AnchoredPosition: {x: -37, y: -35}
+  m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1730486381
 MonoBehaviour:
@@ -10574,12 +10574,20 @@ PrefabInstance:
       value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 363404257099581924, guid: 27df18aa671dd1f408b844dd6954c22b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 363404257099581924, guid: 27df18aa671dd1f408b844dd6954c22b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 363404257099581924, guid: 27df18aa671dd1f408b844dd6954c22b, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -32.79001
+      value: -37
       objectReference: {fileID: 0}
     - target: {fileID: 363404257099581924, guid: 27df18aa671dd1f408b844dd6954c22b, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -32.79004
+      value: -35
       objectReference: {fileID: 0}
     - target: {fileID: 1153260472239463698, guid: 27df18aa671dd1f408b844dd6954c22b, type: 3}
       propertyPath: m_Pivot.x

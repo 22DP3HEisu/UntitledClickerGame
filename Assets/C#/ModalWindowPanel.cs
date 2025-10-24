@@ -137,6 +137,7 @@ public class ModalWindowPanel: MonoBehaviour
     private void Close()
     {
         gameObject.SetActive(false);
+        
     }
 
 
