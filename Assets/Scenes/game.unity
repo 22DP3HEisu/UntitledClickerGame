@@ -453,8 +453,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -888,7 +888,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 0
+  m_Spacing: 20
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -2461,6 +2461,60 @@ MonoBehaviour:
     price: 1000
     rewardType: 0
     rewardValue: 10
+    isPurchased: 0
+  - id: 3
+    upgradeName: More tools
+    description: Never enough tools
+    icon: {fileID: -7871485446138885164, guid: e022e0016e108484ca9658ba503a0ce6, type: 3}
+    targetBuildingName: Better tools
+    price: 10000
+    rewardType: 1
+    rewardValue: 10
+    isPurchased: 0
+  - id: 4
+    upgradeName: Bigger hall
+    description: Bigger is always better
+    icon: {fileID: -1609391156313892090, guid: 099599e9635add94fa027110c404a0b8, type: 3}
+    targetBuildingName: City hall
+    price: 60000
+    rewardType: 0
+    rewardValue: 20
+    isPurchased: 0
+  - id: 5
+    upgradeName: Ruibuilt city
+    description: Fixing up the city
+    icon: {fileID: 7693787601417408041, guid: d23ddbeee565d11468c8320d9e8a0fe0, type: 3}
+    targetBuildingName: City ruins
+    price: 100000
+    rewardType: 1
+    rewardValue: 15
+    isPurchased: 0
+  - id: 6
+    upgradeName: Bigger walls
+    description: As trump ones said WE NEED TO BUILD A WALL
+    icon: {fileID: -2008097868478690923, guid: cfd2b1044452fd7438a8b5f0502931a7, type: 3}
+    targetBuildingName: Small castle
+    price: 140000
+    rewardType: 1
+    rewardValue: 16
+    isPurchased: 0
+  - id: 7
+    upgradeName: Taller towers
+    description: Watch out for dagons
+    icon: {fileID: 3284375733597302095, guid: bf8e1a1049575d548b446ae6f073d6b7, type: 3}
+    targetBuildingName: Big Castle
+    price: 400000
+    rewardType: 0
+    rewardValue: 25
+    isPurchased: 0
+  - id: 8
+    upgradeName: MEGA STONKS
+    description: Congrats you won the corrot race
+    icon: {fileID: -3846161622745150071, guid: 4294694eb98b47b4ca7aba12403408f8, type: 3}
+    targetBuildingName: Stonks
+    price: 400000
+    rewardType: 1
+    rewardValue: 20
     isPurchased: 0
 --- !u!224 &459181552
 RectTransform:
@@ -5373,19 +5427,19 @@ MonoBehaviour:
     clicksPerSecond: 10
   - name: Better tools
     description: You upgrade your farming tools
-    image: {fileID: 4848043262717589262, guid: c4a22e0a05b48b34991c8dc7a71c30f4, type: 3}
+    image: {fileID: -3975075278802685928, guid: d2a9ee0fc94d4594fbfaaa692465d507, type: 3}
     startPrice: 5000
     level: 0
-    clicksPerSecond: 25
+    clicksPerSecond: 15
   - name: City hall
-    description: Herbis 4
+    description: Buitiful hall
     image: {fileID: -1609391156313892090, guid: 099599e9635add94fa027110c404a0b8, type: 3}
     startPrice: 30000
     level: 0
     clicksPerSecond: 20
   - name: City ruins
     description: A once Famous city for its carrot aguculture
-    image: {fileID: -7384141503730564083, guid: 174597a424352ea4d9be5c7bbb424183, type: 3}
+    image: {fileID: 7555700783315272663, guid: e0d72c7fdf32f1a4a8c5c12b9a756222, type: 3}
     startPrice: 50000
     level: 0
     clicksPerSecond: 35
@@ -5395,18 +5449,18 @@ MonoBehaviour:
     startPrice: 70000
     level: 0
     clicksPerSecond: 50
-  - name: Skibid 7
-    description: Herbis 7
+  - name: Big Castle
+    description: Flex on the poor
     image: {fileID: 6553614671408346271, guid: e307f0b70180283429a9577debc0ded4, type: 3}
     startPrice: 200000
     level: 0
     clicksPerSecond: 150
   - name: Stonks
-    description: You caught the best opportunity to dominate the carrot market
+    description: Rich
     image: {fileID: 5206160732605069558, guid: 45607a0662861934e848f9687e765259, type: 3}
     startPrice: 500000
     level: 0
-    clicksPerSecond: 150
+    clicksPerSecond: 200
   tickInterval: 1
 --- !u!1 &1053871209
 GameObject:
@@ -6459,13 +6513,13 @@ MonoBehaviour:
   achievements:
   - id: 1
     achievementName: Start
-    description: Clikc 10 times
+    description: Click 10 times
     icon: {fileID: 2057516106615078274, guid: 68f2f24f04927db4185bb58498744fd5, type: 3}
     type: 0
     targetValue: 10
     targetBuildingName: 
     rewardType: 0
-    boostTarget: 0
+    boostTarget: 1
     rewardValue: 1
     temporaryDuration: 0
     isCompleted: 0
@@ -6506,6 +6560,214 @@ MonoBehaviour:
     rewardType: 0
     boostTarget: 0
     rewardValue: 5
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 5
+    achievementName: Spender
+    description: Buy your first building
+    icon: {fileID: 5624820354321371308, guid: 3eac108a8fc88824b93b5ee12041887c, type: 3}
+    type: 3
+    targetValue: 1
+    targetBuildingName: 
+    rewardType: 0
+    boostTarget: 0
+    rewardValue: 5
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 6
+    achievementName: Big spender
+    description: Buy 10 buildings
+    icon: {fileID: -8349577252986738125, guid: 0fbc4b9e07ea6c842826be8237b95ad7, type: 3}
+    type: 3
+    targetValue: 1
+    targetBuildingName: 
+    rewardType: 0
+    boostTarget: 0
+    rewardValue: 5
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 7
+    achievementName: Clicker
+    description: Have 100 cps
+    icon: {fileID: -7376143277279250243, guid: 87198af40c5dded4bab5d439cb9f5f96, type: 3}
+    type: 2
+    targetValue: 100
+    targetBuildingName: 
+    rewardType: 0
+    boostTarget: 0
+    rewardValue: 5
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 8
+    achievementName: Returners
+    description: Have a daily streak of 100
+    icon: {fileID: -871752453846412538, guid: de1fd1a611f92b6428b75840f8551bd0, type: 3}
+    type: 6
+    targetValue: 100
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 9
+    achievementName: Clicker GOD
+    description: Have CPS of 10000
+    icon: {fileID: 2927780931842212934, guid: ac98ebfe4cb41394ca9d222c7b11d5f7, type: 3}
+    type: 2
+    targetValue: 10000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 10
+    achievementName: Veteran
+    description: Click 10k times
+    icon: {fileID: -1078370065236338852, guid: b8ee1c36845fce640ad6df86c2915edb, type: 3}
+    type: 0
+    targetValue: 10000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 11
+    achievementName: Expert
+    description: Click 100k times
+    icon: {fileID: 6203059290615345688, guid: 5b1bba0f1a03ab747aa117abd13443db, type: 3}
+    type: 2
+    targetValue: 100000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 12
+    achievementName: GOD
+    description: Click 1M times
+    icon: {fileID: -6438216443435693330, guid: 44510807a6f8bc24aad4cbdd1dbafe86, type: 3}
+    type: 2
+    targetValue: 1000000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 13
+    achievementName: Millionaire
+    description: Have 1M carots
+    icon: {fileID: 1830147033117497494, guid: 9395e634058cb95498316099f968858f, type: 3}
+    type: 1
+    targetValue: 1000000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 14
+    achievementName: Billionaire
+    description: Have 1B carots
+    icon: {fileID: 869995975862683356, guid: 657b24f20064bcb49b303a5155081761, type: 3}
+    type: 1
+    targetValue: 1000000000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 15
+    achievementName: Carrot Factory
+    description: Have 100 building
+    icon: {fileID: 5547728874612519967, guid: 761cb3e6e97f1694da784c2c63139f4f, type: 3}
+    type: 3
+    targetValue: 100
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 16
+    achievementName: Carrot Empire
+    description: Have 1000 building
+    icon: {fileID: 5712910031516796360, guid: 3654b12d8a03e5942a4e755e64d66c4f, type: 3}
+    type: 3
+    targetValue: 1000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 17
+    achievementName: Builder
+    description: Have 10K buildings
+    icon: {fileID: -8072591114664276155, guid: af7b95887a81bf34c99e2d3f9356aa75, type: 3}
+    type: 3
+    targetValue: 10000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 18
+    achievementName: Finish?
+    description: Finish the game
+    icon: {fileID: -365044385641360468, guid: ba5060285090d0447988241e334c8fc9, type: 3}
+    type: 5
+    targetValue: 1
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 19
+    achievementName: Builder Legend
+    description: Build 100k buildings
+    icon: {fileID: -3861509453359391609, guid: ced21a5104d8be6478eee896bb9de52c, type: 3}
+    type: 3
+    targetValue: 100000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
+    temporaryDuration: 0
+    isCompleted: 0
+    currentProgress: 0
+  - id: 20
+    achievementName: GOD
+    description: Have 10M carrots
+    icon: {fileID: 8953997984617710940, guid: 430a2aed3dc00c54d944a2c4fe77e2c2, type: 3}
+    type: 1
+    targetValue: 10000000
+    targetBuildingName: 
+    rewardType: 1
+    boostTarget: 0
+    rewardValue: 1000
     temporaryDuration: 0
     isCompleted: 0
     currentProgress: 0
@@ -7268,8 +7530,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9193,7 +9455,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fe9ee52115eacc4f9f1d01d9e3eccf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClickPopupSpawner
-  canvasRectTransform: {fileID: 520189495}
+  canvasRectTransform: {fileID: 196623128}
+  targetButton: {fileID: 1867478741}
+  popupText: +1
+  popupColor: {r: 0.24586153, g: 0.37876514, b: 0.8018868, a: 0}
 --- !u!4 &1760962967
 Transform:
   m_ObjectHideFlags: 0
