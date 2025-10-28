@@ -282,9 +282,9 @@ router.post('/', authenticateToken, async function(req, res, next) {
 
         const clanId = createResult.insertId;
 
-        // Add the creator as the first member
-        const addMemberQuery = 'INSERT INTO Clan_users (ClanID, UserID) VALUES (?, ?)';
-        await executeQuery(addMemberQuery, [clanId, userId]);
+        // Add the creator as the first member with Leader rank
+        const addMemberQuery = 'INSERT INTO Clan_users (ClanID, UserID, ClanRank) VALUES (?, ?, ?)';
+        await executeQuery(addMemberQuery, [clanId, userId, 'Leader']);
 
         // Get the newly created clan with leader info
         const newClanQuery = `
@@ -539,6 +539,593 @@ router.post('/:id/join', authenticateToken, async function(req, res, next) {
             success: false,
             error: 'Internal server error',
             message: 'Failed to join clan'
+        });
+    }
+});
+
+// POST /clans/:id/kick - Kick a user from the clan (Officer+ only)
+router.post('/:id/kick', authenticateToken, async function(req, res, next) {
+    try {
+        console.log('User attempting to kick member from clan...');
+
+        const clanId = parseInt(req.params.id);
+        const kickerId = req.user.id;
+        const { userId: targetUserId } = req.body;
+
+        // Validate clan ID
+        if (!clanId || clanId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid clan ID',
+                message: 'Please provide a valid clan ID'
+            });
+        }
+
+        // Validate target user ID
+        if (!targetUserId || targetUserId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user ID',
+                message: 'Please provide a valid user ID to kick'
+            });
+        }
+
+        // Prevent self-kick
+        if (kickerId === targetUserId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Cannot kick yourself',
+                message: 'You cannot kick yourself from the clan'
+            });
+        }
+
+        // Check if clan exists
+        const clanQuery = 'SELECT ClanID, ClanName, ClanTag FROM Clans WHERE ClanID = ?';
+        const clanResult = await executeQuery(clanQuery, [clanId]);
+
+        if (clanResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Clan not found',
+                message: 'The specified clan does not exist'
+            });
+        }
+
+        const clan = clanResult[0];
+
+        // Get kicker's rank and membership status
+        const kickerQuery = 'SELECT ClanRank FROM Clan_users WHERE ClanID = ? AND UserID = ?';
+        const kickerResult = await executeQuery(kickerQuery, [clanId, kickerId]);
+
+        if (kickerResult.length === 0) {
+            return res.status(403).json({
+                success: false,
+                error: 'Not a clan member',
+                message: 'You must be a member of this clan to kick users'
+            });
+        }
+
+        const kickerRank = kickerResult[0].ClanRank;
+
+        // Check if kicker has sufficient permissions (Officer or Leader)
+        if (kickerRank !== 'Officer' && kickerRank !== 'Leader') {
+            return res.status(403).json({
+                success: false,
+                error: 'Insufficient permissions',
+                message: 'Only Officers and Leaders can kick clan members'
+            });
+        }
+
+        // Get target user's rank and membership status
+        const targetQuery = `
+            SELECT cu.ClanRank, u.Username 
+            FROM Clan_users cu
+            JOIN Users u ON cu.UserID = u.UserID
+            WHERE cu.ClanID = ? AND cu.UserID = ?
+        `;
+        const targetResult = await executeQuery(targetQuery, [clanId, targetUserId]);
+
+        if (targetResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Target user not found',
+                message: 'The specified user is not a member of this clan'
+            });
+        }
+
+        const targetRank = targetResult[0].ClanRank;
+        const targetUsername = targetResult[0].Username;
+
+        // Define rank hierarchy (higher number = higher rank)
+        const rankHierarchy = {
+            'Member': 1,
+            'Officer': 2,
+            'Leader': 3
+        };
+
+        // Check if kicker can kick the target (must have higher rank)
+        if (rankHierarchy[kickerRank] <= rankHierarchy[targetRank]) {
+            return res.status(403).json({
+                success: false,
+                error: 'Cannot kick higher or equal rank',
+                message: `You cannot kick users with ${targetRank} rank or higher`
+            });
+        }
+
+        // Remove the target user from the clan
+        const kickQuery = 'DELETE FROM Clan_users WHERE ClanID = ? AND UserID = ?';
+        const kickResult = await executeQuery(kickQuery, [clanId, targetUserId]);
+
+        if (kickResult.affectedRows === 0) {
+            throw new Error('Failed to kick user from clan');
+        }
+
+        // Get updated clan information
+        const updatedClanQuery = `
+            SELECT 
+                c.ClanID,
+                c.ClanName,
+                c.ClanTag,
+                c.ClanDescription,
+                c.CreationDate,
+                u.Username as LeaderName,
+                COUNT(cu.UserID) as MemberCount
+            FROM Clans c
+            LEFT JOIN Users u ON c.ClanLeaderID = u.UserID
+            LEFT JOIN Clan_users cu ON c.ClanID = cu.ClanID
+            WHERE c.ClanID = ?
+            GROUP BY c.ClanID, c.ClanName, c.ClanTag, c.ClanDescription, c.CreationDate, u.Username
+        `;
+
+        const updatedClan = await executeQuery(updatedClanQuery, [clanId]);
+        const clanInfo = updatedClan[0] || {};
+
+        console.log(`User ${targetUserId} (${targetUsername}) kicked from clan ${clan.ClanName} by ${kickerId} (${kickerRank})`);
+
+        res.json({
+            success: true,
+            message: 'User successfully kicked from clan',
+            kickedUser: {
+                id: targetUserId,
+                username: targetUsername,
+                rank: targetRank
+            },
+            clan: {
+                id: clanInfo.ClanID,
+                name: clanInfo.ClanName,
+                tag: clanInfo.ClanTag,
+                memberCount: clanInfo.MemberCount
+            }
+        });
+
+    } catch (error) {
+        console.error('Kick user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: 'Failed to kick user from clan'
+        });
+    }
+});
+
+// POST /clans/:id/promote - Promote a user to a higher rank (Leader only)
+router.post('/:id/promote', authenticateToken, async function(req, res, next) {
+    try {
+        console.log('User attempting to promote clan member...');
+
+        const clanId = parseInt(req.params.id);
+        const promoterId = req.user.id;
+        const { userId: targetUserId, newRank } = req.body;
+
+        // Validate clan ID
+        if (!clanId || clanId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid clan ID',
+                message: 'Please provide a valid clan ID'
+            });
+        }
+
+        // Validate target user ID
+        if (!targetUserId || targetUserId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user ID',
+                message: 'Please provide a valid user ID to promote'
+            });
+        }
+
+        // Validate new rank
+        const validRanks = ['Member', 'Officer'];
+        if (!newRank || !validRanks.includes(newRank)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid rank',
+                message: 'New rank must be either "Member" or "Officer"'
+            });
+        }
+
+        // Prevent self-promotion
+        if (promoterId === targetUserId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Cannot promote yourself',
+                message: 'You cannot change your own rank'
+            });
+        }
+
+        // Check if clan exists and if promoter is the leader
+        const clanQuery = 'SELECT ClanID, ClanName, ClanTag, ClanLeaderID FROM Clans WHERE ClanID = ?';
+        const clanResult = await executeQuery(clanQuery, [clanId]);
+
+        if (clanResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Clan not found',
+                message: 'The specified clan does not exist'
+            });
+        }
+
+        const clan = clanResult[0];
+
+        // Check if promoter is the clan leader
+        if (clan.ClanLeaderID !== promoterId) {
+            return res.status(403).json({
+                success: false,
+                error: 'Insufficient permissions',
+                message: 'Only the clan leader can promote members'
+            });
+        }
+
+        // Get target user's current rank and membership status
+        const targetQuery = `
+            SELECT cu.ClanRank, u.Username 
+            FROM Clan_users cu
+            JOIN Users u ON cu.UserID = u.UserID
+            WHERE cu.ClanID = ? AND cu.UserID = ?
+        `;
+        const targetResult = await executeQuery(targetQuery, [clanId, targetUserId]);
+
+        if (targetResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Target user not found',
+                message: 'The specified user is not a member of this clan'
+            });
+        }
+
+        const currentRank = targetResult[0].ClanRank;
+        const targetUsername = targetResult[0].Username;
+
+        // Check if user is already at the target rank
+        if (currentRank === newRank) {
+            return res.status(400).json({
+                success: false,
+                error: 'Already at rank',
+                message: `User is already at ${newRank} rank`
+            });
+        }
+
+        // Update user's rank
+        const promoteQuery = 'UPDATE Clan_users SET ClanRank = ? WHERE ClanID = ? AND UserID = ?';
+        const promoteResult = await executeQuery(promoteQuery, [newRank, clanId, targetUserId]);
+
+        if (promoteResult.affectedRows === 0) {
+            throw new Error('Failed to update user rank');
+        }
+
+        console.log(`User ${targetUserId} (${targetUsername}) promoted from ${currentRank} to ${newRank} in clan ${clan.ClanName} by leader ${promoterId}`);
+
+        res.json({
+            success: true,
+            message: 'User successfully promoted',
+            promotedUser: {
+                id: targetUserId,
+                username: targetUsername,
+                oldRank: currentRank,
+                newRank: newRank
+            },
+            clan: {
+                id: clan.ClanID,
+                name: clan.ClanName,
+                tag: clan.ClanTag
+            }
+        });
+
+    } catch (error) {
+        console.error('Promote user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: 'Failed to promote user'
+        });
+    }
+});
+
+// POST /clans/:id/transfer-leadership - Transfer clan leadership to another user (Leader only)
+router.post('/:id/transfer-leadership', authenticateToken, async function(req, res, next) {
+    try {
+        console.log('User attempting to transfer clan leadership...');
+
+        const clanId = parseInt(req.params.id);
+        const currentLeaderId = req.user.id;
+        const { userId: newLeaderId } = req.body;
+
+        // Validate clan ID
+        if (!clanId || clanId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid clan ID',
+                message: 'Please provide a valid clan ID'
+            });
+        }
+
+        // Validate new leader user ID
+        if (!newLeaderId || newLeaderId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user ID',
+                message: 'Please provide a valid user ID for the new leader'
+            });
+        }
+
+        // Prevent self-transfer (redundant but good for clarity)
+        if (currentLeaderId === newLeaderId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Cannot transfer to yourself',
+                message: 'You are already the leader of this clan'
+            });
+        }
+
+        // Check if clan exists and if user is the current leader
+        const clanQuery = 'SELECT ClanID, ClanName, ClanTag, ClanLeaderID FROM Clans WHERE ClanID = ?';
+        const clanResult = await executeQuery(clanQuery, [clanId]);
+
+        if (clanResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Clan not found',
+                message: 'The specified clan does not exist'
+            });
+        }
+
+        const clan = clanResult[0];
+
+        // Check if user is the current clan leader
+        if (clan.ClanLeaderID !== currentLeaderId) {
+            return res.status(403).json({
+                success: false,
+                error: 'Insufficient permissions',
+                message: 'Only the current clan leader can transfer leadership'
+            });
+        }
+
+        // Get new leader's membership status and current rank
+        const newLeaderQuery = `
+            SELECT cu.ClanRank, u.Username 
+            FROM Clan_users cu
+            JOIN Users u ON cu.UserID = u.UserID
+            WHERE cu.ClanID = ? AND cu.UserID = ?
+        `;
+        const newLeaderResult = await executeQuery(newLeaderQuery, [clanId, newLeaderId]);
+
+        if (newLeaderResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Target user not found',
+                message: 'The specified user is not a member of this clan'
+            });
+        }
+
+        const newLeaderUsername = newLeaderResult[0].Username;
+
+        // Get current leader's username for logging
+        const currentLeaderQuery = 'SELECT Username FROM Users WHERE UserID = ?';
+        const currentLeaderResult = await executeQuery(currentLeaderQuery, [currentLeaderId]);
+        const currentLeaderUsername = currentLeaderResult[0]?.Username || 'Unknown';
+
+        // Begin transaction-like operations
+        try {
+            // Update the clan's leader in the Clans table
+            const updateClanLeaderQuery = 'UPDATE Clans SET ClanLeaderID = ? WHERE ClanID = ?';
+            await executeQuery(updateClanLeaderQuery, [newLeaderId, clanId]);
+
+            // Update the new leader's rank to Leader in Clan_users table
+            const updateNewLeaderRankQuery = 'UPDATE Clan_users SET ClanRank = ? WHERE ClanID = ? AND UserID = ?';
+            await executeQuery(updateNewLeaderRankQuery, ['Leader', clanId, newLeaderId]);
+
+            // Update the old leader's rank to Officer in Clan_users table
+            const updateOldLeaderRankQuery = 'UPDATE Clan_users SET ClanRank = ? WHERE ClanID = ? AND UserID = ?';
+            await executeQuery(updateOldLeaderRankQuery, ['Officer', clanId, currentLeaderId]);
+
+        } catch (transactionError) {
+            console.error('Transaction error during leadership transfer:', transactionError);
+            throw new Error('Failed to complete leadership transfer');
+        }
+
+        console.log(`Clan leadership transferred from ${currentLeaderId} (${currentLeaderUsername}) to ${newLeaderId} (${newLeaderUsername}) in clan ${clan.ClanName}`);
+
+        res.json({
+            success: true,
+            message: 'Clan leadership successfully transferred',
+            transfer: {
+                oldLeader: {
+                    id: currentLeaderId,
+                    username: currentLeaderUsername,
+                    newRank: 'Officer'
+                },
+                newLeader: {
+                    id: newLeaderId,
+                    username: newLeaderUsername,
+                    newRank: 'Leader'
+                }
+            },
+            clan: {
+                id: clan.ClanID,
+                name: clan.ClanName,
+                tag: clan.ClanTag
+            }
+        });
+
+    } catch (error) {
+        console.error('Transfer leadership error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: 'Failed to transfer clan leadership'
+        });
+    }
+});
+
+// POST /clans/:id/leave - Leave a clan
+router.post('/:id/leave', authenticateToken, async function(req, res, next) {
+    try {
+        console.log('User attempting to leave clan...');
+
+        const clanId = parseInt(req.params.id);
+        const userId = req.user.id;
+
+        // Validate clan ID
+        if (!clanId || clanId <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid clan ID',
+                message: 'Please provide a valid clan ID'
+            });
+        }
+
+        // Check if clan exists
+        const clanQuery = 'SELECT ClanID, ClanName, ClanTag, ClanLeaderID FROM Clans WHERE ClanID = ?';
+        const clanResult = await executeQuery(clanQuery, [clanId]);
+
+        if (clanResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Clan not found',
+                message: 'The specified clan does not exist'
+            });
+        }
+
+        const clan = clanResult[0];
+
+        // Check if user is a member of this clan
+        const membershipQuery = `
+            SELECT cu.ClanRank, u.Username 
+            FROM Clan_users cu
+            JOIN Users u ON cu.UserID = u.UserID
+            WHERE cu.ClanID = ? AND cu.UserID = ?
+        `;
+        const membershipResult = await executeQuery(membershipQuery, [clanId, userId]);
+
+        if (membershipResult.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Not a clan member',
+                message: 'You are not a member of this clan'
+            });
+        }
+
+        const userRank = membershipResult[0].ClanRank;
+        const username = membershipResult[0].Username;
+
+        // Check if user is the clan leader
+        if (clan.ClanLeaderID === userId) {
+            // Get member count to check if leader is the only member
+            const memberCountQuery = 'SELECT COUNT(*) as memberCount FROM Clan_users WHERE ClanID = ?';
+            const memberCountResult = await executeQuery(memberCountQuery, [clanId]);
+            const memberCount = memberCountResult[0].memberCount;
+
+            if (memberCount > 1) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Cannot leave as leader',
+                    message: 'You cannot leave the clan as a leader. Transfer leadership to another member first or disband the clan if you are the only member'
+                });
+            }
+
+            // If leader is the only member, delete the entire clan
+            try {
+                // Delete clan memberships first (foreign key constraint)
+                const deleteMembersQuery = 'DELETE FROM Clan_users WHERE ClanID = ?';
+                await executeQuery(deleteMembersQuery, [clanId]);
+
+                // Delete the clan
+                const deleteClanQuery = 'DELETE FROM Clans WHERE ClanID = ?';
+                await executeQuery(deleteClanQuery, [clanId]);
+
+                console.log(`Clan ${clan.ClanName} (${clan.ClanTag}) automatically disbanded as leader ${userId} (${username}) was the only member`);
+
+                return res.json({
+                    success: true,
+                    message: 'Successfully left clan and disbanded it as you were the only member',
+                    action: 'disbanded',
+                    clan: {
+                        id: clan.ClanID,
+                        name: clan.ClanName,
+                        tag: clan.ClanTag
+                    }
+                });
+
+            } catch (disbandError) {
+                console.error('Error disbanding clan during leader leave:', disbandError);
+                throw new Error('Failed to disband clan');
+            }
+        }
+
+        // Remove user from the clan (regular member or officer)
+        const leaveQuery = 'DELETE FROM Clan_users WHERE ClanID = ? AND UserID = ?';
+        const leaveResult = await executeQuery(leaveQuery, [clanId, userId]);
+
+        if (leaveResult.affectedRows === 0) {
+            throw new Error('Failed to remove user from clan');
+        }
+
+        // Get updated clan information
+        const updatedClanQuery = `
+            SELECT 
+                c.ClanID,
+                c.ClanName,
+                c.ClanTag,
+                c.ClanDescription,
+                c.CreationDate,
+                u.Username as LeaderName,
+                COUNT(cu.UserID) as MemberCount
+            FROM Clans c
+            LEFT JOIN Users u ON c.ClanLeaderID = u.UserID
+            LEFT JOIN Clan_users cu ON c.ClanID = cu.ClanID
+            WHERE c.ClanID = ?
+            GROUP BY c.ClanID, c.ClanName, c.ClanTag, c.ClanDescription, c.CreationDate, u.Username
+        `;
+
+        const updatedClan = await executeQuery(updatedClanQuery, [clanId]);
+        const clanInfo = updatedClan[0] || {};
+
+        console.log(`User ${userId} (${username}) with rank ${userRank} left clan ${clan.ClanName} (${clan.ClanTag})`);
+
+        res.json({
+            success: true,
+            message: 'Successfully left the clan',
+            action: 'left',
+            leftUser: {
+                id: userId,
+                username: username,
+                rank: userRank
+            },
+            clan: {
+                id: clanInfo.ClanID,
+                name: clanInfo.ClanName,
+                tag: clanInfo.ClanTag,
+                memberCount: clanInfo.MemberCount
+            }
+        });
+
+    } catch (error) {
+        console.error('Leave clan error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: 'Failed to leave clan'
         });
     }
 });

@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS Clan_users (
     ClanUserID INT PRIMARY KEY AUTO_INCREMENT,
     UserID INT NOT NULL,
     ClanID INT NOT NULL,
-    ClanRank VARCHAR(50) DEFAULT 'Member',
+    ClanRank ENUM('Leader', 'Officer', 'Member') DEFAULT 'Member',
     JoinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (ClanID) REFERENCES Clans(ClanID)
