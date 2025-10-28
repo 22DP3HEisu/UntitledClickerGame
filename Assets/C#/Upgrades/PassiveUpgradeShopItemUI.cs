@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,8 +26,9 @@ public class PassiveUpgradeShopItemUI : MonoBehaviour
         if (descText != null)
             descText.text = data?.description ?? "";
 
+        // ✅ Format the price using short notation
         if (priceText != null)
-            priceText.text = data != null ? $"Price: {data.price}" : "";
+            priceText.text = data != null ? $"Price: {FormatNumber(data.price)}" : "";
 
         buyButton.onClick.RemoveAllListeners();
         buyButton.onClick.AddListener(() =>
@@ -60,5 +61,16 @@ public class PassiveUpgradeShopItemUI : MonoBehaviour
     public void SetVisible(bool visible)
     {
         gameObject.SetActive(visible);
+    }
+
+    // 🔹 Helper method for formatting large numbers
+    private string FormatNumber(double num)
+    {
+        if (num < 1000) return num.ToString("0");
+        if (num < 1_000_000) return (num / 1_000d).ToString("0.#") + "k";
+        if (num < 1_000_000_000) return (num / 1_000_000d).ToString("0.#") + "M";
+        if (num < 1_000_000_000_000) return (num / 1_000_000_000d).ToString("0.#") + "B";
+        if (num < 1_000_000_000_000_000) return (num / 1_000_000_000_000d).ToString("0.#") + "T";
+        return num.ToString("0.#e0"); // fallback for huge numbers
     }
 }
