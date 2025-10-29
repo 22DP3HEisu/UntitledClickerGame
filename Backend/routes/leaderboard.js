@@ -5,20 +5,24 @@ const { executeQuery } = require('../lib/database');
 // Get leaderboard - top users sorted by carrots (public route)
 router.get('/', async function(req, res, next) {
     try {
-        // Parse query parameters
-        const limit = Math.min(parseInt(req.query.limit) || 50, 100); // Default 50, max 100
-        const offset = parseInt(req.query.offset) || 0;
+        // Parse query parameters and ensure they are valid integers
+        let limit = parseInt(req.query.limit) || 50;
+        let offset = parseInt(req.query.offset) || 0;
+        
+        // Validate and constrain parameters
+        limit = Math.min(Math.max(1, limit), 100); // Between 1 and 100
+        offset = Math.max(0, offset); // Non-negative
 
         // Get users sorted by carrots descending, excluding banned users
         const leaderboardQuery = `
             SELECT UserID, Username, Carrots, G_Carrots, CreatedAt
             FROM Users 
-            WHERE IsBanned = 0 OR IsBanned IS NULL
+            WHERE (IsBanned = 0 OR IsBanned IS NULL)
             ORDER BY Carrots DESC, G_Carrots DESC, CreatedAt ASC
-            LIMIT ? OFFSET ?
+            LIMIT ${limit} OFFSET ${offset}
         `;
         
-        const users = await executeQuery(leaderboardQuery, [limit, offset]);
+        const users = await executeQuery(leaderboardQuery, []);
 
         // Get total count for pagination info
         const countQuery = `
