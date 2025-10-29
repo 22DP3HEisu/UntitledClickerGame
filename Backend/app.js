@@ -12,6 +12,7 @@ var authRouter = require('./routes/auth');
 var clansRouter = require('./routes/clans');
 var chatRouter = require('./routes/chat');
 var adminRouter = require('./routes/admin');
+var leaderboardRouter = require('./routes/leaderboard');
 
 var app = express();
 
@@ -41,6 +42,7 @@ app.use('/user', userRouter);
 app.use('/clans', clansRouter);
 app.use('/chat', chatRouter);
 app.use('/admin', adminRouter);
+app.use('/leaderboard', leaderboardRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
