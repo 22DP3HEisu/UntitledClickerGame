@@ -10,6 +10,10 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
     [SerializeField] private float swipeThreshold = 10f;
     [SerializeField] private float startDelay = 1f;
 
+    // reference to SwipeController and the page that allows vertical scrolling
+    [SerializeField] private SwipeController swipeController;
+    [SerializeField] private int enableVerticalOnPage = 2;
+
     private Vector2 dragStartPos;
     private bool isHorizontalSwipe;
     private bool isVerticalSwipe;
@@ -86,10 +90,15 @@ public class SwipeScrollController : MonoBehaviour, IBeginDragHandler, IDragHand
                 isVerticalSwipe = true;
                 if (verticalScrollView != null)
                 {
-                    verticalScrollView.StopMovement();
-                    verticalScrollView.velocity = Vector2.zero;
-                    verticalScrollView.enabled = true;
-                    verticalScrollView.OnBeginDrag(eventData);
+                    //  only enable vertical when on the configured page
+                    bool allowVertical = swipeController == null || swipeController.CurrentPage == enableVerticalOnPage;
+                    if (allowVertical)
+                    {
+                        verticalScrollView.StopMovement();
+                        verticalScrollView.velocity = Vector2.zero;
+                        verticalScrollView.enabled = true;
+                        verticalScrollView.OnBeginDrag(eventData);
+                    }
                 }
             }
         }
