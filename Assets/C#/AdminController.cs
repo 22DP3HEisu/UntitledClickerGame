@@ -24,9 +24,8 @@ public class AdminController : MonoBehaviour
     [Header("Confirm UI")]
     [SerializeField] private ConfirmPanel confirmPanel;
 
-    [Header("Edit User profile)")]
+    [Header("Edit User profile")]
     [SerializeField] private GameObject editUserPanelRoot;
-
 
     // API endpoint formats (editable in inspector)
     [Header("API Endpoint Formats")]
@@ -52,22 +51,17 @@ public class AdminController : MonoBehaviour
     {
         if (backButton != null)
         {
-            backButton?.onClick.AddListener(OnBackClicked);
+            backButton.onClick.AddListener(OnBackClicked);
         }
 
         // Initialize display
         if (userStatsText != null)
-        {
             userStatsText.text = "Loading user statistics...";
-        }
 
         if (clanStatsText != null)
-        {
             clanStatsText.text = "Loading clan statistics...";
-        }
     }
 
-    // Load admin statistics from server
     public async Task LoadAdminStatsAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -114,9 +108,6 @@ public class AdminController : MonoBehaviour
             ShowStatus("Network error. Please check connection.", true);
             LogDebug($"Admin stats error: {ex.Message}");
         }
-        finally
-        {
-        }
     }
 
     private void OnBackClicked()
@@ -136,18 +127,14 @@ public class AdminController : MonoBehaviour
     {
         if (userStatsText == null || currentStats?.accounts == null) return;
 
-        var userText = $"Total Users: {currentStats.accounts.totalUsers:N0}";
-
-        userStatsText.text = userText;
+        userStatsText.text = $"Total Users: {currentStats.accounts.totalUsers:N0}";
     }
 
     private void DisplayClanStats()
     {
         if (clanStatsText == null || currentStats?.clans == null) return;
 
-        var clanText = $"Total Clans: {currentStats.clans.totalClans:N0}";
-
-        clanStatsText.text = clanText;
+        clanStatsText.text = $"Total Clans: {currentStats.clans.totalClans:N0}";
     }
 
     private void ShowStatus(string message, bool isError)
@@ -163,14 +150,10 @@ public class AdminController : MonoBehaviour
 
     private void LogDebug(string message)
     {
-        if (showDebugLogs)
-        {
-            Debug.Log($"[AdminController] {message}");
-        }
+        if (showDebugLogs) Debug.Log($"[AdminController] {message}");
     }
 
-    // Context menu methods for testing
-    // Load users list from server and populate the scroll view
+    // Load users list and populate UI
     public async Task LoadUsersListAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -184,7 +167,6 @@ public class AdminController : MonoBehaviour
 
         try
         {
-            // Clear existing user items
             ClearUserList();
 
             var response = await ApiClient.GetAsync<AdminUsersResponse>("/admin/users?limit=100");
@@ -220,27 +202,16 @@ public class AdminController : MonoBehaviour
             ShowStatus("Network error. Please check connection.", true);
             LogDebug($"Users list error: {ex.Message}");
         }
-        finally
-        {
-
-        }
     }
 
     private void ClearUserList()
     {
         if (userListParent == null) return;
 
-        // Destroy all existing user items
         for (int i = userListParent.childCount - 1; i >= 0; i--)
         {
-            if (Application.isPlaying)
-            {
-                Destroy(userListParent.GetChild(i).gameObject);
-            }
-            else
-            {
-                DestroyImmediate(userListParent.GetChild(i).gameObject);
-            }
+            if (Application.isPlaying) Destroy(userListParent.GetChild(i).gameObject);
+            else DestroyImmediate(userListParent.GetChild(i).gameObject);
         }
     }
 
@@ -251,18 +222,13 @@ public class AdminController : MonoBehaviour
         foreach (var user in currentUsers.users)
         {
             GameObject userItem = Instantiate(userPrefab, userListParent);
-
-            // Try to find and populate user item components
-            // Assuming your user prefab has these components
             var userItemScript = userItem.GetComponent<AdminUserItem>();
             if (userItemScript != null)
             {
-                // pass controller reference so prefab can forward actions
                 userItemScript.SetupUser(user, this);
             }
             else
             {
-                // Fallback: try to find text components by name
                 SetupUserItemFallback(userItem, user);
             }
         }
@@ -272,14 +238,12 @@ public class AdminController : MonoBehaviour
 
     private void SetupUserItemFallback(GameObject userItem, AdminUser user)
     {
-        // Try to find common text component names and set them
         var usernameText = userItem.transform.Find("Name")?.GetComponent<TMP_Text>();
         var roleText = userItem.transform.Find("Role")?.GetComponent<TMP_Text>();
 
         if (usernameText != null) usernameText.text = user.username;
         if (roleText != null) roleText.text = user.role;
     }
-
 
     // Called from AdminUserItem when Edit button is pressed.
     public void OpenEditUser(AdminUser user)
@@ -290,11 +254,15 @@ public class AdminController : MonoBehaviour
             return;
         }
 
-        // If you implement an edit UI, assign its fields here.
         if (editUserPanelRoot != null)
         {
             editUserPanelRoot.SetActive(true);
             LogDebug($"OpenEditUser: opening edit panel for user {user.username} (id {user.id})");
+            var editComp = editUserPanelRoot.GetComponent<EditUserAdmin>();
+            if (editComp != null)
+            {
+                editComp.Open(user);
+            }
         }
         else
         {
@@ -302,7 +270,7 @@ public class AdminController : MonoBehaviour
         }
     }
 
-    // --- Public helper methods that operate by ID (so prefab doesn't need AdminUser class) ---
+    // --- ID-based helper methods (prefab can call these directly) ---
     public void RequestBanById(int userId, string username, Action onSuccess = null)
     {
         if (UserManager.GetCurrentUsername()?.Equals(username, StringComparison.OrdinalIgnoreCase) == true)
@@ -312,13 +280,9 @@ public class AdminController : MonoBehaviour
         }
 
         if (confirmPanel != null)
-        {
             confirmPanel.ShowBanUser(username, () => { _ = ExecuteBanByIdAsync(userId, onSuccess); });
-        }
         else
-        {
             _ = ExecuteBanByIdAsync(userId, onSuccess);
-        }
     }
 
     private async Task ExecuteBanByIdAsync(int userId, Action onSuccess)
@@ -346,13 +310,9 @@ public class AdminController : MonoBehaviour
     public void RequestUnbanById(int userId, string username, Action onSuccess = null)
     {
         if (confirmPanel != null)
-        {
             confirmPanel.ShowBanUser(username, () => { _ = ExecuteUnbanByIdAsync(userId, onSuccess); });
-        }
         else
-        {
             _ = ExecuteUnbanByIdAsync(userId, onSuccess);
-        }
     }
 
     private async Task ExecuteUnbanByIdAsync(int userId, Action onSuccess)
@@ -386,13 +346,9 @@ public class AdminController : MonoBehaviour
         }
 
         if (confirmPanel != null)
-        {
             confirmPanel.ShowDeleteUser(username, () => { _ = ExecuteDeleteByIdAsync(userId, onSuccess); });
-        }
         else
-        {
             _ = ExecuteDeleteByIdAsync(userId, onSuccess);
-        }
     }
 
     private async Task ExecuteDeleteByIdAsync(int userId, Action onSuccess)
@@ -420,13 +376,9 @@ public class AdminController : MonoBehaviour
     public void RequestGrantAdminById(int userId, string username, Action onSuccess = null)
     {
         if (confirmPanel != null)
-        {
             confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteGrantAdminByIdAsync(userId, onSuccess); });
-        }
         else
-        {
             _ = ExecuteGrantAdminByIdAsync(userId, onSuccess);
-        }
     }
 
     private async Task ExecuteGrantAdminByIdAsync(int userId, Action onSuccess)
@@ -454,13 +406,9 @@ public class AdminController : MonoBehaviour
     public void RequestRevokeAdminById(int userId, string username, Action onSuccess = null)
     {
         if (confirmPanel != null)
-        {
             confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess); });
-        }
         else
-        {
             _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess);
-        }
     }
 
     private async Task ExecuteRevokeAdminByIdAsync(int userId, Action onSuccess)
@@ -485,16 +433,27 @@ public class AdminController : MonoBehaviour
         }
     }
 
-    // These satisfy AdminUserItem calls and update local model where appropriate.
-
+    // Toggle ban/unban based on AdminUser state (used by AdminUserItem)
     public void RequestBanToggle(AdminUser user, Action onSuccess = null)
     {
         if (user == null) return;
-        RequestBanById(user.id, user.username, () =>
+
+        if (user.isBanned)
         {
-            user.isBanned = !user.isBanned;
-            onSuccess?.Invoke();
-        });
+            RequestUnbanById(user.id, user.username, () =>
+            {
+                user.isBanned = false;
+                onSuccess?.Invoke();
+            });
+        }
+        else
+        {
+            RequestBanById(user.id, user.username, () =>
+            {
+                user.isBanned = true;
+                onSuccess?.Invoke();
+            });
+        }
     }
 
     public void RequestDeleteUser(AdminUser user, Action onSuccess = null)
@@ -528,7 +487,6 @@ public class AdminController : MonoBehaviour
         }
     }
 
-
     [ContextMenu("Refresh Stats")]
     public void RefreshStats()
     {
@@ -545,14 +503,10 @@ public class AdminController : MonoBehaviour
     public void ClearDisplay()
     {
         if (userStatsText != null)
-        {
             userStatsText.text = "User statistics cleared";
-        }
 
         if (clanStatsText != null)
-        {
             clanStatsText.text = "Clan statistics cleared";
-        }
     }
 }
 
