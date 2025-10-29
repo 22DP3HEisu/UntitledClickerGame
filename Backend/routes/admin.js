@@ -207,6 +207,7 @@ router.delete('/user/:id', authenticateToken, isAdmin, async function(req, res, 
         if (!targetId || targetId <= 0) return res.status(400).json({ error: 'Invalid user id' });
 
         // Remove all foreign key references before deleting user
+        await executeQuery('DELETE FROM Clans WHERE ClanLeaderID = ?', [targetId]);
         await executeQuery('DELETE FROM User_buildings WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM Clan_users WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM User_upgrades WHERE UserID = ?', [targetId]);
