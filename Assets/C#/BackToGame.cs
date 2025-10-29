@@ -1,8 +1,9 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using System;
 
 public class BackToGame : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class BackToGame : MonoBehaviour
 
     private void LoadGameScene()
     {
+        Debug.Log("🔘 BackToGame: Button listener added.");
         SceneManager.LoadScene("game");
     }
 }

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem; // For new Input System
-using TMPro;
 
 public class ClickPopupSpawner : MonoBehaviour
 {
@@ -10,8 +9,8 @@ public class ClickPopupSpawner : MonoBehaviour
     public Button targetButton; // assign in Inspector
 
     [Header("Popup Settings")]
-    public string popupText = "+1";
-    public Color popupColor = new Color(0f, 0f, 1f, 1f); // Blue text
+    public Sprite popupImage; // assign in Inspector
+    public Vector2 popupImageSize = new Vector2(64, 64); // adjustable in Inspector
 
     private void Start()
     {
@@ -23,56 +22,101 @@ public class ClickPopupSpawner : MonoBehaviour
 
     private void OnButtonClicked()
     {
-        SpawnPopupAtCursor(popupText);
+        SpawnPopupAtCursor();
     }
 
-    private void SpawnPopupAtCursor(string text)
+    private Vector2 GetScreenPosition()
     {
-        // ✅ Works for both old and new Input Systems
-        Vector2 screenPos;
-
 #if ENABLE_INPUT_SYSTEM
-        screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-#else
-        screenPos = Input.mousePosition;
-#endif
+        // New Input System: prefer touch if any touch exists, otherwise mouse/pointer
+        if (Touchscreen.current != null)
+        {
+            var touches = Touchscreen.current.touches;
+            if (touches.Count > 0)
+            {
+                // use the first touch position
+                return touches[0].position.ReadValue();
+            }
+        }
 
-        Vector2 localPos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRectTransform,
-            screenPos,
-            canvasRectTransform.GetComponentInParent<Canvas>().worldCamera,
-            out localPos);
+        if (Mouse.current != null)
+            return Mouse.current.position.ReadValue();
+
+        // Fallback
+        return Vector2.zero;
+#else
+        // Old input system: touch takes priority
+        if (Input.touchCount > 0)
+            return Input.GetTouch(0).position;
+        return Input.mousePosition;
+#endif
+    }
+
+    private void SpawnPopupAtCursor()
+    {
+        if (canvasRectTransform == null)
+        {
+            Debug.LogError("ClickPopupSpawner: canvasRectTransform is not assigned.");
+            return;
+        }
+
+        if (popupImage == null)
+        {
+            Debug.LogWarning("ClickPopupSpawner: popupImage is not assigned. Popup will be invisible.");
+        }
+
+        Vector2 screenPos = GetScreenPosition();
+
+        // Get canvas and appropriate camera (null for Overlay)
+        Canvas canvas = canvasRectTransform.GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("ClickPopupSpawner: No parent Canvas found for canvasRectTransform.");
+            return;
+        }
+        Camera cam = (canvas.renderMode == RenderMode.ScreenSpaceCamera || canvas.renderMode == RenderMode.WorldSpace)
+            ? canvas.worldCamera
+            : null;
 
         // Create popup object
         GameObject popupObj = new GameObject("ClickPopup",
             typeof(RectTransform),
             typeof(CanvasRenderer),
-            typeof(TextMeshProUGUI));
+            typeof(Image));
+
+        // Parent first to keep canvas scaling / layout consistent
         popupObj.transform.SetParent(canvasRectTransform, false);
 
-        // Position
         RectTransform rectTransform = popupObj.GetComponent<RectTransform>();
-        rectTransform.anchoredPosition = localPos;
-        rectTransform.sizeDelta = new Vector2(150, 50);
+        rectTransform.sizeDelta = popupImageSize;
 
-        // Text setup
-        TextMeshProUGUI tmpText = popupObj.GetComponent<TextMeshProUGUI>();
-        tmpText.text = text;
-        tmpText.fontSize = 36;
-        tmpText.alignment = TextAlignmentOptions.Center;
-        tmpText.color = popupColor;
+        // Convert screen point to world point in rectangle and place the popup there.
+        Vector3 worldPos;
+        bool gotWorld = RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRectTransform, screenPos, cam, out worldPos);
+        if (gotWorld)
+        {
+            popupObj.transform.position = worldPos;
+        }
+        else
+        {
+            // Fallback: place using local point conversion to anchoredPosition
+            Vector2 localPos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, screenPos, cam, out localPos);
+            rectTransform.anchoredPosition = localPos;
+        }
 
-        // ✅ Prevent blocking clicks
-        tmpText.raycastTarget = false;
+        // Image setup
+        Image img = popupObj.GetComponent<Image>();
+        img.sprite = popupImage;
+        img.raycastTarget = false;
 
         // Optional animation
         popupObj.AddComponent<ClickPopupAnimation>();
     }
 
-    // Backward compatibility
+    // Backward compatibility (spawns at cursor, ignores text)
     public void SpawnPopup(Vector2 worldPosition, string text)
     {
-        SpawnPopupAtCursor(text);
+        SpawnPopupAtCursor();
     }
 }

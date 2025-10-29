@@ -95,6 +95,9 @@ public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager Instance { get; private set; }
 
+    // Expose total clicks for other systems (QuestProgressBar, UI, etc.)
+    public int TotalClicks => totalClicks;
+
     [Header("Achievement Definitions")]
     [Tooltip("Create your achievements here by expanding the list")]
     [SerializeField] private List<AchievementItem> achievements = new List<AchievementItem>();
@@ -143,7 +146,7 @@ public class AchievementManager : MonoBehaviour
     {
         // Subscribe to game data loaded event for server sync
         CurrencySyncManager.OnGameDataLoaded += HandleGameDataLoaded;
-        
+
         // Load achievements from server on startup
         await LoadAchievementsFromServerAsync();
     }
@@ -176,7 +179,7 @@ public class AchievementManager : MonoBehaviour
         // Update achievement progress
         UpdateAchievementProgress();
     }
-    
+
     private void UpdateAchievementProgress()
     {
         foreach (var achievement in achievements)
@@ -239,7 +242,7 @@ public class AchievementManager : MonoBehaviour
         ApplyReward(achievement);
         OnAchievementCompleted?.Invoke(achievement);
         Debug.Log($"Achievement Completed: {achievement.achievementName} - Reward: {achievement.rewardValue}");
-        
+
         // Sync achievement completion with server
         _ = SaveAchievementToServerAsync(achievement);
     }
@@ -486,7 +489,7 @@ public class AchievementManager : MonoBehaviour
     {
         if (!ApiClient.IsTokenValid())
         {
-            Debug.LogWarning("[AchievementManager] Cannot save achievement - not logged in");
+            Debug.LogWarning("[AchievementManager] Cannot save achievements - not logged in");
             return;
         }
 
@@ -529,18 +532,18 @@ public class AchievementManager : MonoBehaviour
         foreach (var serverAchievement in serverAchievements)
         {
             var localAchievement = achievements.Find(a => a.id.Equals(serverAchievement.name, StringComparison.OrdinalIgnoreCase));
-            
+
             if (localAchievement != null && !localAchievement.IsCompleted)
             {
                 Debug.Log($"[AchievementManager] Applying server achievement: {localAchievement.achievementName}");
-                
+
                 // Set as completed without triggering server sync again
                 localAchievement.SetCompleted(true);
                 localAchievement.SetProgress(localAchievement.targetValue);
-                
+
                 // Apply the reward
                 ApplyReward(localAchievement);
-                
+
                 // Notify listeners (but don't save to server again)
                 OnAchievementCompleted?.Invoke(localAchievement);
             }
