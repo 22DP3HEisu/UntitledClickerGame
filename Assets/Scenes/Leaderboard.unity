@@ -1670,6 +1670,7 @@ GameObject:
   - component: {fileID: 1642516445}
   - component: {fileID: 1642516444}
   - component: {fileID: 1642516446}
+  - component: {fileID: 1642516449}
   m_Layer: 5
   m_Name: Back btn
   m_TagString: Untagged
@@ -1801,6 +1802,19 @@ RectTransform:
   m_AnchoredPosition: {x: 16, y: 0}
   m_SizeDelta: {x: 28105.996, y: 28122.773}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &1642516449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642516443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c5ea20c57d6c2c4d940cf07c5a6c084, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BackToGame
+  backToGameButton: {fileID: 1642516444}
 --- !u!1 &1930489394
 GameObject:
   m_ObjectHideFlags: 0
