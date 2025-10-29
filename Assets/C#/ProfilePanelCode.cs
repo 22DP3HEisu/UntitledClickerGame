@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 public class ProfilePanelCode : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private TMP_Text usernameText;
-    [SerializeField] private TMP_Text emailText;
+    [SerializeField] private TMP_InputField usernameInputField;
+    [SerializeField] private TMP_InputField emailInputField;
     [SerializeField] private TMP_Text carrotsText;
     [SerializeField] private TMP_Text upgradesText;
     [SerializeField] private TMP_Text achievementsText;
@@ -101,29 +101,21 @@ public class ProfilePanelCode : MonoBehaviour
 
         var user = currentProfile.user;
 
-        if (usernameText) usernameText.text = user.username;
-        if (emailText) emailText.text = user.email;
+        if (usernameInputField) usernameInputField.text = user.username;
+        if (emailInputField) emailInputField.text = user.email;
         if (carrotsText) carrotsText.text = $"{user.gameData?.carrots ?? 0}";
 
         if (upgradesText)
         {
             int upgradeCount = 0;
-            if (user.gameData?.upgrades != null)
-            {
-                // Count number of true upgrades
-                foreach (var prop in user.gameData.upgrades.GetType().GetFields())
-                {
-                    if (prop.GetValue(user.gameData.upgrades) is bool b && b) upgradeCount++;
-                }
-            }
-            upgradesText.text = upgradeCount.ToString();
+            if (user.gameData?.upgrades != null) upgradesText.text = $"3";
         }
 
         if (achievementsText)
-            achievementsText.text = "🏆 First Steps\n🥕 100 Carrots\n🐎 Fast Learner";
+            achievementsText.text = "7";
 
         if (clanText)
-            clanText.text = "Lone Rider";
+            clanText.text = "";
     }
 
     private void ShowLoading(bool show)
@@ -162,12 +154,8 @@ public class ProfilePanelCode : MonoBehaviour
                     carrots = 300,
                     horseShoes = 2,
                     goldenCarrots = 1,
-                    upgrades = new UserProfileResponse.Upgrades
-                    {
-                        upgrade1 = true,
-                        upgrade2 = false,
-                        upgrade3 = true
-                    }
+
+
                 }
             }
         };

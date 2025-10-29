@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Loads and displays a leaderboard sorted from most carrots to least.
@@ -14,13 +16,31 @@ public class LeaderboardManager : MonoBehaviour
     [SerializeField] private Transform leaderboardListParent;
     [SerializeField] private GameObject leaderboardEntryPrefab;
     [SerializeField] private TMP_Text statusText;
+    [SerializeField] private Button carrotsHeaderButton;
+    [SerializeField] private Button backButton;
     [SerializeField] private bool showDebugLogs = true;
 
     private LeaderboardResponse currentLeaderboard;
+    private bool sortDescending = true; // Default: most carrots first
 
     private void Start()
     {
+        SetupUI();
         _ = LoadLeaderboardAsync();
+    }
+
+    private void SetupUI()
+    {
+        if (carrotsHeaderButton != null)
+        {
+            carrotsHeaderButton.onClick.AddListener(ToggleSortOrder);
+            UpdateSortButtonText();
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(OnBackButtonClicked);
+        }
     }
 
     public async Task LoadLeaderboardAsync()
@@ -35,12 +55,11 @@ public class LeaderboardManager : MonoBehaviour
 
             if (response?.entries != null)
             {
-                // Sort descending by carrots (most to least)
-                var sorted = response.entries.OrderByDescending(e => e.carrots).ToArray();
-                currentLeaderboard = new LeaderboardResponse { message = response.message, entries = sorted };
-                PopulateLeaderboard();
-                ShowStatus($"Loaded {sorted.Length} players", false);
-                LogDebug($"Leaderboard loaded: {sorted.Length} entries (sorted desc by carrots)");
+                // Store unsorted data, then apply current sort
+                currentLeaderboard = response;
+                ApplySortAndDisplay();
+                ShowStatus($"Loaded {response.entries.Length} players", false);
+                LogDebug($"Leaderboard loaded: {response.entries.Length} entries");
             }
             else
             {
@@ -105,6 +124,55 @@ public class LeaderboardManager : MonoBehaviour
     private void LogDebug(string message)
     {
         if (showDebugLogs) Debug.Log($"[LeaderboardManager] {message}");
+    }
+
+    public void ToggleSortOrder()
+    {
+        sortDescending = !sortDescending;
+        UpdateSortButtonText();
+        
+        if (currentLeaderboard?.entries != null)
+        {
+            ApplySortAndDisplay();
+            LogDebug($"Sort order toggled to {(sortDescending ? "descending" : "ascending")}");
+        }
+    }
+
+    private void ApplySortAndDisplay()
+    {
+        if (currentLeaderboard?.entries == null) return;
+
+        var sorted = sortDescending 
+            ? currentLeaderboard.entries.OrderByDescending(e => e.carrots).ToArray()
+            : currentLeaderboard.entries.OrderBy(e => e.carrots).ToArray();
+
+        var sortedLeaderboard = new LeaderboardResponse { 
+            message = currentLeaderboard.message, 
+            entries = sorted 
+        };
+
+        currentLeaderboard = sortedLeaderboard;
+        PopulateLeaderboard();
+    }
+
+    private void UpdateSortButtonText()
+    {
+        if (carrotsHeaderButton != null)
+        {
+            var buttonText = carrotsHeaderButton.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null)
+            {
+                string arrow = sortDescending ? "↓" : "↑";
+                string baseText = buttonText.text.Replace("↓", "").Replace("↑", "").Trim();
+                buttonText.text = $"{baseText} {arrow}";
+            }
+        }
+    }
+
+    public void OnBackButtonClicked()
+    {
+        LogDebug("Back button clicked, returning to game scene");
+        SceneManager.LoadScene("game");
     }
 
     [ContextMenu("Refresh Leaderboard")]

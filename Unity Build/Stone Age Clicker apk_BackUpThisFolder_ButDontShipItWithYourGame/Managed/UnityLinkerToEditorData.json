@@ -44,6 +44,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -66,6 +67,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -125,6 +127,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -153,6 +156,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -179,6 +183,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -199,6 +204,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -237,6 +243,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -275,6 +282,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -294,6 +302,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -326,6 +335,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -346,6 +356,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -360,6 +371,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -404,6 +416,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -424,6 +437,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -464,6 +478,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -502,6 +517,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -1475,6 +1491,7 @@
             "name": "Font",
             "scenes": [
               "Assets/Scenes/game.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -1553,6 +1570,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
@@ -1573,6 +1591,7 @@
               "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Intro.unity",
+              "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",
               "Assets/Scenes/Register.unity",
               "Assets/Scenes/StartUp.unity"
