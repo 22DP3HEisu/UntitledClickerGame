@@ -200,6 +200,68 @@ router.put('/change-password', authenticateToken, async function(req, res, next)
 
 });
 
+// Update username and email (protected route)
+router.put('/update', authenticateToken, async function(req, res, next) {
+    try {
+        const { username, email } = req.body;
+
+        if (!username || !email) {
+            return res.status(400).json({
+                error: 'Invalid input',
+                message: 'Username and email are required.'
+            });
+        }
+
+        // Validate basic format
+        if (username.length < 3 || username.length > 20) {
+            return res.status(400).json({
+                error: 'Invalid username',
+                message: 'Username must be between 3 and 20 characters.'
+            });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({
+                error: 'Invalid email format',
+                message: 'Please enter a valid email address.'
+            });
+        }
+
+        // Update the user's info
+        const updateQuery = `
+            UPDATE Users 
+            SET Username = ?, Email = ?, UpdatedAt = CURRENT_TIMESTAMP 
+            WHERE UserID = ?
+        `;
+        const result = await executeQuery(updateQuery, [username, email, req.user.id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: 'User not found',
+                message: 'User could not be updated.'
+            });
+        }
+
+        // Return updated info
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                id: req.user.id,
+                username,
+                email
+            }
+        });
+
+    } catch (error) {
+        console.error('Profile update error:', error);
+        res.status(500).json({
+            error: 'Internal server error',
+            message: 'Failed to update profile.'
+        });
+    }
+});
+
+
 // Purchase upgrade (protected route)
 router.post('/upgrade/:upgradeName', authenticateToken, async function(req, res, next) {
     try {
