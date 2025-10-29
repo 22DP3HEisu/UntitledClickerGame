@@ -2,10 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Component for individual user items in the admin users list
-/// Attach this to your user prefab and assign the UI components
-/// </summary>
 public class AdminUserItem : MonoBehaviour
 {
     [Header("UI Components")]
@@ -17,76 +13,88 @@ public class AdminUserItem : MonoBehaviour
     [SerializeField] private TMP_Text goldenCarrotsText;
     [SerializeField] private TMP_Text createdAtText;
     [SerializeField] private TMP_Text bannedStatusText;
-    
+
     [Header("Actions")]
     [SerializeField] private Button banButton;
-    [SerializeField] private Button editButton;
+    [SerializeField] private Button editButton;      // back to Edit (opens edit panel)
     [SerializeField] private Button deleteButton;
-    
+
     private AdminUser userData;
-    
-    /// <summary>
-    /// Check if the current logged-in user is viewing their own profile
-    /// </summary>
-    /// <returns>True if current user is viewing themselves</returns>
+    private AdminController adminController; // set by AdminController when populating list
+
+    // Check if the current logged-in user is viewing their own profile
     private bool IsCurrentUser()
     {
         if (userData == null) return false;
-        
+
         string currentUsername = UserManager.GetCurrentUsername();
-        return !string.IsNullOrEmpty(currentUsername) && 
+        return !string.IsNullOrEmpty(currentUsername) &&
                currentUsername.Equals(userData.username, System.StringComparison.OrdinalIgnoreCase);
     }
-    
-    public void SetupUser(AdminUser user)
+
+    // New signature: AdminController will provide itself so actions are performed there.
+    public void SetupUser(AdminUser user, AdminController controller)
     {
         userData = user;
+        adminController = controller;
         UpdateDisplay();
         SetupButtons();
     }
-    
+
     private void UpdateDisplay()
     {
         if (userData == null) return;
-        
+
         // Set text fields
         if (usernameText != null) usernameText.text = userData.username;
-        if (roleText != null) 
+        if (roleText != null)
         {
             roleText.text = userData.role;
             // Color code roles
             roleText.color = userData.role == "Admin" ? Color.red : Color.white;
         }
+
+        if (bannedStatusText != null)
+            bannedStatusText.text = userData.isBanned ? "Banned" : "";
     }
-    
+
     private void SetupButtons()
     {
-        // Setup button listeners
-        banButton?.onClick.AddListener(() => ToggleBanUser());
-        editButton?.onClick.AddListener(() => EditUser());
-        deleteButton?.onClick.AddListener(() => DeleteUser());
-        
+        // Remove previous listeners to avoid duplicates
+        banButton?.onClick.RemoveAllListeners();
+        editButton?.onClick.RemoveAllListeners();
+        deleteButton?.onClick.RemoveAllListeners();
+
+        // Wire buttons to forward actions to AdminController.
+        if (banButton != null)
+            banButton.onClick.AddListener(() => OnBanClicked());
+        if (editButton != null)
+            editButton.onClick.AddListener(() => OnEditClicked());
+        if (deleteButton != null)
+            deleteButton.onClick.AddListener(() => OnDeleteClicked());
+
         // Update button states based on user data
         UpdateButtonStates();
     }
-    
+
     private void UpdateButtonStates()
     {
         if (userData == null) return;
-        
+
         bool isCurrentUser = IsCurrentUser();
-        
+
         if (banButton != null)
         {
             var banButtonText = banButton.GetComponentInChildren<TMP_Text>();
             if (banButtonText != null)
             {
                 banButtonText.text = userData.isBanned ? "Unban" : "Ban";
+                banButtonText.color = Color.white;
             }
-            
+
             // Disable ban button if user is trying to ban themselves
             banButton.interactable = !isCurrentUser;
-            
+
             // Visual feedback for disabled state
             if (isCurrentUser && banButtonText != null)
             {
@@ -94,12 +102,12 @@ public class AdminUserItem : MonoBehaviour
                 banButtonText.text = "Can't Ban Self";
             }
         }
-        
+
         if (deleteButton != null)
         {
             // Disable delete button if user is trying to delete themselves
             deleteButton.interactable = !isCurrentUser;
-            
+
             // Visual feedback for disabled state
             var deleteButtonText = deleteButton.GetComponentInChildren<TMP_Text>();
             if (isCurrentUser && deleteButtonText != null)
@@ -108,67 +116,108 @@ public class AdminUserItem : MonoBehaviour
                 deleteButtonText.text = "Can't Delete Self";
             }
         }
+
+        if (editButton != null)
+        {
+            // Edit button opens edit panel; disable for self to match previous UX (change if you want to allow self-edit)
+            editButton.interactable = !isCurrentUser;
+            var editText = editButton.GetComponentInChildren<TMP_Text>();
+            if (editText != null)
+            {
+                editText.text = "Edit";
+                editText.color = isCurrentUser ? Color.gray : Color.white;
+            }
+        }
     }
-    
-    private async void ToggleBanUser()
+
+    private void OnBanClicked()
     {
-        // Prevent users from banning themselves
         if (IsCurrentUser())
         {
             Debug.LogWarning("Cannot ban yourself!");
             return;
         }
-        
-        Debug.Log($"Toggling ban status for user {userData.username}...");
-        try
+
+        if (adminController != null)
         {
-            string endpoint = userData.isBanned ? "unban" : "ban";
-            await ApiClient.PostAsync<object, object>($"/admin/user/{userData.id}/{endpoint}", null);
-            userData.isBanned = !userData.isBanned;
-            UpdateDisplay();
-            UpdateButtonStates();
-            Debug.Log($"User {userData.username} {(userData.isBanned ? "banned" : "unbanned")}");
+            adminController.RequestBanToggle(userData, () =>
+            {
+                // Update local display after controller completes action
+                UpdateDisplay();
+                UpdateButtonStates();
+            });
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError($"Failed to toggle ban status: {ex.Message}");
+            Debug.LogWarning("AdminController not assigned to AdminUserItem. Action skipped.");
         }
     }
 
-    private async void DeleteUser()
+    private void OnDeleteClicked()
     {
-        // Prevent users from deleting themselves
         if (IsCurrentUser())
         {
             Debug.LogWarning("Cannot delete yourself!");
             return;
         }
-        
-        // Show confirmation dialog (you might want to implement a proper confirmation UI)
-        // if (Application.isEditor || Debug.isDebugBuild)
-        // {
-        //     Debug.LogWarning($"Delete user {userData.username} requested - implement confirmation dialog");
-        //     return;
-        // }
 
-        try
+        if (adminController != null)
         {
-            await ApiClient.DeleteAsync($"/admin/user/{userData.id}");
-            Destroy(gameObject);
-            Debug.Log($"User {userData.username} deleted");
+            adminController.RequestDeleteUser(userData, () =>
+            {
+                // remove prefab after successful delete
+                Destroy(gameObject);
+            });
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError($"Failed to delete user: {ex.Message}");
+            Debug.LogWarning("AdminController not assigned to AdminUserItem. Action skipped.");
         }
     }
-    
-    private void EditUser()
+
+    private void OnGrantAdminClicked()
     {
-        // Open edit user dialog or scene
-        Debug.Log($"Edit user {userData.username} requested - implement edit functionality");
+        // kept in case you still use grant/revoke from code; not wired to editButton anymore
+        if (IsCurrentUser())
+        {
+            Debug.LogWarning("Cannot change your own admin status here!");
+            return;
+        }
+
+        if (adminController != null)
+        {
+            adminController.RequestToggleAdmin(userData, () =>
+            {
+                // update local model/state after change
+                userData.role = userData.role == "Admin" ? "User" : "Admin";
+                UpdateDisplay();
+                UpdateButtonStates();
+            });
+        }
+        else
+        {
+            Debug.LogWarning("AdminController not assigned to AdminUserItem. Action skipped.");
+        }
     }
-    
+
+    private void OnEditClicked()
+    {
+        if (IsCurrentUser())
+        {
+            Debug.LogWarning("Cannot edit yourself from this panel!");
+            return;
+        }
+
+        if (adminController != null)
+        {
+            adminController.OpenEditUser(userData); // controller should open the edit panel (you will implement)
+        }
+        else
+        {
+            Debug.LogWarning("AdminController not assigned to AdminUserItem. Action skipped.");
+        }
+    }
+
     // Public method to get user data
     public AdminUser GetUserData()
     {
