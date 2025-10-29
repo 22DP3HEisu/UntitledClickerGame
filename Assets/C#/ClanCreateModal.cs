@@ -200,10 +200,12 @@ public class ClanCreateModal : MonoBehaviour
                 // Trigger events
                 OnClanCreated?.Invoke(response.clan);
                 
-                // Refresh clan list if manager is available
+                // Update panel visibility and refresh clan list if manager is available
                 if (clanManager != null)
                 {
-                    _ = clanManager.LoadClansAsync();
+                    // The OnClanCreated event will also be called in ClanManager, 
+                    // but we can call this directly for immediate feedback
+                    clanManager.OnUserJoinedClan();
                 }
                 
                 // Close modal after a short delay

@@ -271,16 +271,56 @@ public class ClanDetailModal : MonoBehaviour
         {
             if (memberItemPrefab != null)
             {
-                var memberItem = Instantiate(memberItemPrefab, memberListParent);
-                var memberText = memberItem.GetComponentInChildren<TMP_Text>();
+                var memberItemObj = Instantiate(memberItemPrefab, memberListParent);
+                var memberItemScript = memberItemObj.GetComponent<ClanMemberItem>();
                 
-                if (memberText != null)
+                if (memberItemScript != null)
                 {
-                    string role = member.isLeader ? "Leader" : "Member";
-                    memberText.text = $"{member.username} ({role})";
+                    // Setup the member item with all necessary data
+                    memberItemScript.SetupMember(member, detailedClanInfo, currentUser, this);
+                    
+                    // Subscribe to member action events
+                    memberItemScript.OnMemberActionCompleted += OnMemberActionCompleted;
+                }
+                else
+                {
+                    // Fallback for prefabs without ClanMemberItem script
+                    SetupMemberItemFallback(memberItemObj, member);
                 }
             }
         }
+    }
+    
+    /// <summary>
+    /// Fallback method for member items without ClanMemberItem script
+    /// </summary>
+    private void SetupMemberItemFallback(GameObject memberItem, ClanMember member)
+    {
+        var textComponents = memberItem.GetComponentsInChildren<TMP_Text>();
+        
+        if (textComponents.Length >= 2)
+        {
+            // Assume first text is for username, second is for role
+            textComponents[0].text = member.username;
+            textComponents[1].text = member.isLeader ? "Leader" : "Member";
+        }
+        else if (textComponents.Length == 1)
+        {
+            // Fallback to single text if only one component found
+            string role = member.isLeader ? "Leader" : "Member";
+            textComponents[0].text = $"{member.username} ({role})";
+        }
+    }
+    
+    /// <summary>
+    /// Called when a member action is completed (promote, kick, etc.)
+    /// </summary>
+    private void OnMemberActionCompleted(ClanMemberItem memberItem)
+    {
+        Debug.Log($"Member action completed for {memberItem.GetMemberData()?.username}");
+        
+        // Refresh the clan information to show updated data
+        _ = RefreshClanInfoAsync();
     }
     
     private void SetText(TMP_Text textComponent, string text)
@@ -354,6 +394,13 @@ public class ClanDetailModal : MonoBehaviour
             if (response?.success == true)
             {
                 ShowStatus("Successfully joined clan!", false);
+                
+                // Notify clan manager about the join
+                if (clanManager != null)
+                {
+                    clanManager.OnUserJoinedClan();
+                }
+                
                 await RefreshClanInfoAsync();
             }
             else
@@ -410,6 +457,13 @@ public class ClanDetailModal : MonoBehaviour
                     : "Successfully left clan!";
                 
                 ShowStatus(message, false);
+                
+                // Notify clan manager about leaving the clan
+                if (clanManager != null)
+                {
+                    clanManager.OnUserLeftClan();
+                }
+                
                 await RefreshClanInfoAsync();
             }
             else
@@ -452,6 +506,14 @@ public class ClanDetailModal : MonoBehaviour
             statusText.text = message;
             statusText.color = isError ? Color.red : Color.white;
         }
+    }
+    
+    /// <summary>
+    /// Public method for child components to show status messages
+    /// </summary>
+    public void ShowPublicStatus(string message, bool isError)
+    {
+        ShowStatus(message, isError);
     }
     
     private void SetLoadingState(bool loading)
