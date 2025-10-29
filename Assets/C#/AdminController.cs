@@ -371,6 +371,10 @@ public class AdminController : MonoBehaviour
             LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
+
+            // Refresh users list to reflect role change
+            _ = LoadUsersListAsync();
+
             ShowStatus($"User {userId} granted admin", false);
         }
         catch (ApiException aex)
@@ -394,6 +398,10 @@ public class AdminController : MonoBehaviour
             LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
+
+            // Refresh users list to reflect role change
+            _ = LoadUsersListAsync();
+
             ShowStatus($"User {userId} admin revoked", false);
         }
         catch (ApiException aex)
@@ -435,6 +443,11 @@ public class AdminController : MonoBehaviour
             LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
+
+            // Refresh users list and stats because ban state changed
+            _ = LoadUsersListAsync();
+            _ = LoadAdminStatsAsync();
+
             ShowStatus($"User {userId} banned", false);
         }
         catch (ApiException aex)
@@ -466,6 +479,11 @@ public class AdminController : MonoBehaviour
             LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
+
+            // Refresh users list and stats because ban state changed
+            _ = LoadUsersListAsync();
+            _ = LoadAdminStatsAsync();
+
             ShowStatus($"User {userId} unbanned", false);
         }
         catch (ApiException aex)
@@ -503,6 +521,11 @@ public class AdminController : MonoBehaviour
             LogDebug($"AdminController: DELETE {endpoint} -> {fullUrl}");
             await ApiClient.DeleteAsync(endpoint);
             onSuccess?.Invoke();
+
+            // refresh stats and list so userStatsText / clanStatsText update immediately
+            _ = LoadAdminStatsAsync();
+            _ = LoadUsersListAsync();
+
             ShowStatus($"User {userId} deleted", false);
         }
         catch (ApiException aex)
@@ -525,15 +548,21 @@ public class AdminController : MonoBehaviour
     {
         if (user == null) return;
         if (user.isBanned)
-            RequestUnbanById(user.id, user.username, () => { user.isBanned = false; onSuccess?.Invoke(); });
+            RequestUnbanById(user.id, user.username, () => { user.isBanned = false; onSuccess?.Invoke(); _ = LoadUsersListAsync(); });
         else
-            RequestBanById(user.id, user.username, () => { user.isBanned = true; onSuccess?.Invoke(); });
+            RequestBanById(user.id, user.username, () => { user.isBanned = true; onSuccess?.Invoke(); _ = LoadUsersListAsync(); });
     }
 
     public void RequestDeleteUser(AdminUser user, Action onSuccess = null)
     {
         if (user == null) return;
-        RequestDeleteById(user.id, user.username, onSuccess);
+        RequestDeleteById(user.id, user.username, () =>
+        {
+            onSuccess?.Invoke();
+            // ensure stats and list refreshed (in case caller didn't rely on callbacks)
+            _ = LoadAdminStatsAsync();
+            _ = LoadUsersListAsync();
+        });
     }
 
     public void RequestToggleAdmin(AdminUser user, Action onSuccess = null)
@@ -541,9 +570,9 @@ public class AdminController : MonoBehaviour
         if (user == null) return;
         bool currentlyAdmin = user.role == "Admin";
         if (currentlyAdmin)
-            RequestRevokeAdminById(user.id, user.username, () => { user.role = "User"; onSuccess?.Invoke(); });
+            RequestRevokeAdminById(user.id, user.username, () => { user.role = "User"; onSuccess?.Invoke(); _ = LoadUsersListAsync(); });
         else
-            RequestGrantAdminById(user.id, user.username, () => { user.role = "Admin"; onSuccess?.Invoke(); });
+            RequestGrantAdminById(user.id, user.username, () => { user.role = "Admin"; onSuccess?.Invoke(); _ = LoadUsersListAsync(); });
     }
 
     // Open edit panel and optionally subscribe to save event to refresh UI
