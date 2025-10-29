@@ -14030,7 +14030,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -17583,8 +17583,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ClickPopupSpawner
   canvasRectTransform: {fileID: 196623128}
   targetButton: {fileID: 1867478741}
-  popupText: +1
-  popupColor: {r: 0.24586153, g: 0.37876514, b: 0.8018868, a: 0}
+  popupImage: {fileID: -2616149912025662473, guid: 597a44ba4e2dd684c99336a67499d57f, type: 3}
+  popupImageSize: {x: 42, y: 42}
 --- !u!4 &1760962967
 Transform:
   m_ObjectHideFlags: 0
