@@ -211,6 +211,8 @@ router.delete('/user/:id', authenticateToken, isAdmin, async function(req, res, 
         await executeQuery('DELETE FROM User_upgrades WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM User_achievements WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM Users WHERE UserID = ?', [targetId]);
+        await executeQuery('DELETE FROM Clans WHERE UserID = ?', [targetId]);
+        await executeQuery('DELETE FROM User_buildings WHERE UserID = ?', [targetId]);
 
         res.json({ message: 'User deleted', userId: targetId });
     } catch (err) {
