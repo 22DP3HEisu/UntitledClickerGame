@@ -901,8 +901,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6717,6 +6717,8 @@ MonoBehaviour:
   verticalScrollView: {fileID: 1254517226}
   swipeThreshold: 1
   startDelay: 0
+  swipeController: {fileID: 633679599}
+  enableVerticalOnPage: 3
 --- !u!114 &633679601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6733,6 +6735,8 @@ MonoBehaviour:
   verticalScrollView: {fileID: 240768766}
   swipeThreshold: 1
   startDelay: 0
+  swipeController: {fileID: 633679599}
+  enableVerticalOnPage: 3
 --- !u!114 &633679602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6749,6 +6753,8 @@ MonoBehaviour:
   verticalScrollView: {fileID: 1343234272}
   swipeThreshold: 1
   startDelay: 0
+  swipeController: {fileID: 633679599}
+  enableVerticalOnPage: 1
 --- !u!1 &634632760
 GameObject:
   m_ObjectHideFlags: 0
@@ -13938,8 +13944,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
