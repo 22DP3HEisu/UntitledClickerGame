@@ -484,6 +484,20 @@ router.post('/:id/join', authenticateToken, async function(req, res, next) {
             });
         }
 
+        // Check if clan has reached maximum member limit (50 members)
+        const memberCountQuery = 'SELECT COUNT(*) as memberCount FROM Clan_users WHERE ClanID = ?';
+        const memberCountResult = await executeQuery(memberCountQuery, [clanId]);
+        const currentMemberCount = memberCountResult[0].memberCount;
+
+        const MAX_CLAN_MEMBERS = 50;
+        if (currentMemberCount >= MAX_CLAN_MEMBERS) {
+            return res.status(400).json({
+                success: false,
+                error: 'Clan is full',
+                message: `This clan has reached the maximum limit of ${MAX_CLAN_MEMBERS} members`
+            });
+        }
+
         // Add user to the clan
         const joinClanQuery = 'INSERT INTO Clan_users (ClanID, UserID) VALUES (?, ?)';
         const joinResult = await executeQuery(joinClanQuery, [clanId, userId]);

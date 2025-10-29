@@ -17,7 +17,8 @@ public class ClanManager : MonoBehaviour
     
     [Header("Modal Window")]
     [SerializeField] private GameObject clanModalWindow; // Modal window GameObject
-    [SerializeField] private ClanDetailModal clanDetailModal; // Modal window controller
+    
+    private ClanDetailModal clanDetailModal; // Will be found automatically from modal window
     
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -42,10 +43,22 @@ public class ClanManager : MonoBehaviour
             statusText.text = "Loading clans...";
         }
         
-        // Ensure modal starts hidden
+        // Ensure modal starts hidden and find the ClanDetailModal component
         if (clanModalWindow != null)
         {
             clanModalWindow.SetActive(false);
+            
+            // Find ClanDetailModal component on the modal window or its children
+            clanDetailModal = clanModalWindow.GetComponent<ClanDetailModal>();
+            if (clanDetailModal == null)
+            {
+                clanDetailModal = clanModalWindow.GetComponentInChildren<ClanDetailModal>();
+            }
+            
+            if (clanDetailModal == null)
+            {
+                LogDebug("Warning: ClanDetailModal component not found on modal window or its children");
+            }
         }
     }
     
@@ -149,18 +162,10 @@ public class ClanManager : MonoBehaviour
     {
         // Try to find common component names and set them
         var nameText = clanCard.transform.Find("ClanName")?.GetComponent<TMP_Text>();
-        var tagText = clanCard.transform.Find("ClanTag")?.GetComponent<TMP_Text>();
         var memberCountText = clanCard.transform.Find("MemberCount")?.GetComponent<TMP_Text>();
-        var joinButton = clanCard.transform.Find("JoinButton")?.GetComponent<Button>();
         
         if (nameText != null) nameText.text = clan.name;
-        if (tagText != null) tagText.text = $"[{clan.tag}]";
         if (memberCountText != null) memberCountText.text = $"Members: {clan.memberCount}";
-        
-        if (joinButton != null)
-        {
-            joinButton.onClick.AddListener(() => ShowClanDetails(clan));
-        }
     }
     
     /// <summary>
