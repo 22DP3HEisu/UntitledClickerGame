@@ -23,7 +23,7 @@ public class EditUserAdmin : MonoBehaviour
     [SerializeField] private Button saveButton;
     [SerializeField] private Button cancelButton;
 
-    [Header("Optional controller")]
+    [Header("Controller")]
     [SerializeField] private AdminController adminController; // assign if you want automatic grant/revoke calls
 
     private AdminUser currentUser;
