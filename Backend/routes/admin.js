@@ -203,18 +203,134 @@ router.post('/user/:id/demote', authenticateToken, isAdmin, async function(req, 
 // DELETE /admin/user/:id - delete user and cleanup
 router.delete('/user/:id', authenticateToken, isAdmin, async function(req, res, next) {
     try {
-        const targetId = parseInt(req.params.id);
+        const targetId = parseInt(req.params.id, 10);
         if (!targetId || targetId <= 0) return res.status(400).json({ error: 'Invalid user id' });
 
-        // Remove all foreign key references before deleting user
+        // 1) Find clans where this user is the leader
+        const clans = await executeQuery('SELECT ClanID FROM Clans WHERE ClanLeaderID = ?', [targetId]);
+
+        // 2) If there are clans, delete related Clan_users entries first, then delete the clans
+        if (clans && clans.length > 0) {
+            const clanIds = clans.map(c => c.ClanID);
+            const placeholders = clanIds.map(() => '?').join(',');
+
+            // Delete memberships for those clans (satisfy FK from Clan_users -> Clans)
+            await executeQuery(`DELETE FROM Clan_users WHERE ClanID IN (${placeholders})`, clanIds);
+
+            // Now safe to delete the clans
+            await executeQuery(`DELETE FROM Clans WHERE ClanID IN (${placeholders})`, clanIds);
+        }
+
+        // 3) Remove any remaining references to the user
         await executeQuery('DELETE FROM Clan_users WHERE UserID = ?', [targetId]);
+        await executeQuery('DELETE FROM User_buildings WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM User_upgrades WHERE UserID = ?', [targetId]);
         await executeQuery('DELETE FROM User_achievements WHERE UserID = ?', [targetId]);
+
+        // 4) Finally delete the user row
         await executeQuery('DELETE FROM Users WHERE UserID = ?', [targetId]);
 
         res.json({ message: 'User deleted', userId: targetId });
     } catch (err) {
         console.error('Delete user error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PUT /admin/user/:id - update user details
+router.put('/user/:id', authenticateToken, isAdmin, async function (req, res, next) {
+    try {
+        const targetId = parseInt(req.params.id, 10);
+        if (!targetId || targetId <= 0) return res.status(400).json({ error: 'Invalid user id' });
+
+        // Acceptable updatable fields
+        const rawUsername = req.body.username;
+        const rawEmail = req.body.email;
+        const rawCarrots = req.body.carrots;
+        const rawHorseShoes = req.body.horseShoes;
+        const rawGoldenCarrots = req.body.goldenCarrots;
+
+        const updates = [];
+        const values = [];
+
+        // Username
+        if (rawUsername !== undefined && rawUsername !== null) {
+            const username = sanitizeInput(String(rawUsername)).trim();
+            if (username.length === 0) return res.status(400).json({ error: 'Username cannot be empty' });
+
+            // optional: ensure uniqueness
+            const exists = await executeQuery('SELECT UserID FROM Users WHERE Username = ? AND UserID != ?', [username, targetId]);
+            if (exists.length > 0) return res.status(409).json({ error: 'Username already in use' });
+
+            updates.push('Username = ?');
+            values.push(username);
+        }
+
+        // Email
+        if (rawEmail !== undefined && rawEmail !== null) {
+            const email = sanitizeInput(String(rawEmail)).trim();
+            if (email.length === 0) return res.status(400).json({ error: 'Email cannot be empty' });
+
+            // optional: ensure uniqueness
+            const exists = await executeQuery('SELECT UserID FROM Users WHERE Email = ? AND UserID != ?', [email, targetId]);
+            if (exists.length > 0) return res.status(409).json({ error: 'Email already in use' });
+
+            updates.push('Email = ?');
+            values.push(email);
+        }
+
+        // Carrots
+        if (rawCarrots !== undefined) {
+            const carrots = parseInt(rawCarrots, 10);
+            if (isNaN(carrots) || carrots < 0) return res.status(400).json({ error: 'Invalid carrots value' });
+            updates.push('Carrots = ?');
+            values.push(carrots);
+        }
+
+        // Horse shoes
+        if (rawHorseShoes !== undefined) {
+            const horseShoes = parseInt(rawHorseShoes, 10);
+            if (isNaN(horseShoes) || horseShoes < 0) return res.status(400).json({ error: 'Invalid horseShoes value' });
+            updates.push('HorseShoes = ?');
+            values.push(horseShoes);
+        }
+
+        // Golden carrots (G_Carrots column)
+        if (rawGoldenCarrots !== undefined) {
+            const golden = parseInt(rawGoldenCarrots, 10);
+            if (isNaN(golden) || golden < 0) return res.status(400).json({ error: 'Invalid goldenCarrots value' });
+            updates.push('G_Carrots = ?');
+            values.push(golden);
+        }
+
+        if (updates.length === 0) return res.status(400).json({ error: 'No updatable fields provided' });
+
+        values.push(targetId);
+        const updateQuery = `UPDATE Users SET ${updates.join(', ')} WHERE UserID = ?`;
+        await executeQuery(updateQuery, values);
+
+        // Return updated user snapshot (minimal fields)
+        const updated = await executeQuery('SELECT UserID, Username, Email, Role, Carrots, HorseShoes, G_Carrots, CreatedAt, UpdatedAt, COALESCE(IsBanned,0) as IsBanned FROM Users WHERE UserID = ?', [targetId]);
+        if (!updated || updated.length === 0) return res.status(404).json({ error: 'User not found after update' });
+
+        const u = updated[0];
+        res.json({
+            message: 'User updated',
+            user: {
+                id: u.UserID,
+                username: u.Username,
+                email: u.Email,
+                role: u.Role,
+                carrots: u.Carrots,
+                horseShoes: u.HorseShoes,
+                goldenCarrots: u.G_Carrots,
+                createdAt: u.CreatedAt,
+                updatedAt: u.UpdatedAt,
+                isBanned: Boolean(u.IsBanned)
+            }
+        });
+    } catch (err) {
+        console.error('Update user error:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

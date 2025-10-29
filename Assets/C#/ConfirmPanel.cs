@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class ConfirmPanel : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private GameObject panelRoot;         // root GameObject to enable/disable
-    [SerializeField] private TMP_Text messageText;         // main message e.g. "Delete user X?"
+    [SerializeField] private GameObject panelRoot;
+    [SerializeField] private TMP_Text messageText;
     [SerializeField] private Button yesButton;
     [SerializeField] private TMP_Text yesButtonText;
     [SerializeField] private Button noButton;

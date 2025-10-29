@@ -1,25 +1,23 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-/// <summary>
-/// Clean and maintainable API client for Unity with authentication support.
-/// Provides simple async HTTP methods with automatic token handling and refresh logic.
-/// </summary>
+// Clean and maintainable API client for Unity with authentication support.
+// Provides simple async HTTP methods with automatic token handling and refresh logic.
 public static class ApiClient
 {
     public static string BaseUrl = "http://92.5.105.149:3000";
-    
-    /// <summary>
-    /// Optional callback for token refresh. Should return true if refresh succeeded.
-    /// </summary>
+
+    // Optional callback for token refresh. Should return true if refresh succeeded.
     public static Func<Task<bool>> OnTokenRefresh;
-    
-    /// <summary>
-    /// Optional callback when token expires and cannot be refreshed.
-    /// </summary>
+
+    // Optional callback when token expires and cannot be refreshed.
     public static Action OnTokenExpired;
 
     // Public API Methods
@@ -75,7 +73,7 @@ public static class ApiClient
             catch (ApiException ex) when (ex.StatusCode == 401 && !hasAttemptedRefresh && OnTokenRefresh != null)
             {
                 hasAttemptedRefresh = true;
-                
+
                 try
                 {
                     bool refreshSuccess = await OnTokenRefresh();
@@ -104,7 +102,7 @@ public static class ApiClient
         string url = BuildUrl(path);
         UnityWebRequest request;
 
-        if (method == "GET")
+        if (string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
         {
             request = UnityWebRequest.Get(url);
         }
@@ -115,8 +113,9 @@ public static class ApiClient
 
             if (body != null)
             {
-                string jsonData = JsonUtility.ToJson(body);
-                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+                // Use robust serializer that supports Dictionary<string, object>, lists and primitives.
+                string jsonData = SerializeToJson(body);
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.SetRequestHeader("Content-Type", "application/json");
             }
@@ -138,7 +137,7 @@ public static class ApiClient
     private static async Task<TResponse> ExecuteRequestAsync<TResponse>(UnityWebRequest request, CancellationToken cancellationToken)
     {
         var tcs = new TaskCompletionSource<TResponse>();
-        
+
         // Handle cancellation
         cancellationToken.Register(() =>
         {
@@ -150,7 +149,7 @@ public static class ApiClient
         });
 
         var operation = request.SendWebRequest();
-        
+
         operation.completed += _ =>
         {
             try
@@ -163,8 +162,17 @@ public static class ApiClient
                     }
                     else
                     {
-                        var response = JsonUtility.FromJson<TResponse>(request.downloadHandler.text);
-                        tcs.TrySetResult(response);
+                        // If server returns empty body, avoid passing empty string to JsonUtility
+                        var text = request.downloadHandler?.text ?? "";
+                        if (string.IsNullOrWhiteSpace(text))
+                        {
+                            tcs.TrySetResult(default(TResponse));
+                        }
+                        else
+                        {
+                            var response = JsonUtility.FromJson<TResponse>(text);
+                            tcs.TrySetResult(response);
+                        }
                     }
                 }
                 else
@@ -193,7 +201,7 @@ public static class ApiClient
     private static ApiException CreateApiException(UnityWebRequest request)
     {
         string message = "Unknown error";
-        
+
         if (request.result == UnityWebRequest.Result.ConnectionError)
         {
             message = "Cannot connect to server. Please check your internet connection.";
@@ -202,7 +210,8 @@ public static class ApiClient
         {
             try
             {
-                var errorResponse = JsonUtility.FromJson<ErrorResponse>(request.downloadHandler?.text ?? "");
+                var bodyText = request.downloadHandler?.text ?? "";
+                var errorResponse = JsonUtility.FromJson<ErrorResponse>(bodyText);
                 message = errorResponse?.message ?? errorResponse?.error ?? $"Server error: {request.responseCode}";
             }
             catch
@@ -214,6 +223,107 @@ public static class ApiClient
         return new ApiException(message, (int)request.responseCode);
     }
 
+    // Robust serializer for runtime types (IDictionary, IEnumerable, primitives).
+    // Keeps behavior deterministic and avoids JsonUtility limitations for Dictionary<string, object>.
+    private static string SerializeToJson(object obj)
+    {
+        if (obj == null) return "null";
+
+        // IDictionary<string, object>
+        if (obj is IDictionary<string, object> dictStringObj)
+        {
+            return SerializeDictionary(dictStringObj);
+        }
+
+        // non-generic IDictionary (e.g. Hashtable)
+        if (obj is IDictionary dict)
+        {
+            var tmp = new Dictionary<string, object>();
+            foreach (DictionaryEntry de in dict)
+            {
+                tmp[Convert.ToString(de.Key)] = de.Value;
+            }
+            return SerializeDictionary(tmp);
+        }
+
+        // IEnumerable (arrays, lists), but not string
+        if (obj is IEnumerable enumerable && !(obj is string))
+        {
+            var sbArr = new StringBuilder();
+            sbArr.Append('[');
+            bool first = true;
+            foreach (var item in enumerable)
+            {
+                if (!first) sbArr.Append(',');
+                sbArr.Append(SerializeToJson(item));
+                first = false;
+            }
+            sbArr.Append(']');
+            return sbArr.ToString();
+        }
+
+        // Primitives & strings
+        if (obj is string s) return $"\"{EscapeString(s)}\"";
+        if (obj is bool b) return b ? "true" : "false";
+        if (obj is byte || obj is sbyte || obj is short || obj is ushort || obj is int || obj is uint ||
+            obj is long || obj is ulong || obj is float || obj is double || obj is decimal)
+        {
+            return Convert.ToString(obj, CultureInfo.InvariantCulture);
+        }
+
+        // Fallback to Unity JsonUtility for serializable objects (keeps existing behavior)
+        try
+        {
+            return JsonUtility.ToJson(obj);
+        }
+        catch
+        {
+            // Final fallback: quoted ToString()
+            return $"\"{EscapeString(obj.ToString())}\"";
+        }
+    }
+
+    private static string SerializeDictionary(IDictionary<string, object> dict)
+    {
+        var sb = new StringBuilder();
+        sb.Append('{');
+        bool first = true;
+        foreach (var kv in dict)
+        {
+            if (!first) sb.Append(',');
+            sb.Append('\"').Append(EscapeString(kv.Key)).Append("\":").Append(SerializeToJson(kv.Value));
+            first = false;
+        }
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    private static string EscapeString(string s)
+    {
+        if (s == null) return "";
+        var sb = new StringBuilder();
+        foreach (var c in s)
+        {
+            switch (c)
+            {
+                case '\\': sb.Append("\\\\"); break;
+                case '\"': sb.Append("\\\""); break;
+                case '\b': sb.Append("\\b"); break;
+                case '\f': sb.Append("\\f"); break;
+                case '\n': sb.Append("\\n"); break;
+                case '\r': sb.Append("\\r"); break;
+                case '\t': sb.Append("\\t"); break;
+                default:
+                    if (char.IsControl(c) || c < 32)
+                        sb.AppendFormat("\\u{0:X4}", (int)c);
+                    else
+                        sb.Append(c);
+                    break;
+            }
+        }
+        return sb.ToString();
+    }
+
     // Helper Classes
     [Serializable]
     private class ErrorResponse
@@ -223,9 +333,7 @@ public static class ApiClient
     }
 }
 
-/// <summary>
-/// Handles authentication token storage and validation.
-/// </summary>
+// Handles authentication token storage and validation.
 public static class AuthTokenManager
 {
     private const string TokenKey = "AuthToken";
@@ -298,7 +406,7 @@ public static class AuthTokenManager
         PlayerPrefs.DeleteKey(ExpiryKey);
     }
 
-    private static void ExecuteOnMainThread(System.Action action)
+    private static void ExecuteOnMainThread(Action action)
     {
         try
         {
@@ -312,9 +420,7 @@ public static class AuthTokenManager
     }
 }
 
-/// <summary>
-/// Exception thrown by API operations.
-/// </summary>
+// Exception thrown by API operations.
 public class ApiException : Exception
 {
     public int StatusCode { get; }

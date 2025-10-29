@@ -16,11 +16,11 @@ public class AdminUserItem : MonoBehaviour
 
     [Header("Actions")]
     [SerializeField] private Button banButton;
-    [SerializeField] private Button editButton;      // back to Edit (opens edit panel)
+    [SerializeField] private Button editButton;  
     [SerializeField] private Button deleteButton;
 
     private AdminUser userData;
-    private AdminController adminController; // set by AdminController when populating list
+    private AdminController adminController; 
 
     // Check if the current logged-in user is viewing their own profile
     private bool IsCurrentUser()
@@ -32,7 +32,7 @@ public class AdminUserItem : MonoBehaviour
                currentUsername.Equals(userData.username, System.StringComparison.OrdinalIgnoreCase);
     }
 
-    // New signature: AdminController will provide itself so actions are performed there.
+    // AdminController will provide itself so actions are performed there.
     public void SetupUser(AdminUser user, AdminController controller)
     {
         userData = user;
@@ -175,30 +175,6 @@ public class AdminUserItem : MonoBehaviour
         }
     }
 
-    private void OnGrantAdminClicked()
-    {
-        // kept in case you still use grant/revoke from code; not wired to editButton anymore
-        if (IsCurrentUser())
-        {
-            Debug.LogWarning("Cannot change your own admin status here!");
-            return;
-        }
-
-        if (adminController != null)
-        {
-            adminController.RequestToggleAdmin(userData, () =>
-            {
-                // update local model/state after change
-                userData.role = userData.role == "Admin" ? "User" : "Admin";
-                UpdateDisplay();
-                UpdateButtonStates();
-            });
-        }
-        else
-        {
-            Debug.LogWarning("AdminController not assigned to AdminUserItem. Action skipped.");
-        }
-    }
 
     private void OnEditClicked()
     {
@@ -210,7 +186,13 @@ public class AdminUserItem : MonoBehaviour
 
         if (adminController != null)
         {
-            adminController.OpenEditUser(userData); // controller should open the edit panel (you will implement)
+            // Pass a callback so the item refreshes its display after the edit panel saves changes.
+            adminController.OpenEditUser(userData, (updatedUser) =>
+            {
+                // updatedUser is the same object instance; refresh visuals
+                UpdateDisplay();
+                UpdateButtonStates();
+            });
         }
         else
         {

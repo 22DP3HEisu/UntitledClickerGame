@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +7,7 @@ using UnityEngine.UI;
 public class EditUserAdmin : MonoBehaviour
 {
     [Header("Root")]
-    [SerializeField] private GameObject panelRoot; // root to show/hide the edit panel
+    [SerializeField] private GameObject panelRoot;
 
     [Header("Labels (optional)")]
     [SerializeField] private TMP_Text UsernameLabel;
@@ -24,12 +25,20 @@ public class EditUserAdmin : MonoBehaviour
     [SerializeField] private Button cancelButton;
 
     [Header("Controller")]
-    [SerializeField] private AdminController adminController; // assign if you want automatic grant/revoke calls
+    [SerializeField] private AdminController adminController;
 
     private AdminUser currentUser;
+    // snapshot of original values so we send only changed fields
+    private string originalUsername;
+    private string originalEmail;
+    private int originalCarrots;
+    private bool originalIsAdmin;
 
     // Event fired after user pressed Save and update flow completed (local model updated).
     public event Action<AdminUser> OnUserSaved;
+
+    // Prevent duplicate saves while an async update is in progress
+    private bool isSaving;
 
     private void Awake()
     {
@@ -37,6 +46,7 @@ public class EditUserAdmin : MonoBehaviour
         if (saveButton != null) saveButton.onClick.AddListener(OnSaveClicked);
         if (cancelButton != null) cancelButton.onClick.AddListener(Close);
         if (panelRoot != null) panelRoot.SetActive(false);
+        isSaving = false;
     }
 
     private void OnDestroy()
@@ -51,12 +61,22 @@ public class EditUserAdmin : MonoBehaviour
         if (user == null) return;
         currentUser = user;
 
+        // take snapshot of original values
+        originalUsername = user.username ?? string.Empty;
+        originalEmail = user.email ?? string.Empty;
+        originalCarrots = user.carrots;
+        originalIsAdmin = string.Equals(user.role, "Admin", StringComparison.OrdinalIgnoreCase);
+
         if (panelRoot != null) panelRoot.SetActive(true);
 
-        if (UsernameInput != null) UsernameInput.text = user.username ?? string.Empty;
-        if (EmailInput != null) EmailInput.text = user.email ?? string.Empty;
-        if (CarrotsInput != null) CarrotsInput.text = user.carrots.ToString();
-        if (isAdminToggle != null) isAdminToggle.isOn = string.Equals(user.role, "Admin", StringComparison.OrdinalIgnoreCase);
+        if (UsernameInput != null) UsernameInput.text = originalUsername;
+        if (EmailInput != null) EmailInput.text = originalEmail;
+        if (CarrotsInput != null) CarrotsInput.text = originalCarrots.ToString();
+        if (isAdminToggle != null) isAdminToggle.isOn = originalIsAdmin;
+
+        // ensure buttons are interactable when opened
+        if (saveButton != null) saveButton.interactable = true;
+        isSaving = false;
     }
 
     // Close/hide panel
@@ -64,9 +84,11 @@ public class EditUserAdmin : MonoBehaviour
     {
         if (panelRoot != null) panelRoot.SetActive(false);
         currentUser = null;
+        isSaving = false;
+        if (saveButton != null) saveButton.interactable = true;
     }
 
-    // Save button handler: updates local model and optionally calls AdminController to grant/revoke admin.
+    // Save button handler: compute changed fields and call AdminController.UpdateUserFieldsById.
     private void OnSaveClicked()
     {
         if (currentUser == null)
@@ -75,53 +97,143 @@ public class EditUserAdmin : MonoBehaviour
             return;
         }
 
-        // Update local fields
-        if (UsernameInput != null) currentUser.username = UsernameInput.text.Trim();
-        if (EmailInput != null) currentUser.email = EmailInput.text.Trim();
-
-        if (CarrotsInput != null)
+        if (isSaving)
         {
-            if (int.TryParse(CarrotsInput.text, out int carrots))
-                currentUser.carrots = carrots;
-            else
-                Debug.LogWarning("EditUserAdmin: invalid carrots input");
+            Debug.LogWarning("EditUserAdmin: save already in progress");
+            return;
         }
 
-        bool wantAdmin = isAdminToggle != null && isAdminToggle.isOn;
-        bool isCurrentlyAdmin = string.Equals(currentUser.role, "Admin", StringComparison.OrdinalIgnoreCase);
-
-        // If AdminController assigned, use its grant/revoke helpers for admin toggle
-        if (adminController != null)
+        // fetch values from inputs
+        string newUsername = UsernameInput != null ? UsernameInput.text.Trim() : originalUsername;
+        string newEmail = EmailInput != null ? EmailInput.text.Trim() : originalEmail;
+        int newCarrots = originalCarrots;
+        if (CarrotsInput != null)
         {
-            if (wantAdmin && !isCurrentlyAdmin)
+            if (!int.TryParse(CarrotsInput.text, out newCarrots))
             {
-                adminController.RequestGrantAdminById(currentUser.id, currentUser.username, () =>
-                {
-                    currentUser.role = "Admin";
-                    OnUserSaved?.Invoke(currentUser);
-                });
+                Debug.LogWarning("EditUserAdmin: invalid carrots input");
+                // Keep originalCarrots if parse fails
+                newCarrots = originalCarrots;
             }
-            else if (!wantAdmin && isCurrentlyAdmin)
+        }
+        bool wantAdmin = isAdminToggle != null && isAdminToggle.isOn;
+
+        // build payload with only changed fields
+        var payload = new Dictionary<string, object>();
+
+        if (!string.Equals(newUsername, originalUsername, StringComparison.Ordinal))
+            payload["username"] = newUsername;
+
+        if (!string.Equals(newEmail, originalEmail, StringComparison.Ordinal))
+            payload["email"] = newEmail;
+
+        if (newCarrots != originalCarrots)
+            payload["carrots"] = newCarrots;
+
+        // If no payload changes, still may need admin change. Handle admin separately.
+        bool adminChanged = wantAdmin != originalIsAdmin;
+
+        // If there are fields to update, call UpdateUserFieldsById; otherwise skip to admin change.
+        if (payload.Count > 0)
+        {
+            if (adminController == null)
             {
-                adminController.RequestRevokeAdminById(currentUser.id, currentUser.username, () =>
-                {
-                    currentUser.role = "User";
-                    OnUserSaved?.Invoke(currentUser);
-                });
-            }
-            else
-            {
-                // No admin state change required — just invoke saved event
+                Debug.LogWarning("EditUserAdmin: adminController not assigned; changes will not be persisted to server.");
+                // apply locally
+                currentUser.username = newUsername;
+                currentUser.email = newEmail;
+                currentUser.carrots = newCarrots;
+                // handle admin toggle below
+                ApplyAdminChangeIfNeeded(adminChanged, wantAdmin);
                 OnUserSaved?.Invoke(currentUser);
+                Close();
+                return;
             }
+
+            // mark saving and disable save button to avoid race where panel is closed before callback runs
+            isSaving = true;
+            if (saveButton != null) saveButton.interactable = false;
+
+            adminController.UpdateUserFieldsById(currentUser.id, payload,
+                onSuccess: (returnedPayload) =>
+                {
+                    try
+                    {
+                        // Update local model with changed fields
+                        if (returnedPayload.ContainsKey("username")) currentUser.username = newUsername;
+                        if (returnedPayload.ContainsKey("email")) currentUser.email = newEmail;
+                        if (returnedPayload.ContainsKey("carrots")) currentUser.carrots = newCarrots;
+
+                        // After successfully saving fields, apply admin change immediately without confirm
+                        ApplyAdminChangeIfNeeded(adminChanged, wantAdmin);
+
+                        OnUserSaved?.Invoke(currentUser);
+
+                        // Close panel now that update completed
+                        Close();
+                    }
+                    finally
+                    {
+                        // Ensure saving flag is cleared and buttons re-enabled
+                        isSaving = false;
+                        if (saveButton != null) saveButton.interactable = true;
+                    }
+                },
+                onError: (err) =>
+                {
+                    Debug.LogError($"EditUserAdmin: update failed - {err}");
+                    // Keep panel open so user can retry. Re-enable save.
+                    isSaving = false;
+                    if (saveButton != null) saveButton.interactable = true;
+                });
+
+            // do not close here — wait for async callback to finish
+            return;
         }
         else
         {
-            // No controller: just update local model and notify listeners
-            currentUser.role = wantAdmin ? "Admin" : "User";
+            // No profile fields changed; only admin toggle maybe changed
+            ApplyAdminChangeIfNeeded(adminChanged, wantAdmin);
             OnUserSaved?.Invoke(currentUser);
+            Close();
         }
+    }
 
-        Close();
+    private void ApplyAdminChangeIfNeeded(bool adminChanged, bool wantAdmin)
+    {
+        if (!adminChanged || adminController == null || currentUser == null) return;
+
+        // Capture a strong reference to the AdminUser instance so callbacks don't reference the possibly-cleared 'currentUser' field.
+        var userRef = currentUser;
+
+        if (wantAdmin && !string.Equals(userRef.role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            adminController.GrantAdminImmediateById(userRef.id, userRef.username, () =>
+            {
+                // Update the captured user reference safely (works even if this EditUserAdmin instance closed)
+                try
+                {
+                    userRef.role = "Admin";
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"GrantAdmin callback failed to update local model: {ex.Message}");
+                }
+            });
+        }
+        else if (!wantAdmin && string.Equals(userRef.role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            adminController.RevokeAdminImmediateById(userRef.id, userRef.username, () =>
+            {
+                try
+                {
+                    userRef.role = "User";
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"RevokeAdmin callback failed to update local model: {ex.Message}");
+                }
+            });
+        }
     }
 }
