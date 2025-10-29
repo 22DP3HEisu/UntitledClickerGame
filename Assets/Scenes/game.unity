@@ -991,8 +991,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 255300768}
   m_HandleRect: {fileID: 255300767}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.95309174
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2453,7 +2453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
-  m_Content: {fileID: 1353520310}
+  m_Content: {fileID: 240768765}
   m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
@@ -9780,7 +9780,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -438}
+  m_AnchoredPosition: {x: 200, y: -439}
   m_SizeDelta: {x: 400, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &982820127
@@ -11828,7 +11828,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 393.08}
+  m_SizeDelta: {x: 0, y: 362.41}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1254517226
 MonoBehaviour:
@@ -11842,7 +11842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
-  m_Content: {fileID: 1656305114}
+  m_Content: {fileID: 1254517225}
   m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
@@ -13474,7 +13474,7 @@ MonoBehaviour:
   m_Content: {fileID: 1536117500}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
@@ -13577,8 +13577,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 635.99994}
-  m_SizeDelta: {x: -17, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.000061035156}
+  m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1353520311
 MonoBehaviour:
@@ -15586,7 +15586,7 @@ MonoBehaviour:
     m_Top: 5
     m_Bottom: 5
   m_ChildAlignment: 1
-  m_Spacing: 60
+  m_Spacing: 15
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -15980,12 +15980,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84494222899432a4fb09ec8406c150f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProfilePanelCode
-  usernameInputField: {fileID: 0}
-  emailInputField: {fileID: 0}
+  usernameInputField: {fileID: 1891270958}
+  emailInputField: {fileID: 520145264}
   carrotsText: {fileID: 1675946710}
   upgradesText: {fileID: 1696710055}
   achievementsText: {fileID: 1285778109}
-  clanText: {fileID: 0}
+  clanText: {fileID: 466794992}
   statusText: {fileID: 0}
   refreshButton: {fileID: 0}
   loadingIndicator: {fileID: 0}
@@ -16364,8 +16364,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 635.99994}
-  m_SizeDelta: {x: -17, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -20, y: -17}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1656305115
 MonoBehaviour:

@@ -115,7 +115,7 @@ public class ProfilePanelCode : MonoBehaviour
             achievementsText.text = "7";
 
         if (clanText)
-            clanText.text = "";
+            clanText.text = "Test";
     }
 
     private void ShowLoading(bool show)
