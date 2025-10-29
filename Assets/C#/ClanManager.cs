@@ -14,11 +14,14 @@ public class ClanManager : MonoBehaviour
     [SerializeField] private GameObject clanCardPrefab; // The clan card prefab to instantiate
     [SerializeField] private TMP_Text statusText; // Status text for loading/error messages
     [SerializeField] private Button refreshButton; // Button to refresh clan list
+    [SerializeField] private Button createClanButton; // Button to open clan creation modal
     
-    [Header("Modal Window")]
-    [SerializeField] private GameObject clanModalWindow; // Modal window GameObject
+    [Header("Modal Windows")]
+    [SerializeField] private GameObject clanModalWindow; // Clan detail modal window GameObject
+    [SerializeField] private GameObject clanCreateModalWindow; // Clan creation modal window GameObject
     
     private ClanDetailModal clanDetailModal; // Will be found automatically from modal window
+    private ClanCreateModal clanCreateModal; // Will be found automatically from creation modal
     
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -31,6 +34,16 @@ public class ClanManager : MonoBehaviour
         _ = LoadClansAsync();
     }
     
+    private void OnDestroy()
+    {
+        // Unsubscribe from events to prevent memory leaks
+        if (clanCreateModal != null)
+        {
+            clanCreateModal.OnClanCreated -= OnClanCreated;
+            clanCreateModal.OnClanCreationCancelled -= OnClanCreationCancelled;
+        }
+    }
+    
     private void SetupUI()
     {
         if (refreshButton != null)
@@ -38,12 +51,17 @@ public class ClanManager : MonoBehaviour
             refreshButton.onClick.AddListener(() => _ = LoadClansAsync());
         }
         
+        if (createClanButton != null)
+        {
+            createClanButton.onClick.AddListener(ShowCreateClanModal);
+        }
+        
         if (statusText != null)
         {
             statusText.text = "Loading clans...";
         }
         
-        // Ensure modal starts hidden and find the ClanDetailModal component
+        // Setup detail modal
         if (clanModalWindow != null)
         {
             clanModalWindow.SetActive(false);
@@ -58,6 +76,30 @@ public class ClanManager : MonoBehaviour
             if (clanDetailModal == null)
             {
                 LogDebug("Warning: ClanDetailModal component not found on modal window or its children");
+            }
+        }
+        
+        // Setup clan creation modal
+        if (clanCreateModalWindow != null)
+        {
+            clanCreateModalWindow.SetActive(false);
+            
+            // Find ClanCreateModal component on the modal window or its children
+            clanCreateModal = clanCreateModalWindow.GetComponent<ClanCreateModal>();
+            if (clanCreateModal == null)
+            {
+                clanCreateModal = clanCreateModalWindow.GetComponentInChildren<ClanCreateModal>();
+            }
+            
+            if (clanCreateModal == null)
+            {
+                LogDebug("Warning: ClanCreateModal component not found on creation modal window or its children");
+            }
+            else
+            {
+                // Subscribe to clan creation events
+                clanCreateModal.OnClanCreated += OnClanCreated;
+                clanCreateModal.OnClanCreationCancelled += OnClanCreationCancelled;
             }
         }
     }
@@ -171,7 +213,7 @@ public class ClanManager : MonoBehaviour
     /// <summary>
     /// Show clan details in modal window
     /// </summary>
-public void ShowClanDetails(ClanData clan)
+    public void ShowClanDetails(ClanData clan)
     {
         if (clanDetailModal != null && clanModalWindow != null)
         {
@@ -181,6 +223,24 @@ public void ShowClanDetails(ClanData clan)
         else
         {
             LogDebug($"Modal components not assigned. Clan: {clan.name}");
+        }
+    }
+    
+    /// <summary>
+    /// Show the clan creation modal
+    /// </summary>
+    public void ShowCreateClanModal()
+    {
+        Debug.Log("Create Clan button clicked");
+        if (clanCreateModal != null && clanCreateModalWindow != null)
+        {
+            clanCreateModal.ShowModal(this);
+            clanCreateModalWindow.SetActive(true);
+            LogDebug("Showing clan creation modal");
+        }
+        else
+        {
+            LogDebug("Cannot show clan creation modal - modal components not assigned");
         }
     }
     
@@ -213,6 +273,30 @@ public void ShowClanDetails(ClanData clan)
             Debug.Log($"[ClanManager] {message}");
         }
     }
+    
+    #region Clan Creation Events
+    
+    /// <summary>
+    /// Called when a new clan is successfully created
+    /// </summary>
+    /// <param name="newClan">The newly created clan data</param>
+    private void OnClanCreated(ClanData newClan)
+    {
+        LogDebug($"New clan created: {newClan.name} ({newClan.tag})");
+        
+        // Refresh the clan list to show the new clan
+        _ = LoadClansAsync();
+    }
+    
+    /// <summary>
+    /// Called when clan creation is cancelled
+    /// </summary>
+    private void OnClanCreationCancelled()
+    {
+        LogDebug("Clan creation cancelled");
+    }
+    
+    #endregion
     
     // Context menu methods for testing
     [ContextMenu("Refresh Clans")]

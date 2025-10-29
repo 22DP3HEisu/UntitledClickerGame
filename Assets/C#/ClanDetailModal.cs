@@ -6,335 +6,355 @@ using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Modal window for displaying detailed clan information and join functionality
+/// Modal window for displaying detailed clan information with comprehensive management functionality
+/// Handles all clan operations: viewing, joining, leaving, and member management
 /// </summary>
 public class ClanDetailModal : MonoBehaviour
 {
-    [Header("UI Elements")]
+    [Header("Basic Info Display")]
     [SerializeField] private TMP_Text clanNameText;
     [SerializeField] private TMP_Text clanTagText;
     [SerializeField] private TMP_Text clanDescriptionText;
     [SerializeField] private TMP_Text leaderNameText;
     [SerializeField] private TMP_Text memberCountText;
     [SerializeField] private TMP_Text creationDateText;
-    [SerializeField] private TMP_Text statusText;
     
-    [Header("Actions")]
+    [Header("Status & Feedback")]
+    [SerializeField] private TMP_Text statusText;
+    [SerializeField] private GameObject loadingIndicator;
+    
+    [Header("Member Actions")]
     [SerializeField] private Button joinButton;
     [SerializeField] private Button leaveButton;
+    
+    [Header("Navigation")]
     [SerializeField] private Button closeButton;
     [SerializeField] private Button refreshButton;
-    
-    [Header("Visual Elements")]
-    [SerializeField] private Image clanBanner; // Optional clan banner/icon
-    [SerializeField] private GameObject loadingIndicator;
     
     [Header("Member List (Optional)")]
     [SerializeField] private Transform memberListParent;
     [SerializeField] private GameObject memberItemPrefab;
     
+    // State management
     private ClanData currentClan;
     private ClanManager clanManager;
+    private UserProfileResponse.UserProfile currentUser;
+    private ClanDetailData detailedClanInfo;
+    
+    #region Unity Lifecycle
     
     private void Awake()
     {
         SetupButtons();
+        HideAllActionButtons();
     }
+    
+    #endregion
+    
+    #region Public Interface
+    
+    /// <summary>
+    /// Show the modal with clan information and determine available actions
+    /// </summary>
+    public async void ShowModal(ClanData clan, ClanManager manager = null)
+    {
+        if (clan == null)
+        {
+            Debug.LogError("Cannot show modal: clan data is null");
+            return;
+        }
+        
+        currentClan = clan;
+        clanManager = manager;
+        
+        gameObject.SetActive(true);
+        
+        // Show basic clan info immediately
+        DisplayBasicClanInfo();
+        
+        // Load detailed information and determine user actions
+        await LoadDetailedClanInfoAsync();
+    }
+    
+    /// <summary>
+    /// Legacy method for backward compatibility with ClanManager
+    /// </summary>
+    public void ShowClanDetails(ClanData clan)
+    {
+        ShowModal(clan, clanManager);
+    }
+    
+    /// <summary>
+    /// Hide the modal
+    /// </summary>
+    public void HideModal()
+    {
+        gameObject.SetActive(false);
+        ClearClanData();
+    }
+    
+    #endregion
+    
+    #region UI Setup
     
     private void SetupButtons()
     {
+        // Member action buttons
         if (joinButton != null)
         {
             joinButton.onClick.RemoveAllListeners();
-            joinButton.onClick.AddListener(JoinClan);
+            joinButton.onClick.AddListener(() => _ = JoinClanAsync());
         }
         
         if (leaveButton != null)
         {
             leaveButton.onClick.RemoveAllListeners();
-            leaveButton.onClick.AddListener(LeaveClan);
+            leaveButton.onClick.AddListener(() => _ = LeaveClanAsync());
         }
         
+        // Navigation buttons
         if (closeButton != null)
         {
             closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(CloseModal);
+            closeButton.onClick.AddListener(HideModal);
         }
         
         if (refreshButton != null)
         {
             refreshButton.onClick.RemoveAllListeners();
-            refreshButton.onClick.AddListener(() => _ = LoadDetailedClanInfo());
-        }
-    }
-    
-    /// <summary>
-    /// Show clan details in the modal
-    /// </summary>
-    public void ShowClanDetails(ClanData clan)
-    {
-        currentClan = clan;
-        
-        // Find clan manager in scene if not set
-        if (clanManager == null)
-        {
-            clanManager = FindObjectOfType<ClanManager>();
-        }
-        
-        UpdateDisplay();
-        
-        // Check user membership status and update button visibility
-        _ = CheckUserMembershipAndUpdateButtons();
-        
-        // Load detailed information if possible
-        _ = LoadDetailedClanInfo();
-    }
-    
-    private void UpdateDisplay()
-    {
-        if (currentClan == null) return;
-        
-        // Update basic clan information
-        if (clanNameText != null) clanNameText.text = currentClan.name;
-        if (clanTagText != null) clanTagText.text = $"[{currentClan.tag}]";
-        if (clanDescriptionText != null) 
-        {
-            clanDescriptionText.text = !string.IsNullOrEmpty(currentClan.description) 
-                ? currentClan.description 
-                : "No description available";
-        }
-        if (leaderNameText != null) leaderNameText.text = $"Leader: {currentClan.leaderName}";
-        if (memberCountText != null) memberCountText.text = $"Members:\n{currentClan.memberCount}";
-        
-        // Format creation date
-        if (creationDateText != null)
-        {
-            try
-            {
-                if (System.DateTime.TryParse(currentClan.creationDate, out System.DateTime date))
-                {
-                    creationDateText.text = $"Created: {date:MMMM dd, yyyy}";
-                }
-                else
-                {
-                    creationDateText.text = "Created: Unknown";
-                }
-            }
-            catch
-            {
-                creationDateText.text = "Created: Unknown";
-            }
-        }
-        
-        ShowStatus("Clan information loaded", false);
-    }
-    
-    private async Task LoadDetailedClanInfo()
-    {
-        if (currentClan == null) return;
-        
-        ShowLoading(true);
-        ShowStatus("Loading detailed clan information...", false);
-        
-        try
-        {
-            // This would require an endpoint like /clans/{id} for detailed info
-            // For now, we'll use the basic information we already have
-            
-            // Simulate loading delay
-            await Task.Delay(500);
-            
-            // If you have a detailed clan endpoint, use it like this:
-            /*
-            var detailedClan = await ApiClient.GetAsync<DetailedClanResponse>($"/clans/{currentClan.id}");
-            if (detailedClan?.clan != null)
-            {
-                // Update with detailed information
-                LoadMemberList(detailedClan.clan.members);
-            }
-            */
-            
-            ShowStatus("Clan details loaded", false);
-        }
-        catch (Exception ex)
-        {
-            ShowStatus($"Failed to load details: {ex.Message}", true);
-            Debug.LogError($"Error loading clan details: {ex.Message}");
-        }
-        finally
-        {
-            ShowLoading(false);
-        }
-    }
-    
-    /// <summary>
-    /// Check user's clan membership status and update button visibility accordingly
-    /// This uses a simpler approach by trying to join/leave and handling the API response
-    /// </summary>
-    private async Task CheckUserMembershipAndUpdateButtons()
-    {
-        if (currentClan == null) return;
-        
-        try
-        {
-            ShowStatus("Checking membership status...", false);
-            
-            // Get user profile first to get current user ID
-            var userProfile = await ApiClient.GetAsync<UserProfileResponse>("/user");
-            if (userProfile?.user?.id == null)
-            {
-                Debug.LogWarning("Could not get user profile, showing default buttons");
-                ShowDefaultButtons();
-                ShowStatus("Ready", false);
-                return;
-            }
-            
-            int currentUserId = userProfile.user.id;
-            Debug.Log($"Current user ID: {currentUserId}");
-            
-            // Get detailed clan information to check membership
-            var detailedClan = await ApiClient.GetAsync<DetailedClanResponse>($"/clans/{currentClan.id}");
-            
-            if (detailedClan?.clan?.members != null)
-            {
-                // Check if current user is a member of this clan
-                bool isCurrentClanMember = detailedClan.clan.members.Any(member => member.userId == currentUserId);
-                
-                if (isCurrentClanMember)
-                {
-                    // User is a member of this clan - show leave button
-                    HideJoinButton();
-                    ShowLeaveButton();
-                    Debug.Log("User is a member of this clan - showing leave button");
-                }
-                else
-                {
-                    // User is not a member of this clan
-                    // Check if clan is full
-                    if (detailedClan.clan.memberCount >= 50)
-                    {
-                        // Clan is full - hide both buttons
-                        HideJoinButton();
-                        HideLeaveButton();
-                        Debug.Log("Clan is full - hiding both buttons");
-                    }
-                    else
-                    {
-                        // Clan has space - show join button (API will handle if user is in another clan)
-                        ShowJoinButton();
-                        HideLeaveButton();
-                        Debug.Log("User is not a member and clan has space - showing join button");
-                    }
-                }
-                ShowStatus("Ready", false);
-            }
-            else
-            {
-                // Fallback: show default buttons
-                ShowDefaultButtons();
-                ShowStatus("Ready", false);
-            }
-        }
-        catch (ApiException ex)
-        {
-            Debug.LogWarning($"Could not check membership status: {ex.StatusCode} - {ex.Message}");
-            // Show default buttons anyway - let API calls handle the validation
-            ShowDefaultButtons();
-            ShowStatus("Ready", false);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Error checking membership status: {ex.Message}");
-            ShowDefaultButtons();
-            ShowStatus("Ready", false);
-        }
-    }
-    
-    /// <summary>
-    /// Show default button configuration - both buttons visible, let API responses determine behavior
-    /// </summary>
-    private void ShowDefaultButtons()
-    {
-        // Show join button if clan isn't full
-        if (currentClan.memberCount < 50)
-        {
-            ShowJoinButton();
-        }
-        else
-        {
-            HideJoinButton();
-        }
-        
-        // Always show leave button - API will return appropriate error if user isn't a member
-        ShowLeaveButton();
-    }
-    
-    private void ShowJoinButton()
-    {
-        if (joinButton != null)
-        {
-            joinButton.gameObject.SetActive(true);
-            joinButton.interactable = true;
-        }
-    }
-    
-    private void HideJoinButton()
-    {
-        if (joinButton != null)
-        {
-            joinButton.gameObject.SetActive(false);
-        }
-    }
-    
-    private void ShowLeaveButton()
-    {
-        if (leaveButton != null)
-        {
-            leaveButton.gameObject.SetActive(true);
-            leaveButton.interactable = true;
-        }
-    }
-    
-    private void HideLeaveButton()
-    {
-        if (leaveButton != null)
-        {
-            leaveButton.gameObject.SetActive(false);
+            refreshButton.onClick.AddListener(() => _ = RefreshClanInfoAsync());
         }
     }
     
     private void HideAllActionButtons()
     {
-        HideJoinButton();
-        HideLeaveButton();
+        SetButtonVisibility(joinButton, false);
+        SetButtonVisibility(leaveButton, false);
     }
     
-    private async void JoinClan()
+    private void SetButtonVisibility(Button button, bool visible)
     {
-        Debug.Log("JoinClan button clicked");
-        if (currentClan == null) return;
+        if (button != null)
+        {
+            button.gameObject.SetActive(visible);
+        }
+    }
+    
+    #endregion
+    
+    #region Data Loading
+    
+    private async Task LoadDetailedClanInfoAsync()
+    {
+        try
+        {
+            ShowStatus("Loading clan details...", false);
+            SetLoadingState(true);
+            
+            // Load user profile and detailed clan info in parallel
+            var userTask = LoadCurrentUserAsync();
+            var clanTask = LoadDetailedClanAsync();
+            
+            await Task.WhenAll(userTask, clanTask);
+            
+            currentUser = await userTask;
+            detailedClanInfo = await clanTask;
+            
+            if (currentUser != null && detailedClanInfo != null)
+            {
+                DisplayDetailedClanInfo();
+                DetermineAvailableActions();
+                ShowStatus("Ready", false);
+            }
+            else
+            {
+                ShowStatus("Failed to load clan information", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error loading clan details: {ex.Message}");
+            ShowStatus("Error loading clan information", true);
+        }
+        finally
+        {
+            SetLoadingState(false);
+        }
+    }
+    
+    private async Task<UserProfileResponse.UserProfile> LoadCurrentUserAsync()
+    {
+        try
+        {
+            var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
+            return response?.user;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to load user profile: {ex.Message}");
+            return null;
+        }
+    }
+    
+    private async Task<ClanDetailData> LoadDetailedClanAsync()
+    {
+        try
+        {
+            var response = await ApiClient.GetAsync<ClanDetailResponse>($"/clans/{currentClan.id}");
+            return response?.success == true ? response.clan : null;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to load detailed clan info: {ex.Message}");
+            return null;
+        }
+    }
+    
+    private async Task RefreshClanInfoAsync()
+    {
+        if (currentClan != null)
+        {
+            await LoadDetailedClanInfoAsync();
+            
+            // Refresh the clan list if manager is available
+            if (clanManager != null)
+            {
+                _ = clanManager.LoadClansAsync();
+            }
+        }
+    }
+    
+    #endregion
+    
+    #region UI Display
+    
+    private void DisplayBasicClanInfo()
+    {
+        SetText(clanNameText, currentClan.name);
+        SetText(clanTagText, currentClan.tag);
+        SetText(clanDescriptionText, currentClan.description);
+        SetText(memberCountText, $"{currentClan.memberCount}/50");
+    }
+    
+    private void DisplayDetailedClanInfo()
+    {
+        if (detailedClanInfo == null) return;
         
-        ShowStatus("Joining clan...", false);
-        joinButton.interactable = false;
+        // Update with detailed information
+        SetText(clanNameText, detailedClanInfo.name);
+        SetText(clanTagText, detailedClanInfo.tag);
+        SetText(clanDescriptionText, detailedClanInfo.description);
+        SetText(leaderNameText, detailedClanInfo.leaderName);
+        SetText(memberCountText, $"{detailedClanInfo.memberCount}/50");
+        SetText(creationDateText, FormatDate(detailedClanInfo.creationDate));
+        
+        // Display member list if available
+        if (memberListParent != null && detailedClanInfo.members != null)
+        {
+            DisplayMemberList();
+        }
+    }
+    
+    private void DisplayMemberList()
+    {
+        // Clear existing member items
+        foreach (Transform child in memberListParent)
+        {
+            if (child != memberListParent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+        
+        // Create member items
+        foreach (var member in detailedClanInfo.members)
+        {
+            if (memberItemPrefab != null)
+            {
+                var memberItem = Instantiate(memberItemPrefab, memberListParent);
+                var memberText = memberItem.GetComponentInChildren<TMP_Text>();
+                
+                if (memberText != null)
+                {
+                    string role = member.isLeader ? "Leader" : "Member";
+                    memberText.text = $"{member.username} ({role})";
+                }
+            }
+        }
+    }
+    
+    private void SetText(TMP_Text textComponent, string text)
+    {
+        if (textComponent != null)
+        {
+            textComponent.text = text ?? "N/A";
+        }
+    }
+    
+    private string FormatDate(string dateString)
+    {
+        if (DateTime.TryParse(dateString, out DateTime date))
+        {
+            return date.ToString("MMM dd, yyyy");
+        }
+        return dateString ?? "Unknown";
+    }
+    
+    #endregion
+    
+    #region User Actions Logic
+    
+    private void DetermineAvailableActions()
+    {
+        if (currentUser == null || detailedClanInfo == null)
+        {
+            HideAllActionButtons();
+            return;
+        }
+        
+        bool isCurrentClanMember = detailedClanInfo.members?.Any(m => m.id == currentUser.id) ?? false;
+        bool isClanFull = detailedClanInfo.memberCount >= 50;
+        
+        Debug.Log($"User {currentUser.id} membership check: isCurrentClanMember={isCurrentClanMember}, isClanFull={isClanFull}");
+        
+        if (isCurrentClanMember)
+        {
+            // User is a member - show leave button
+            SetButtonVisibility(joinButton, false);
+            SetButtonVisibility(leaveButton, true);
+        }
+        else if (isClanFull)
+        {
+            // Clan is full and user is not a member - hide both buttons
+            HideAllActionButtons();
+        }
+        else
+        {
+            // User is not a member and clan has space - show join button
+            SetButtonVisibility(joinButton, true);
+            SetButtonVisibility(leaveButton, false);
+        }
+    }
+    
+    #endregion
+    
+    #region Clan Actions
+    
+    private async Task JoinClanAsync()
+    {
+        if (currentClan == null) return;
         
         try
         {
-            Debug.Log($"Attempting to join clan: {currentClan.name} (ID: {currentClan.id})");
+            ShowStatus("Joining clan...", false);
+            SetButtonInteractable(joinButton, false);
             
-            var response = await ApiClient.PostAsync<object, JoinClanResponse>($"/clans/{currentClan.id}/join", null);
-            if (response != null && response.success)
+            var response = await ApiClient.PostAsync<object, ClanActionResponse>($"/clans/{currentClan.id}/join", null);
+            
+            if (response?.success == true)
             {
                 ShowStatus("Successfully joined clan!", false);
-                
-                // Update button visibility - user is now a member
-                HideJoinButton();
-                ShowLeaveButton();
-                
-                // Refresh clan list if clan manager is available
-                if (clanManager != null)
-                {
-                    _ = clanManager.LoadClansAsync();
-                }
+                await RefreshClanInfoAsync();
             }
             else
             {
@@ -348,70 +368,49 @@ public class ClanDetailModal : MonoBehaviour
                 400 => "Cannot join - you may already be in a clan or this clan may be full",
                 403 => "You are already in another clan",
                 404 => "Clan not found",
-                _ => $"Failed to join clan: {ex.Message}"
+                _ => "Failed to join clan"
             };
-            ShowStatus(errorMessage, true);
-            Debug.LogError($"Error joining clan: {ex.StatusCode} - {ex.Message}");
             
-            // If user is already in another clan (403), hide both buttons
+            ShowStatus(errorMessage, true);
+            Debug.LogError($"Join clan error: {ex.StatusCode} - {ex.Message}");
+            
+            // Handle specific error cases
             if (ex.StatusCode == 403)
             {
-                HideJoinButton();
-                HideLeaveButton();
-            }
-            // If already a member of this clan or has other issues (400), adjust buttons accordingly
-            else if (ex.StatusCode == 400)
-            {
-                HideJoinButton();
-                // If they're already a member of this clan, show leave button
-                if (ex.Message.Contains("already"))
-                {
-                    ShowLeaveButton();
-                }
+                // User is in another clan - hide both buttons
+                HideAllActionButtons();
             }
         }
         catch (Exception ex)
         {
-            ShowStatus($"Failed to join clan: {ex.Message}", true);
-            Debug.LogError($"Error joining clan: {ex.Message}");
+            ShowStatus("Failed to join clan", true);
+            Debug.LogError($"Join clan error: {ex.Message}");
         }
         finally
         {
-            joinButton.interactable = true;
+            SetButtonInteractable(joinButton, true);
         }
     }
     
-    private async void LeaveClan()
+    private async Task LeaveClanAsync()
     {
         if (currentClan == null) return;
         
-        ShowStatus("Leaving clan...", false);
-        leaveButton.interactable = false;
-        
         try
         {
-            Debug.Log($"Attempting to leave clan: {currentClan.name} (ID: {currentClan.id})");
+            ShowStatus("Leaving clan...", false);
+            SetButtonInteractable(leaveButton, false);
             
-            var response = await ApiClient.PostAsync<object, LeaveClanResponse>($"/clans/{currentClan.id}/leave", null);
-            if (response != null && response.success)
+            var response = await ApiClient.PostAsync<object, ClanLeaveResponse>($"/clans/{currentClan.id}/leave", null);
+            
+            if (response?.success == true)
             {
                 string message = response.action == "disbanded" 
-                    ? "Clan disbanded as you were the only member" 
+                    ? "Clan disbanded (you were the only member)" 
                     : "Successfully left clan!";
+                
                 ShowStatus(message, false);
-                
-                // Update button visibility - user is no longer a member
-                HideLeaveButton();
-                if (currentClan.memberCount < 50)
-                {
-                    ShowJoinButton();
-                }
-                
-                // Refresh clan list if clan manager is available
-                if (clanManager != null)
-                {
-                    _ = clanManager.LoadClansAsync();
-                }
+                await RefreshClanInfoAsync();
             }
             else
             {
@@ -425,122 +424,102 @@ public class ClanDetailModal : MonoBehaviour
                 400 => "Cannot leave - you may not be a member or may need to transfer leadership first",
                 403 => "Permission denied",
                 404 => "Clan not found",
-                _ => $"Failed to leave clan: {ex.Message}"
+                _ => "Failed to leave clan"
             };
-            ShowStatus(errorMessage, true);
-            Debug.LogError($"Error leaving clan: {ex.StatusCode} - {ex.Message}");
             
-            // If user is not a member, hide leave button
-            if (ex.StatusCode == 400)
-            {
-                HideLeaveButton();
-                if (currentClan.memberCount < 50)
-                {
-                    ShowJoinButton();
-                }
-            }
+            ShowStatus(errorMessage, true);
+            Debug.LogError($"Leave clan error: {ex.StatusCode} - {ex.Message}");
         }
         catch (Exception ex)
         {
-            ShowStatus($"Failed to leave clan: {ex.Message}", true);
-            Debug.LogError($"Error leaving clan: {ex.Message}");
+            ShowStatus("Failed to leave clan", true);
+            Debug.LogError($"Leave clan error: {ex.Message}");
         }
         finally
         {
-            leaveButton.interactable = true;
+            SetButtonInteractable(leaveButton, true);
         }
     }
     
-    public void CloseModal()
-    {
-        if (clanManager != null)
-        {
-            clanManager.HideClanDetails();
-        }
-        else
-        {
-            gameObject.SetActive(false);
-        }
-    }
+    #endregion
     
-    private void ShowLoading(bool show)
-    {
-        if (loadingIndicator != null)
-        {
-            loadingIndicator.SetActive(show);
-        }
-    }
+    #region UI Utilities
     
     private void ShowStatus(string message, bool isError)
     {
         if (statusText != null)
         {
             statusText.text = message;
-            statusText.color = isError ? Color.red : Color.green;
+            statusText.color = isError ? Color.red : Color.white;
         }
-        
-        Debug.Log($"[ClanDetailModal] {message}");
     }
     
-    // Optional: Load member list if you have detailed clan info
-    private void LoadMemberList(ClanMember[] members)
+    private void SetLoadingState(bool loading)
     {
-        if (memberListParent == null || memberItemPrefab == null || members == null) return;
-        
-        // Clear existing member items
-        for (int i = memberListParent.childCount - 1; i >= 0; i--)
+        if (loadingIndicator != null)
         {
-            if (Application.isPlaying)
-            {
-                Destroy(memberListParent.GetChild(i).gameObject);
-            }
-            else
-            {
-                DestroyImmediate(memberListParent.GetChild(i).gameObject);
-            }
+            loadingIndicator.SetActive(loading);
         }
         
-        // Create member items
-        foreach (var member in members)
+        // Disable interactive buttons during loading
+        SetButtonInteractable(joinButton, !loading);
+        SetButtonInteractable(leaveButton, !loading);
+        SetButtonInteractable(refreshButton, !loading);
+    }
+    
+    private void SetButtonInteractable(Button button, bool interactable)
+    {
+        if (button != null)
         {
-            GameObject memberItem = Instantiate(memberItemPrefab, memberListParent);
-            
-            // Setup member item (you'd need to create a ClanMemberItem component)
-            var memberText = memberItem.GetComponentInChildren<TMP_Text>();
-            if (memberText != null)
-            {
-                memberText.text = $"{member.username} ({member.rank})";
-            }
+            button.interactable = interactable;
         }
     }
+    
+    private void ClearClanData()
+    {
+        currentClan = null;
+        currentUser = null;
+        detailedClanInfo = null;
+        clanManager = null;
+    }
+    
+    #endregion
 }
 
-// Data structures for detailed clan information
+#region Data Structures
+
 [Serializable]
-public class DetailedClanResponse
+public class ClanDetailResponse
 {
     public bool success;
     public string message;
-    public DetailedClanData clan;
+    public ClanDetailData clan;
 }
 
 [Serializable]
-public class DetailedClanData : ClanData
+public class ClanDetailData
 {
+    public int id;
+    public string name;
+    public string tag;
+    public string description;
+    public string leaderName;
+    public int memberCount;
+    public string creationDate;
     public ClanMember[] members;
 }
 
 [Serializable]
 public class ClanMember
 {
-    public int userId;
+    public int id;
     public string username;
-    public string rank;
-    public string joinDate;
+    public bool isLeader;
+    public string joinedDate;
 }
 
 [Serializable]
-public class JoinClanResponse
+public class ClanActionResponse
 {
     public bool success;
     public string message;
@@ -548,10 +527,12 @@ public class JoinClanResponse
 }
 
 [Serializable]
-public class LeaveClanResponse
+public class ClanLeaveResponse
 {
     public bool success;
     public string message;
     public string action; // "left" or "disbanded"
     public ClanData clan;
 }
+
+#endregion

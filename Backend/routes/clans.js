@@ -533,6 +533,18 @@ router.post('/:id/join', authenticateToken, async function(req, res, next) {
 
         console.log(`User ${userId} successfully joined clan: ${clan.ClanName} (${clan.ClanTag})`);
 
+        // Send join message to clan chat
+        try {
+            const joinMessageQuery = `
+                INSERT INTO Clan_messages (ClanID, UserID, Message, MessageType, Timestamp)
+                VALUES (?, ?, ?, 'join', NOW())
+            `;
+            const joinMessage = `${clanInfo.LeaderName} has joined the clan!`;
+            await executeQuery(joinMessageQuery, [clanId, userId, joinMessage]);
+        } catch (chatError) {
+            console.warn('Failed to send join message to chat:', chatError.message);
+        }
+
         res.json({
             success: true,
             message: 'Successfully joined clan',
@@ -1116,6 +1128,18 @@ router.post('/:id/leave', authenticateToken, async function(req, res, next) {
         const clanInfo = updatedClan[0] || {};
 
         console.log(`User ${userId} (${username}) with rank ${userRank} left clan ${clan.ClanName} (${clan.ClanTag})`);
+
+        // Send leave message to clan chat
+        try {
+            const leaveMessageQuery = `
+                INSERT INTO Clan_messages (ClanID, UserID, Message, MessageType, Timestamp)
+                VALUES (?, ?, ?, 'leave', NOW())
+            `;
+            const leaveMessage = `${username} has left the clan.`;
+            await executeQuery(leaveMessageQuery, [clanId, userId, leaveMessage]);
+        } catch (chatError) {
+            console.warn('Failed to send leave message to chat:', chatError.message);
+        }
 
         res.json({
             success: true,
