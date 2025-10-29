@@ -19,6 +19,7 @@ public class LeaderboardManager : MonoBehaviour
     [SerializeField] private Button carrotsHeaderButton;
     [SerializeField] private Button backButton;
     [SerializeField] private bool showDebugLogs = true;
+    [SerializeField] private string gameSceneName = "game";
 
     private LeaderboardResponse currentLeaderboard;
     private bool sortDescending = true; // Default: most carrots first
@@ -171,8 +172,7 @@ public class LeaderboardManager : MonoBehaviour
 
     public void OnBackButtonClicked()
     {
-        LogDebug("Back button clicked, returning to game scene");
-        SceneManager.LoadScene("game");
+        SceneManager.LoadScene(gameSceneName);
     }
 
     [ContextMenu("Refresh Leaderboard")]
