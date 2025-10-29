@@ -206,23 +206,45 @@ router.delete('/user/:id', authenticateToken, isAdmin, async function(req, res, 
         const targetId = parseInt(req.params.id);
         if (!targetId || targetId <= 0) return res.status(400).json({ error: 'Invalid user id' });
 
-        // Remove all foreign key references before deleting user
-        await executeQuery('DELETE FROM Clans WHERE ClanLeaderID = ?', [targetId]);
-        await executeQuery('DELETE FROM User_buildings WHERE UserID = ?', [targetId]);
-        await executeQuery('DELETE FROM Clan_users WHERE UserID = ?', [targetId]);
-        await executeQuery('DELETE FROM User_upgrades WHERE UserID = ?', [targetId]);
-        await executeQuery('DELETE FROM User_achievements WHERE UserID = ?', [targetId]);
-        await executeQuery('DELETE FROM Users WHERE UserID = ?', [targetId]);
+        // Use an explicit transaction so cleanup is atomic.
+        await executeQuery('START TRANSACTION');
 
+        try {
+            // Find clans where the user is the leader
+            const clans = await executeQuery('SELECT ClanID FROM Clans WHERE ClanLeaderID = ?', [targetId]);
 
-        res.json({ message: 'User deleted', userId: targetId });
+            if (clans && clans.length > 0) {
+                // Delete memberships for those clans first to satisfy FK constraints
+                const clanIds = clans.map(c => c.ClanID);
+                const placeholders = clanIds.map(_ => '?').join(',');
+                await executeQuery(`DELETE FROM Clan_users WHERE ClanID IN (${placeholders})`, clanIds);
+            }
+
+            // Now safe to delete clans led by the user
+            await executeQuery('DELETE FROM Clans WHERE ClanLeaderID = ?', [targetId]);
+
+            // Remove any remaining foreign key references to the user
+            await executeQuery('DELETE FROM User_buildings WHERE UserID = ?', [targetId]);
+            await executeQuery('DELETE FROM Clan_users WHERE UserID = ?', [targetId]);
+            await executeQuery('DELETE FROM User_upgrades WHERE UserID = ?', [targetId]);
+            await executeQuery('DELETE FROM User_achievements WHERE UserID = ?', [targetId]);
+
+            // Finally delete the user row
+            await executeQuery('DELETE FROM Users WHERE UserID = ?', [targetId]);
+
+            await executeQuery('COMMIT');
+            res.json({ message: 'User deleted', userId: targetId });
+        } catch (innerErr) {
+            await executeQuery('ROLLBACK');
+            throw innerErr;
+        }
     } catch (err) {
         console.error('Delete user error:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-
+// PUT /admin/user/:id - update user details
 router.put('/user/:id', authenticateToken, isAdmin, async function (req, res, next) {
     try {
         const targetId = parseInt(req.params.id, 10);

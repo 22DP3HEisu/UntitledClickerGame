@@ -1,9 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 public class AdminController : MonoBehaviour
 {
@@ -20,20 +21,19 @@ public class AdminController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    // Confirm panel reference
     [Header("Confirm UI")]
     [SerializeField] private ConfirmPanel confirmPanel;
 
     [Header("Edit User profile")]
     [SerializeField] private GameObject editUserPanelRoot;
 
-    // API endpoint formats (editable in inspector)
     [Header("API Endpoint Formats")]
     [SerializeField] private string banEndpointFormat = "/admin/user/{0}/ban";
     [SerializeField] private string unbanEndpointFormat = "/admin/user/{0}/unban";
-    [SerializeField] private string grantAdminEndpointFormat = "/admin/user/{0}/grant-admin";
-    [SerializeField] private string revokeAdminEndpointFormat = "/admin/user/{0}/revoke-admin";
+    [SerializeField] private string grantAdminEndpointFormat = "/admin/user/{0}/promote";
+    [SerializeField] private string revokeAdminEndpointFormat = "/admin/user/{0}/demote";
     [SerializeField] private string deleteEndpointFormat = "/admin/user/{0}";
+    [SerializeField] private string updateUserEndpointFormat = "/admin/user/{0}";
 
     private AdminStatsResponse currentStats;
     private AdminUsersResponse currentUsers;
@@ -41,8 +41,7 @@ public class AdminController : MonoBehaviour
     private void Start()
     {
         SetupUI();
-
-        // Always reload stats when admin page is loaded
+        NormalizeEndpointFormats();
         _ = LoadAdminStatsAsync();
         _ = LoadUsersListAsync();
     }
@@ -50,17 +49,75 @@ public class AdminController : MonoBehaviour
     private void SetupUI()
     {
         if (backButton != null)
-        {
             backButton.onClick.AddListener(OnBackClicked);
-        }
 
-        // Initialize display
         if (userStatsText != null)
             userStatsText.text = "Loading user statistics...";
 
         if (clanStatsText != null)
             clanStatsText.text = "Loading clan statistics...";
     }
+
+    private void OnBackClicked()
+    {
+        SceneManager.LoadScene("game");
+    }
+
+    private void LogDebug(string message)
+    {
+        if (showDebugLogs) Debug.Log($"[AdminController] {message}");
+    }
+
+    private void ShowStatus(string message, bool isError)
+    {
+        if (statusText != null)
+        {
+            statusText.text = message;
+            statusText.color = isError ? Color.red : Color.green;
+        }
+        LogDebug($"Status: {message}");
+    }
+
+    // Ensure commonly-mistyped/old endpoint formats are normalized at runtime.
+    private void NormalizeEndpointFormats()
+    {
+        bool changed = false;
+
+        if (!string.IsNullOrWhiteSpace(grantAdminEndpointFormat) &&
+            (grantAdminEndpointFormat.Contains("grant-admin") || grantAdminEndpointFormat.Contains("grant_admin") || grantAdminEndpointFormat.Contains("grantAdmin")))
+        {
+            grantAdminEndpointFormat = "/admin/user/{0}/promote";
+            changed = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(revokeAdminEndpointFormat) &&
+            (revokeAdminEndpointFormat.Contains("revoke-admin") || revokeAdminEndpointFormat.Contains("revoke_admin") || revokeAdminEndpointFormat.Contains("revokeAdmin")))
+        {
+            revokeAdminEndpointFormat = "/admin/user/{0}/demote";
+            changed = true;
+        }
+
+        if (changed)
+            LogDebug("Normalized admin endpoint formats to match server routes (promote/demote).");
+    }
+
+    private string BuildFullUrl(string endpointFormat, int id)
+    {
+        try
+        {
+            var path = string.Format(endpointFormat, id);
+            var baseUrl = ApiClient.BaseUrl ?? "";
+            if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
+            if (path.StartsWith("/")) return baseUrl.TrimEnd('/') + path;
+            return baseUrl.TrimEnd('/') + "/" + path;
+        }
+        catch
+        {
+            return $"<invalid endpoint format: {endpointFormat}>";
+        }
+    }
+
+    #region Stats & Users Loading
 
     public async Task LoadAdminStatsAsync()
     {
@@ -76,7 +133,6 @@ public class AdminController : MonoBehaviour
         try
         {
             var response = await ApiClient.GetAsync<AdminStatsResponse>("/admin/stats");
-
             if (response != null)
             {
                 currentStats = response;
@@ -110,50 +166,15 @@ public class AdminController : MonoBehaviour
         }
     }
 
-    private void OnBackClicked()
-    {
-        SceneManager.LoadScene("game");
-    }
-
     private void DisplayStats()
     {
         if (currentStats == null) return;
-
-        DisplayUserStats();
-        DisplayClanStats();
+        if (userStatsText != null && currentStats.accounts != null)
+            userStatsText.text = $"Total Users: {currentStats.accounts.totalUsers:N0}";
+        if (clanStatsText != null && currentStats.clans != null)
+            clanStatsText.text = $"Total Clans: {currentStats.clans.totalClans:N0}";
     }
 
-    private void DisplayUserStats()
-    {
-        if (userStatsText == null || currentStats?.accounts == null) return;
-
-        userStatsText.text = $"Total Users: {currentStats.accounts.totalUsers:N0}";
-    }
-
-    private void DisplayClanStats()
-    {
-        if (clanStatsText == null || currentStats?.clans == null) return;
-
-        clanStatsText.text = $"Total Clans: {currentStats.clans.totalClans:N0}";
-    }
-
-    private void ShowStatus(string message, bool isError)
-    {
-        if (statusText != null)
-        {
-            statusText.text = message;
-            statusText.color = isError ? Color.red : Color.green;
-        }
-
-        LogDebug($"Status: {message}");
-    }
-
-    private void LogDebug(string message)
-    {
-        if (showDebugLogs) Debug.Log($"[AdminController] {message}");
-    }
-
-    // Load users list and populate UI
     public async Task LoadUsersListAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -168,9 +189,7 @@ public class AdminController : MonoBehaviour
         try
         {
             ClearUserList();
-
             var response = await ApiClient.GetAsync<AdminUsersResponse>("/admin/users?limit=100");
-
             if (response?.users != null)
             {
                 currentUsers = response;
@@ -207,7 +226,6 @@ public class AdminController : MonoBehaviour
     private void ClearUserList()
     {
         if (userListParent == null) return;
-
         for (int i = userListParent.childCount - 1; i >= 0; i--)
         {
             if (Application.isPlaying) Destroy(userListParent.GetChild(i).gameObject);
@@ -221,16 +239,12 @@ public class AdminController : MonoBehaviour
 
         foreach (var user in currentUsers.users)
         {
-            GameObject userItem = Instantiate(userPrefab, userListParent);
+            var userItem = Instantiate(userPrefab, userListParent);
             var userItemScript = userItem.GetComponent<AdminUserItem>();
             if (userItemScript != null)
-            {
                 userItemScript.SetupUser(user, this);
-            }
             else
-            {
                 SetupUserItemFallback(userItem, user);
-            }
         }
 
         LogDebug($"Populated {currentUsers.users.Length} user items in scroll view");
@@ -240,37 +254,164 @@ public class AdminController : MonoBehaviour
     {
         var usernameText = userItem.transform.Find("Name")?.GetComponent<TMP_Text>();
         var roleText = userItem.transform.Find("Role")?.GetComponent<TMP_Text>();
-
         if (usernameText != null) usernameText.text = user.username;
         if (roleText != null) roleText.text = user.role;
     }
 
-    // Called from AdminUserItem when Edit button is pressed.
-    public void OpenEditUser(AdminUser user)
+    #endregion
+
+    #region Edit User (PUT)
+
+    // Accepts a payload dictionary containing only the fields to update.
+    public void UpdateUserFieldsById(int userId, Dictionary<string, object> payload, Action<Dictionary<string, object>> onSuccess = null, Action<string> onError = null)
     {
-        if (user == null)
+        if (userId <= 0)
         {
-            Debug.LogWarning("OpenEditUser called with null user");
+            onError?.Invoke("Invalid user id");
             return;
         }
 
-        if (editUserPanelRoot != null)
+        if (payload == null || payload.Count == 0)
         {
-            editUserPanelRoot.SetActive(true);
-            LogDebug($"OpenEditUser: opening edit panel for user {user.username} (id {user.id})");
-            var editComp = editUserPanelRoot.GetComponent<EditUserAdmin>();
-            if (editComp != null)
-            {
-                editComp.Open(user);
-            }
+            onError?.Invoke("No fields to update");
+            return;
         }
-        else
+
+        _ = UpdateUserFieldsByIdAsync(userId, payload, onSuccess, onError);
+    }
+
+    private async Task UpdateUserFieldsByIdAsync(int userId, Dictionary<string, object> payload, Action<Dictionary<string, object>> onSuccess, Action<string> onError)
+    {
+        try
         {
-            LogDebug($"OpenEditUser requested for user {user.username} but editUserPanelRoot is not assigned.");
+            string endpoint = string.Format(updateUserEndpointFormat, userId);
+            LogDebug($"AdminController: PUT {endpoint} (fields: {payload.Count})");
+
+            // Debug: log payload keys & values so we can see what is sent
+            foreach (var kv in payload)
+            {
+                LogDebug($"Payload -> {kv.Key}: {kv.Value ?? "null"}");
+            }
+
+            // send request
+            await ApiClient.PutAsync<Dictionary<string, object>, object>(endpoint, payload);
+
+            onSuccess?.Invoke(payload);
+            ShowStatus($"User {userId} updated", false);
+        }
+        catch (ApiException aex)
+        {
+            var msg = $"Failed to update user: {aex.StatusCode} {aex.Message}";
+            onError?.Invoke(msg);
+            ShowStatus(msg, true);
+            Debug.LogError($"UpdateUserFieldsByIdAsync API error: {aex.StatusCode} - {aex.Message}");
+        }
+        catch (Exception ex)
+        {
+            var msg = $"Failed to update user: {ex.Message}";
+            onError?.Invoke(msg);
+            ShowStatus("Failed to update user", true);
+            Debug.LogError($"UpdateUserFieldsByIdAsync error: {ex.Message}");
         }
     }
 
-    // --- ID-based helper methods (prefab can call these directly) ---
+    // Convenience: update full AdminUser (sends fields that exist)
+    public void UpdateUserById(AdminUser user, Action<AdminUser> onSuccess = null, Action<string> onError = null)
+    {
+        if (user == null) { onError?.Invoke("User is null"); return; }
+        var payload = new Dictionary<string, object>
+        {
+            ["username"] = user.username,
+            ["email"] = user.email,
+            ["carrots"] = user.carrots,
+            ["horseShoes"] = user.horseShoes,
+            ["goldenCarrots"] = user.goldenCarrots
+        };
+        UpdateUserFieldsById(user.id, payload, returned => onSuccess?.Invoke(user), onError);
+    }
+
+    #endregion
+
+    #region Admin Grant/Revoke (immediate vs confirmed)
+
+    // Immediate helpers (no confirm) - used by edit panel to avoid double confirmation
+    public void GrantAdminImmediateById(int userId, string username, Action onSuccess = null)
+    {
+        _ = ExecuteGrantAdminByIdAsync(userId, onSuccess);
+    }
+
+    public void RevokeAdminImmediateById(int userId, string username, Action onSuccess = null)
+    {
+        _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess);
+    }
+
+    // Confirming variants (used by list buttons)
+    public void RequestGrantAdminById(int userId, string username, Action onSuccess = null)
+    {
+        if (confirmPanel != null)
+            confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteGrantAdminByIdAsync(userId, onSuccess); });
+        else
+            _ = ExecuteGrantAdminByIdAsync(userId, onSuccess);
+    }
+
+    public void RequestRevokeAdminById(int userId, string username, Action onSuccess = null)
+    {
+        if (confirmPanel != null)
+            confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess); });
+        else
+            _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess);
+    }
+
+    private async Task ExecuteGrantAdminByIdAsync(int userId, Action onSuccess)
+    {
+        try
+        {
+            string endpoint = string.Format(grantAdminEndpointFormat, userId);
+            string fullUrl = BuildFullUrl(grantAdminEndpointFormat, userId);
+            LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
+            await ApiClient.PostAsync<object, object>(endpoint, null);
+            onSuccess?.Invoke();
+            ShowStatus($"User {userId} granted admin", false);
+        }
+        catch (ApiException aex)
+        {
+            ShowStatus($"Failed to grant admin: {aex.StatusCode}", true);
+            Debug.LogError($"ExecuteGrantAdminByIdAsync API error: {aex.StatusCode} - {aex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus("Failed to grant admin", true);
+            Debug.LogError($"ExecuteGrantAdminByIdAsync error: {ex.Message}");
+        }
+    }
+
+    private async Task ExecuteRevokeAdminByIdAsync(int userId, Action onSuccess)
+    {
+        try
+        {
+            string endpoint = string.Format(revokeAdminEndpointFormat, userId);
+            string fullUrl = BuildFullUrl(revokeAdminEndpointFormat, userId);
+            LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
+            await ApiClient.PostAsync<object, object>(endpoint, null);
+            onSuccess?.Invoke();
+            ShowStatus($"User {userId} admin revoked", false);
+        }
+        catch (ApiException aex)
+        {
+            ShowStatus($"Failed to revoke admin: {aex.StatusCode}", true);
+            Debug.LogError($"ExecuteRevokeAdminByIdAsync API error: {aex.StatusCode} - {aex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus("Failed to revoke admin", true);
+            Debug.LogError($"ExecuteRevokeAdminByIdAsync error: {ex.Message}");
+        }
+    }
+
+    #endregion
+
+    #region Ban / Unban / Delete
+
     public void RequestBanById(int userId, string username, Action onSuccess = null)
     {
         if (UserManager.GetCurrentUsername()?.Equals(username, StringComparison.OrdinalIgnoreCase) == true)
@@ -290,7 +431,8 @@ public class AdminController : MonoBehaviour
         try
         {
             string endpoint = string.Format(banEndpointFormat, userId);
-            LogDebug($"AdminController: POST {endpoint}");
+            string fullUrl = BuildFullUrl(banEndpointFormat, userId);
+            LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
             ShowStatus($"User {userId} banned", false);
@@ -320,7 +462,8 @@ public class AdminController : MonoBehaviour
         try
         {
             string endpoint = string.Format(unbanEndpointFormat, userId);
-            LogDebug($"AdminController: POST {endpoint}");
+            string fullUrl = BuildFullUrl(unbanEndpointFormat, userId);
+            LogDebug($"AdminController: POST {endpoint} -> {fullUrl}");
             await ApiClient.PostAsync<object, object>(endpoint, null);
             onSuccess?.Invoke();
             ShowStatus($"User {userId} unbanned", false);
@@ -356,7 +499,8 @@ public class AdminController : MonoBehaviour
         try
         {
             string endpoint = string.Format(deleteEndpointFormat, userId);
-            LogDebug($"AdminController: DELETE {endpoint}");
+            string fullUrl = BuildFullUrl(deleteEndpointFormat, userId);
+            LogDebug($"AdminController: DELETE {endpoint} -> {fullUrl}");
             await ApiClient.DeleteAsync(endpoint);
             onSuccess?.Invoke();
             ShowStatus($"User {userId} deleted", false);
@@ -373,96 +517,23 @@ public class AdminController : MonoBehaviour
         }
     }
 
-    public void RequestGrantAdminById(int userId, string username, Action onSuccess = null)
-    {
-        if (confirmPanel != null)
-            confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteGrantAdminByIdAsync(userId, onSuccess); });
-        else
-            _ = ExecuteGrantAdminByIdAsync(userId, onSuccess);
-    }
+    #endregion
 
-    private async Task ExecuteGrantAdminByIdAsync(int userId, Action onSuccess)
-    {
-        try
-        {
-            string endpoint = string.Format(grantAdminEndpointFormat, userId);
-            LogDebug($"AdminController: POST {endpoint}");
-            await ApiClient.PostAsync<object, object>(endpoint, null);
-            onSuccess?.Invoke();
-            ShowStatus($"User {userId} granted admin", false);
-        }
-        catch (ApiException aex)
-        {
-            ShowStatus($"Failed to grant admin: {aex.StatusCode}", true);
-            Debug.LogError($"ExecuteGrantAdminByIdAsync API error: {aex.StatusCode} - {aex.Message}");
-        }
-        catch (Exception ex)
-        {
-            ShowStatus("Failed to grant admin", true);
-            Debug.LogError($"ExecuteGrantAdminByIdAsync error: {ex.Message}");
-        }
-    }
+    #region Helpers used by AdminUserItem (wrappers)
 
-    public void RequestRevokeAdminById(int userId, string username, Action onSuccess = null)
-    {
-        if (confirmPanel != null)
-            confirmPanel.ShowGrantAdmin(username, () => { _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess); });
-        else
-            _ = ExecuteRevokeAdminByIdAsync(userId, onSuccess);
-    }
-
-    private async Task ExecuteRevokeAdminByIdAsync(int userId, Action onSuccess)
-    {
-        try
-        {
-            string endpoint = string.Format(revokeAdminEndpointFormat, userId);
-            LogDebug($"AdminController: POST {endpoint}");
-            await ApiClient.PostAsync<object, object>(endpoint, null);
-            onSuccess?.Invoke();
-            ShowStatus($"User {userId} admin revoked", false);
-        }
-        catch (ApiException aex)
-        {
-            ShowStatus($"Failed to revoke admin: {aex.StatusCode}", true);
-            Debug.LogError($"ExecuteRevokeAdminByIdAsync API error: {aex.StatusCode} - {aex.Message}");
-        }
-        catch (Exception ex)
-        {
-            ShowStatus("Failed to revoke admin", true);
-            Debug.LogError($"ExecuteRevokeAdminByIdAsync error: {ex.Message}");
-        }
-    }
-
-    // Toggle ban/unban based on AdminUser state (used by AdminUserItem)
     public void RequestBanToggle(AdminUser user, Action onSuccess = null)
     {
         if (user == null) return;
-
         if (user.isBanned)
-        {
-            RequestUnbanById(user.id, user.username, () =>
-            {
-                user.isBanned = false;
-                onSuccess?.Invoke();
-            });
-        }
+            RequestUnbanById(user.id, user.username, () => { user.isBanned = false; onSuccess?.Invoke(); });
         else
-        {
-            RequestBanById(user.id, user.username, () =>
-            {
-                user.isBanned = true;
-                onSuccess?.Invoke();
-            });
-        }
+            RequestBanById(user.id, user.username, () => { user.isBanned = true; onSuccess?.Invoke(); });
     }
 
     public void RequestDeleteUser(AdminUser user, Action onSuccess = null)
     {
         if (user == null) return;
-        RequestDeleteById(user.id, user.username, () =>
-        {
-            onSuccess?.Invoke();
-        });
+        RequestDeleteById(user.id, user.username, onSuccess);
     }
 
     public void RequestToggleAdmin(AdminUser user, Action onSuccess = null)
@@ -470,44 +541,44 @@ public class AdminController : MonoBehaviour
         if (user == null) return;
         bool currentlyAdmin = user.role == "Admin";
         if (currentlyAdmin)
+            RequestRevokeAdminById(user.id, user.username, () => { user.role = "User"; onSuccess?.Invoke(); });
+        else
+            RequestGrantAdminById(user.id, user.username, () => { user.role = "Admin"; onSuccess?.Invoke(); });
+    }
+
+    // Open edit panel and optionally subscribe to save event to refresh UI
+    public void OpenEditUser(AdminUser user, Action<AdminUser> onSaved = null)
+    {
+        if (user == null) return;
+        if (editUserPanelRoot != null)
         {
-            RequestRevokeAdminById(user.id, user.username, () =>
+            editUserPanelRoot.SetActive(true);
+            LogDebug($"OpenEditUser: opening edit panel for user {user.username} (id {user.id})");
+            var editComp = editUserPanelRoot.GetComponent<EditUserAdmin>();
+            if (editComp != null)
             {
-                user.role = "User";
-                onSuccess?.Invoke();
-            });
+                if (onSaved != null)
+                {
+                    // subscribe with self-unsubscribe to avoid leaking handlers
+                    Action<AdminUser> handler = null;
+                    handler = (u) =>
+                    {
+                        try { onSaved?.Invoke(u); }
+                        finally { editComp.OnUserSaved -= handler; }
+                    };
+                    editComp.OnUserSaved += handler;
+                }
+
+                editComp.Open(user);
+            }
         }
         else
         {
-            RequestGrantAdminById(user.id, user.username, () =>
-            {
-                user.role = "Admin";
-                onSuccess?.Invoke();
-            });
+            LogDebug($"OpenEditUser requested for user {user.username} but editUserPanelRoot is not assigned.");
         }
     }
 
-    [ContextMenu("Refresh Stats")]
-    public void RefreshStats()
-    {
-        _ = LoadAdminStatsAsync();
-    }
-
-    [ContextMenu("Load Users")]
-    public void LoadUsers()
-    {
-        _ = LoadUsersListAsync();
-    }
-
-    [ContextMenu("Clear Display")]
-    public void ClearDisplay()
-    {
-        if (userStatsText != null)
-            userStatsText.text = "User statistics cleared";
-
-        if (clanStatsText != null)
-            clanStatsText.text = "Clan statistics cleared";
-    }
+    #endregion
 }
 
 // Data structures for admin API responses
