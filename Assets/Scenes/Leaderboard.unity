@@ -819,7 +819,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7.5065, y: 0}
+  m_AnchoredPosition: {x: -7.5064697, y: 0}
   m_SizeDelta: {x: -712.4039, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &833302897
@@ -1729,7 +1729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c8dc0d0921362343ada3cb9d1c435df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeaderboardManager
-  leaderboardListParent: {fileID: 454784612}
+  leaderboardListParent: {fileID: 618512719}
   leaderboardEntryPrefab: {fileID: 782563706493030486, guid: 48ad74780e86a5d43a0271db8aa49c2b, type: 3}
   statusText: {fileID: 0}
   showDebugLogs: 1
