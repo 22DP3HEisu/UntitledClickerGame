@@ -572,14 +572,20 @@ router.post('/:id/join', authenticateToken, async function(req, res, next) {
 // POST /clans/:id/kick - Kick a user from the clan (Officer+ only)
 router.post('/:id/kick', authenticateToken, async function(req, res, next) {
     try {
-        console.log('User attempting to kick member from clan...');
+        console.log('[Clan Kick] User attempting to kick member from clan...');
+        console.log('[Clan Kick] Request params:', req.params);
+        console.log('[Clan Kick] Request body:', req.body);
+        console.log('[Clan Kick] Authenticated user:', req.user);
 
         const clanId = parseInt(req.params.id);
         const kickerId = req.user.id;
         const { userId: targetUserId } = req.body;
 
+        console.log('[Clan Kick] Parsed values - clanId:', clanId, 'kickerId:', kickerId, 'targetUserId:', targetUserId);
+
         // Validate clan ID
         if (!clanId || clanId <= 0) {
+            console.log('[Clan Kick] Invalid clan ID:', clanId);
             return res.status(400).json({
                 success: false,
                 error: 'Invalid clan ID',
@@ -589,6 +595,9 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
 
         // Validate target user ID
         if (!targetUserId || targetUserId <= 0) {
+            console.log('[Clan Kick] Invalid target user ID:', targetUserId);
+            console.log('[Clan Kick] Raw userId from body:', req.body.userId);
+            console.log('[Clan Kick] Type of userId:', typeof req.body.userId);
             return res.status(400).json({
                 success: false,
                 error: 'Invalid user ID',
@@ -598,6 +607,7 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
 
         // Prevent self-kick
         if (kickerId === targetUserId) {
+            console.log('[Clan Kick] User attempting to kick themselves');
             return res.status(400).json({
                 success: false,
                 error: 'Cannot kick yourself',
@@ -606,10 +616,12 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
         }
 
         // Check if clan exists
+        console.log('[Clan Kick] Checking if clan exists:', clanId);
         const clanQuery = 'SELECT ClanID, ClanName, ClanTag FROM Clans WHERE ClanID = ?';
         const clanResult = await executeQuery(clanQuery, [clanId]);
 
         if (clanResult.length === 0) {
+            console.log('[Clan Kick] Clan not found:', clanId);
             return res.status(404).json({
                 success: false,
                 error: 'Clan not found',
@@ -618,6 +630,7 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
         }
 
         const clan = clanResult[0];
+        console.log('[Clan Kick] Found clan:', clan);
 
         // Get kicker's rank and membership status
         const kickerQuery = 'SELECT ClanRank FROM Clan_users WHERE ClanID = ? AND UserID = ?';
@@ -706,7 +719,7 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
         const updatedClan = await executeQuery(updatedClanQuery, [clanId]);
         const clanInfo = updatedClan[0] || {};
 
-        console.log(`User ${targetUserId} (${targetUsername}) kicked from clan ${clan.ClanName} by ${kickerId} (${kickerRank})`);
+        console.log(`[Clan Kick] SUCCESS: User ${targetUserId} (${targetUsername}) kicked from clan ${clan.ClanName} by ${kickerId} (${kickerRank})`);
 
         res.json({
             success: true,
@@ -725,7 +738,8 @@ router.post('/:id/kick', authenticateToken, async function(req, res, next) {
         });
 
     } catch (error) {
-        console.error('Kick user error:', error);
+        console.error('[Clan Kick] ERROR:', error);
+        console.error('[Clan Kick] Error stack:', error.stack);
         res.status(500).json({
             success: false,
             error: 'Internal server error',

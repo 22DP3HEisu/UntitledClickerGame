@@ -172,7 +172,8 @@ public class LeaderboardManager : MonoBehaviour
 
     public void OnBackButtonClicked()
     {
-        SceneManager.LoadScene(gameSceneName);
+        LogDebug("Back button clicked, returning to game scene");
+        SceneManager.LoadScene("game");
     }
 
     [ContextMenu("Refresh Leaderboard")]

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class ProfilePanelCode : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class ProfilePanelCode : MonoBehaviour
     [SerializeField] private TMP_InputField usernameInputField;
     [SerializeField] private TMP_InputField emailInputField;
     [SerializeField] private TMP_Text carrotsText;
+    [SerializeField] private TMP_Text buildingsText; 
     [SerializeField] private TMP_Text upgradesText;
     [SerializeField] private TMP_Text achievementsText;
     [SerializeField] private TMP_Text clanText;
@@ -17,12 +19,28 @@ public class ProfilePanelCode : MonoBehaviour
 
     [Header("Actions")]
     [SerializeField] private Button refreshButton;
+    [SerializeField] private Button submitButton;
 
     [Header("Visual Elements")]
     [SerializeField] private GameObject loadingIndicator;
 
     private UserProfileResponse currentProfile;
     private int userId;
+
+    [Serializable]
+    public class BuildingsResponse
+    {
+        public string message;
+        public BuildingData[] buildings;
+    }
+
+    [Serializable]
+    public class BuildingData
+    {
+        public string name;
+        public int count;
+        public string firstPurchased;
+    }
 
     private void Awake()
     {
@@ -40,6 +58,12 @@ public class ProfilePanelCode : MonoBehaviour
         {
             refreshButton.onClick.RemoveAllListeners();
             refreshButton.onClick.AddListener(() => _ = LoadProfileInfo());
+        }
+
+        if (submitButton != null)
+        {
+            submitButton.onClick.RemoveAllListeners();
+            submitButton.onClick.AddListener(() => _ = SubmitProfileChanges());
         }
     }
 
@@ -72,14 +96,14 @@ public class ProfilePanelCode : MonoBehaviour
             if (response != null && response.user != null)
             {
                 currentProfile = response;
-                UpdateDisplay();
+                await UpdateDisplay();
                 ShowStatus("Profile loaded successfully", false);
             }
             else
             {
                 ShowStatus("Profile not found. Showing test data.", true);
                 LoadMockProfile();
-                UpdateDisplay();
+                await UpdateDisplay();
             }
         }
         catch (Exception ex)
@@ -87,7 +111,7 @@ public class ProfilePanelCode : MonoBehaviour
             Debug.LogWarning($"[ProfilePanelCode] Error: {ex.Message}");
             ShowStatus("Could not load profile (using mock data).", true);
             LoadMockProfile();
-            UpdateDisplay();
+            await UpdateDisplay();
         }
         finally
         {
@@ -95,28 +119,81 @@ public class ProfilePanelCode : MonoBehaviour
         }
     }
 
-    private void UpdateDisplay()
+    private async Task UpdateDisplay()
     {
         if (currentProfile?.user == null) return;
 
         var user = currentProfile.user;
 
+        // --- Basic info ---
         if (usernameInputField) usernameInputField.text = user.username;
         if (emailInputField) emailInputField.text = user.email;
         if (carrotsText) carrotsText.text = $"{user.gameData?.carrots ?? 0}";
 
+        // --- Upgrades ---
         if (upgradesText)
         {
-            int upgradeCount = 0;
-            if (user.gameData?.upgrades != null) upgradesText.text = $"3";
+            int purchasedUpgrades = 0;
+            int totalUpgrades = 0;
+
+            if (PassiveUpgradeManager.Instance != null)
+            {
+                var upgrades = PassiveUpgradeManager.Instance.GetAllUpgrades();
+                totalUpgrades = upgrades.Count;
+                purchasedUpgrades = upgrades.Count(u => u.isPurchased);
+            }
+
+            upgradesText.text = $"{purchasedUpgrades} / {totalUpgrades}";
         }
 
-        if (achievementsText)
-            achievementsText.text = "7";
+        // --- Buildings ---
+        if (buildingsText)
+        {
+            try
+            {
+                // Fetch buildings from server
+                var buildingsResponse = await ApiClient.GetAsync<BuildingsResponse>("/user/buildings");
+                int unlockedBuildings = buildingsResponse?.buildings?.Length ?? 0;
 
+                // Total buildings from PassiveUpgradeManager (all possible upgrades)
+                int totalBuildings = 0;
+                if (PassiveUpgradeManager.Instance != null)
+                {
+                    var allUpgrades = PassiveUpgradeManager.Instance.GetAllUpgrades();
+                    totalBuildings = allUpgrades.Count;
+                }
+
+                // Show x/y format
+                buildingsText.text = $"{unlockedBuildings} / {totalBuildings}";
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"Error loading buildings count: {ex.Message}");
+                buildingsText.text = "0 / 0";
+            }
+        }
+
+        // --- Achievements ---
+        if (achievementsText)
+        {
+            int completedCount = 0;
+            int totalCount = 0;
+
+            if (AchievementManager.Instance != null)
+            {
+                completedCount = AchievementManager.Instance.GetCompletedAchievements().Count;
+                totalCount = AchievementManager.Instance.GetAllAchievements().Count;
+            }
+
+            achievementsText.text = $"{completedCount} / {totalCount}";
+        }
+
+        // --- Clan ---
         if (clanText)
             clanText.text = "Test";
     }
+
+
 
     private void ShowLoading(bool show)
     {
@@ -133,6 +210,70 @@ public class ProfilePanelCode : MonoBehaviour
         }
 
         Debug.Log($"[ProfilePanelCode] {message}");
+    }
+
+    private async Task SubmitProfileChanges()
+    {
+        if (!ApiClient.IsTokenValid())
+        {
+            ShowStatus("Cannot update profile: not logged in.", true);
+            return;
+        }
+
+        if (currentProfile?.user == null)
+        {
+            ShowStatus("No profile loaded.", true);
+            return;
+        }
+
+        // Read the input field values
+        string newUsername = usernameInputField?.text.Trim() ?? "";
+        string newEmail = emailInputField?.text.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(newUsername) || string.IsNullOrEmpty(newEmail))
+        {
+            ShowStatus("Username and email cannot be empty.", true);
+            return;
+        }
+
+        ShowLoading(true);
+        ShowStatus("Submitting profile changes...", false);
+
+        try
+        {
+            var requestData = new
+            {
+                username = newUsername,
+                email = newEmail
+            };
+
+            // Example POST request: adjust endpoint according to your API
+            var response = await ApiClient.PutAsync<object, UserProfileResponse>("/user/update", requestData);
+
+            if (response != null && response.user != null)
+            {
+                currentProfile = response;
+                UpdateDisplay();
+                ShowStatus("Profile updated successfully.", false);
+
+                // Optionally update PlayerPrefs
+                PlayerPrefs.SetString("RegisteredUsername", newUsername);
+                PlayerPrefs.SetString("RegisteredEmail", newEmail);
+            }
+            else
+            {
+                ShowStatus("Failed to update profile.", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[ProfilePanelCode] Update failed: {ex.Message}");
+            ShowStatus("Error updating profile.", true);
+        }
+        finally
+        {
+            ShowLoading(false);
+        }
     }
 
     // 🧩 Mock data fallback so UI always shows something
