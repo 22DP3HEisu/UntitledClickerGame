@@ -11,7 +11,7 @@ public class ProfilePanelCode : MonoBehaviour
     [SerializeField] private TMP_InputField usernameInputField;
     [SerializeField] private TMP_InputField emailInputField;
     [SerializeField] private TMP_Text carrotsText;
-    [SerializeField] private TMP_Text buildingsText; 
+    [SerializeField] private TMP_Text buildingsText;
     [SerializeField] private TMP_Text upgradesText;
     [SerializeField] private TMP_Text achievementsText;
     [SerializeField] private TMP_Text clanText;
@@ -56,7 +56,8 @@ public class ProfilePanelCode : MonoBehaviour
 
     private void OnEnable()
     {
-        LoadProfileInfo();
+        // fire-and-forget is OK here; method handles its own errors and UI.
+        _ = LoadProfileInfo();
     }
 
     private async Task LoadProfileInfo()
@@ -64,15 +65,14 @@ public class ProfilePanelCode : MonoBehaviour
         ShowLoading(true);
         ShowStatus("Loading profile...", false);
 
+        // Try to read a saved user id (optional); do NOT block loading if missing.
         userId = PlayerPrefs.GetInt("RegisteredUserId", -1);
-
         if (userId == -1)
         {
-            ShowStatus("No saved user ID found. Please log in again.", true);
-            ShowLoading(false);
-            return;
+            Debug.Log("[ProfilePanelCode] No saved RegisteredUserId in PlayerPrefs - will use auth token to fetch profile if available.");
         }
 
+        // Require a valid auth token for server profile fetch.
         if (!ApiClient.IsTokenValid())
         {
             ShowStatus("Auth token missing or expired. Please log in again.", true);
@@ -82,7 +82,7 @@ public class ProfilePanelCode : MonoBehaviour
 
         try
         {
-            // Updated endpoint to use user ID
+            // Use authenticated endpoint that returns currently logged-in user's profile.
             var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
 
             if (response != null && response.user != null)
@@ -90,6 +90,11 @@ public class ProfilePanelCode : MonoBehaviour
                 currentProfile = response;
                 await UpdateDisplay();
                 ShowStatus("Profile loaded successfully", false);
+
+                // Persist basic info to PlayerPrefs for convenience (optional)
+                PlayerPrefs.SetString("RegisteredUsername", currentProfile.user.username ?? "");
+                PlayerPrefs.SetString("RegisteredEmail", currentProfile.user.email ?? "");
+                PlayerPrefs.Save();
             }
             else
             {
@@ -100,7 +105,7 @@ public class ProfilePanelCode : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"[ProfilePanelCode] Error: {ex.Message}");
+            Debug.LogWarning($"[ProfilePanelCode] Error fetching profile: {ex.Message}");
             ShowStatus("Could not load profile (using mock data).", true);
             LoadMockProfile();
             await UpdateDisplay();
@@ -185,8 +190,6 @@ public class ProfilePanelCode : MonoBehaviour
             clanText.text = "Test";
     }
 
-
-
     private void ShowLoading(bool show)
     {
         if (loadingIndicator != null)
@@ -205,89 +208,89 @@ public class ProfilePanelCode : MonoBehaviour
     }
 
     private void SetupButtons()
-{
-    if (refreshButton != null)
     {
-        refreshButton.onClick.RemoveAllListeners();
-        refreshButton.onClick.AddListener(async () => await LoadProfileInfo());
-    }
-
-    if (submitButton != null)
-    {
-        submitButton.onClick.RemoveAllListeners();
-        // ✅ Ensure async listener awaits SubmitProfileChanges
-        submitButton.onClick.AddListener(async () => await SubmitProfileChanges());
-    }
-}
-
-private async Task SubmitProfileChanges()
-{
-    if (!ApiClient.IsTokenValid())
-    {
-        ShowStatus("Cannot update profile: not logged in.", true);
-        return;
-    }
-
-    if (currentProfile?.user == null)
-    {
-        ShowStatus("No profile loaded.", true);
-        return;
-    }
-
-    string newUsername = usernameInputField?.text.Trim() ?? "";
-    string newEmail = emailInputField?.text.Trim() ?? "";
-
-    Debug.Log($"Submitting profile: username='{newUsername}', email='{newEmail}'");
-
-    if (string.IsNullOrEmpty(newUsername) || string.IsNullOrEmpty(newEmail))
-    {
-        ShowStatus("Username and email cannot be empty.", true);
-        return;
-    }
-
-    ShowLoading(true);
-    ShowStatus("Submitting profile changes...", false);
-
-    try
-    {
-        var requestData = new UpdateProfileRequest
+        if (refreshButton != null)
         {
-            username = newUsername,
-            email = newEmail
-        };
-
-        var response = await ApiClient.PutAsync<UpdateProfileRequest, UserProfileResponse>("/user/update", requestData);
-
-        if (response != null && response.user != null)
-        {
-            // Preserve gameData
-            response.user.gameData = currentProfile.user.gameData;
-            
-            currentProfile = response;
-            await UpdateDisplay();
-            ShowStatus("Profile updated successfully.", false);
-
-            PlayerPrefs.SetString("RegisteredUsername", newUsername);
-            PlayerPrefs.SetString("RegisteredEmail", newEmail);
+            refreshButton.onClick.RemoveAllListeners();
+            refreshButton.onClick.AddListener(() => { _ = LoadProfileInfo(); });
         }
-        else
+
+        if (submitButton != null)
         {
-            ShowStatus("Failed to update profile.", true);
+            submitButton.onClick.RemoveAllListeners();
+            // Ensure async listener doesn't block Unity event system
+            submitButton.onClick.AddListener(() => { _ = SubmitProfileChanges(); });
         }
     }
-    catch (Exception ex)
-    {
-        UnityEngine.Debug.LogWarning($"[ProfilePanelCode] SubmitProfileChanges Exception: {ex.Message}");
-        ShowStatus("Error updating profile.", true);
-    }
-    finally
-    {
-        ShowLoading(false);
-    }
-}
 
+    private async Task SubmitProfileChanges()
+    {
+        if (!ApiClient.IsTokenValid())
+        {
+            ShowStatus("Cannot update profile: not logged in.", true);
+            return;
+        }
 
-    // 🧩 Mock data fallback so UI always shows something
+        if (currentProfile?.user == null)
+        {
+            ShowStatus("No profile loaded.", true);
+            return;
+        }
+
+        string newUsername = usernameInputField?.text.Trim() ?? "";
+        string newEmail = emailInputField?.text.Trim() ?? "";
+
+        Debug.Log($"Submitting profile: username='{newUsername}', email='{newEmail}'");
+
+        if (string.IsNullOrEmpty(newUsername) || string.IsNullOrEmpty(newEmail))
+        {
+            ShowStatus("Username and email cannot be empty.", true);
+            return;
+        }
+
+        ShowLoading(true);
+        ShowStatus("Submitting profile changes...", false);
+
+        try
+        {
+            var requestData = new UpdateProfileRequest
+            {
+                username = newUsername,
+                email = newEmail
+            };
+
+            var response = await ApiClient.PutAsync<UpdateProfileRequest, UserProfileResponse>("/user/update", requestData);
+
+            if (response != null && response.user != null)
+            {
+                // Preserve gameData
+                response.user.gameData = currentProfile.user.gameData;
+
+                currentProfile = response;
+                await UpdateDisplay();
+                ShowStatus("Profile updated successfully.", false);
+
+                PlayerPrefs.SetString("RegisteredUsername", newUsername);
+                PlayerPrefs.SetString("RegisteredEmail", newEmail);
+                PlayerPrefs.Save();
+            }
+            else
+            {
+                ShowStatus("Failed to update profile.", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogWarning($"[ProfilePanelCode] SubmitProfileChanges Exception: {ex.Message}");
+            ShowStatus("Error updating profile.", true);
+        }
+        finally
+        {
+            ShowLoading(false);
+        }
+    }
+
+    // Mock data fallback so UI always shows something
     private void LoadMockProfile()
     {
         currentProfile = new UserProfileResponse
@@ -306,8 +309,6 @@ private async Task SubmitProfileChanges()
                     carrots = 300,
                     horseShoes = 2,
                     goldenCarrots = 1,
-
-
                 }
             }
         };
