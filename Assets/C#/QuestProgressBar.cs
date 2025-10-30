@@ -20,7 +20,7 @@ public class QuestProgressBar : MonoBehaviour
     [SerializeField] private TMP_Text NextQuestIn;
 
     [Header("Quest")]
-    [SerializeField] private QuestTarget questTarget = QuestTarget.TotalCarrots; // dropdown in inspector
+    [SerializeField] private QuestTarget questTarget = QuestTarget.TotalCarrots;
     [SerializeField] private int carrotTarget = 1000;
     [SerializeField] private bool showAsFraction = true;
     [SerializeField] private UnityEvent onQuestCompleted;
@@ -28,7 +28,7 @@ public class QuestProgressBar : MonoBehaviour
     [Tooltip("How many carrots to add to the player's total when this quest completes.")]
     [SerializeField] private int rewardCarrotsOnComplete = 0;
 
-    public event Action OnQuestCompleted; // code hook
+    public event Action OnQuestCompleted;
 
     private Coroutine tweenCoroutine;
     private int lastTrackedValue = -1;

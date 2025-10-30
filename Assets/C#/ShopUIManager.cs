@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Manages the shop UI for purchasing passive clicker buildings/upgrades
-/// </summary>
+// Manages the shop UI for purchasing passive clicker buildings/upgrades
 public class ShopUIManager : MonoBehaviour
 {
     #region Serialized Fields

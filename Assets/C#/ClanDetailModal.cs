@@ -5,10 +5,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Modal window for displaying detailed clan information with comprehensive management functionality
-/// Handles all clan operations: viewing, joining, leaving, and member management
-/// </summary>
+// Modal window for displaying detailed clan information with comprehensive management functionality
+// Handles all clan operations: viewing, joining, leaving, and member management
 public class ClanDetailModal : MonoBehaviour
 {
     [Header("Basic Info Display")]
@@ -53,9 +51,7 @@ public class ClanDetailModal : MonoBehaviour
     
     #region Public Interface
     
-    /// <summary>
-    /// Show the modal with clan information and determine available actions
-    /// </summary>
+    // Show the modal with clan information and determine available actions
     public async void ShowModal(ClanData clan, ClanManager manager = null)
     {
         if (clan == null)
@@ -76,17 +72,13 @@ public class ClanDetailModal : MonoBehaviour
         await LoadDetailedClanInfoAsync();
     }
     
-    /// <summary>
-    /// Legacy method for backward compatibility with ClanManager
-    /// </summary>
+    // Legacy method for backward compatibility with ClanManager
     public void ShowClanDetails(ClanData clan)
     {
         ShowModal(clan, clanManager);
     }
     
-    /// <summary>
-    /// Hide the modal
-    /// </summary>
+    // Hide the modal
     public void HideModal()
     {
         gameObject.SetActive(false);
@@ -290,10 +282,8 @@ public class ClanDetailModal : MonoBehaviour
             }
         }
     }
-    
-    /// <summary>
-    /// Fallback method for member items without ClanMemberItem script
-    /// </summary>
+
+    // Fallback method for member items without ClanMemberItem script
     private void SetupMemberItemFallback(GameObject memberItem, ClanMember member)
     {
         var textComponents = memberItem.GetComponentsInChildren<TMP_Text>();
@@ -312,9 +302,7 @@ public class ClanDetailModal : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Called when a member action is completed (promote, kick, etc.)
-    /// </summary>
+    // Called when a member action is completed (promote, kick, etc.)
     private void OnMemberActionCompleted(ClanMemberItem memberItem)
     {
         Debug.Log($"Member action completed for {memberItem.GetMemberData()?.username}");
@@ -508,9 +496,7 @@ public class ClanDetailModal : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Public method for child components to show status messages
-    /// </summary>
+    // Public method for child components to show status messages
     public void ShowPublicStatus(string message, bool isError)
     {
         ShowStatus(message, isError);

@@ -2,11 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Component for individual clan cards in the clan list
-/// Attach this to your clan card prefab and assign the UI components
-/// The entire card acts as a button to open the clan details modal
-/// </summary>
+// Component for individual clan cards in the clan list
+// Attach this to your clan card prefab and assign the UI components
+// The entire card acts as a button to open the clan details modal
 public class ClanCard : MonoBehaviour
 {
     [Header("UI Components")]
@@ -68,17 +66,13 @@ public class ClanCard : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Get the clan data associated with this card
-    /// </summary>
+    // Get the clan data associated with this card
     public ClanData GetClanData()
     {
         return clanData;
     }
     
-    /// <summary>
-    /// Refresh the display with updated clan data
-    /// </summary>
+    // Refresh the display with updated clan data
     public void RefreshDisplay()
     {
         UpdateDisplay();

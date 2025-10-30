@@ -1,16 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem; // For new Input System
+using UnityEngine.InputSystem;
 
 public class ClickPopupSpawner : MonoBehaviour
 {
     [Header("References")]
     public RectTransform canvasRectTransform;
-    public Button targetButton; // assign in Inspector
+    public Button targetButton;
 
     [Header("Popup Settings")]
-    public Sprite popupImage; // assign in Inspector
-    public Vector2 popupImageSize = new Vector2(64, 64); // adjustable in Inspector
+    public Sprite popupImage;
+    public Vector2 popupImageSize = new Vector2(64, 64); 
 
     private void Start()
     {
@@ -28,7 +28,7 @@ public class ClickPopupSpawner : MonoBehaviour
     private Vector2 GetScreenPosition()
     {
 #if ENABLE_INPUT_SYSTEM
-        // New Input System: prefer touch if any touch exists, otherwise mouse/pointer
+        // prefer touch if any touch exists, otherwise mouse/pointer
         if (Touchscreen.current != null)
         {
             var touches = Touchscreen.current.touches;

@@ -6,10 +6,8 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Loads and displays a leaderboard sorted from most carrots to least.
-/// Attach this to a leaderboard manager object and assign the list parent and entry prefab.
-/// </summary>
+// Loads and displays a leaderboard sorted from most carrots to least.
+// Attach this to a leaderboard manager object and assign the list parent and entry prefab.
 public class LeaderboardManager : MonoBehaviour
 {
     [Header("UI References")]

@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class AchievmentListPopulator : MonoBehaviour
 {
-    [SerializeField] private GameObject achievementPrefab; // prefab with Achievment_list_prefab component
-    [SerializeField] private Transform parentTransform;    // content parent for instantiated prefabs
-    [SerializeField] private AchievementDetailPrefab detailPanel; // Reference to the detail panel
+    [SerializeField] private GameObject achievementPrefab;
+    [SerializeField] private Transform parentTransform;
+    [SerializeField] private AchievementDetailPrefab detailPanel; 
 
     private void Start()
     {

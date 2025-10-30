@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 
-/// <summary>
-/// Manages clan chat functionality including message display, sending, and auto-refresh
-/// </summary>
+// Manages clan chat functionality including message display, sending, and auto-refresh
 public class ClanChatManager : MonoBehaviour
 {
     [Header("UI Elements")]
@@ -63,9 +61,7 @@ public class ClanChatManager : MonoBehaviour
     
     #region Public Interface
     
-    /// <summary>
-    /// Initialize chat for a specific clan
-    /// </summary>
+    // Initialize chat for a specific clan
     public async void InitializeChatForClan(int clanId)
     {
         if (clanId <= 0)
@@ -81,25 +77,19 @@ public class ClanChatManager : MonoBehaviour
         await LoadChatMessagesAsync();
     }
     
-    /// <summary>
-    /// Send a message to the current clan chat
-    /// </summary>
+    // Send a message to the current clan chat
     public async void SendMessage()
     {
         await SendMessageAsync();
     }
     
-    /// <summary>
-    /// Manually refresh chat messages
-    /// </summary>
+    // Manually refresh chat messages
     public async void RefreshChat()
     {
         await RefreshChatAsync();
     }
     
-    /// <summary>
-    /// Close chat (cleanup)
-    /// </summary>
+    // Close chat (cleanup)
     public void CloseChat()
     {
         currentClanId = -1;

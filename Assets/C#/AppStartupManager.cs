@@ -2,11 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Startup manager that should be placed on the first scene that loads when the app starts.
-/// This can be a splash screen, loading screen, or even the intro scene itself.
-/// It will check if the user is logged in and redirect accordingly.
-/// </summary>
+// Startup manager that should be placed on the first scene that loads when the app starts.
+// This can be a splash screen, loading screen, or even the intro scene itself.
+// It will check if the user is logged in and redirect accordingly.
 public class AppStartupManager : MonoBehaviour
 {
     #region Inspector Settings
@@ -153,10 +151,8 @@ public class AppStartupManager : MonoBehaviour
         UserManager.LoadGameScene();
     }
     
-    /// <summary>
-    /// Handle banned user by clearing their data and redirecting to intro
-    /// </summary>
-    /// <param name="username">Username of the banned user</param>
+    // Handle banned user by clearing their data and redirecting to intro
+    // <param name="username">Username of the banned user</param>
     private void HandleBannedUser(string username)
     {
         Debug.LogWarning($"[AppStartupManager] User {username} is banned. Clearing session and redirecting.");

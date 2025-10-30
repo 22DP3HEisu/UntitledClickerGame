@@ -3,9 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-/// <summary>
-/// Individual chat message item component
-/// </summary>
+// Individual chat message item component
 public class ChatMessageItem : MonoBehaviour
 {
     [Header("UI Components")]
@@ -24,9 +22,7 @@ public class ChatMessageItem : MonoBehaviour
     [SerializeField] private Color systemMessageBackground = new Color(1f, 1f, 0f, 0.1f);
     [SerializeField] private Color normalMessageBackground = new Color(1f, 1f, 1f, 0.05f);
     
-    /// <summary>
-    /// Setup the message item with chat data
-    /// </summary>
+    // Setup the message item with chat data
     public void SetupMessage(ChatMessage message, Color textColor)
     {
         if (message == null) return;

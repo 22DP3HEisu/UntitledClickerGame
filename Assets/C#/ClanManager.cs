@@ -5,9 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Main clan management controller that handles loading clans and displaying them in a scroll view
-/// </summary>
+// Main clan management controller that handles loading clans and displaying them in a scroll view
 public class ClanManager : MonoBehaviour
 {
     [Header("UI References")]
@@ -118,9 +116,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Load initial data including user clan status and clan list
-    /// </summary>
+    // Load initial data including user clan status and clan list
     private async Task LoadInitialDataAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -149,9 +145,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Load user's current clan membership status using existing clan routes
-    /// </summary>
+    // Load user's current clan membership status using existing clan routes
     private async Task LoadUserClanStatusAsync()
     {
         try
@@ -167,10 +161,8 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Check clan membership by examining all clans using existing routes
-    /// This is more efficient than creating a new endpoint
-    /// </summary>
+    // Check clan membership by examining all clans using existing routes
+    // This is more efficient than creating a new endpoint
     private async Task CheckClanMembershipUsingExistingRoutes()
     {
         try
@@ -252,9 +244,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Set panel visibility based on clan membership status
-    /// </summary>
+    // Set panel visibility based on clan membership status
     private void SetPanelVisibility(bool hasClan)
     {
         if (hasClanPanel != null)
@@ -279,9 +269,7 @@ public class ClanManager : MonoBehaviour
         LogDebug($"Panel visibility set: hasClan={hasClan}");
     }
     
-    /// <summary>
-    /// Update the clan name and member count texts for the current user's clan
-    /// </summary>
+    // Update the clan name and member count texts for the current user's clan
     private async void UpdateMyClanInfoTexts()
     {
         if (userClanStatus?.isInClan == true && userClanStatus.clanInfo != null)
@@ -327,9 +315,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Load clans from the server and populate the UI
-    /// </summary>
+    // Load clans from the server and populate the UI
     public async Task LoadClansAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -433,9 +419,7 @@ public class ClanManager : MonoBehaviour
         if (memberCountText != null) memberCountText.text = $"Members: {clan.memberCount}";
     }
     
-    /// <summary>
-    /// Show clan details in modal window
-    /// </summary>
+    // Show clan details in modal window
     public void ShowClanDetails(ClanData clan)
     {
         if (clanDetailModal != null && clanModalWindow != null)
@@ -449,9 +433,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Show the clan creation modal
-    /// </summary>
+    // Show the clan creation modal
     public void ShowCreateClanModal()
     {
         Debug.Log("Create Clan button clicked");
@@ -467,9 +449,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Show the current user's clan details in the detail modal
-    /// </summary>
+    // Show the current user's clan details in the detail modal
     public async Task ShowMyClanDetailsAsync()
     {
         LogDebug("View My Clan button clicked");
@@ -512,9 +492,7 @@ public class ClanManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Hide clan details modal window
-    /// </summary>
+    // Hide clan details modal window
     public void HideClanDetails()
     {
         if (clanModalWindow != null)
@@ -582,9 +560,7 @@ public class ClanManager : MonoBehaviour
         _ = LoadInitialDataAsync();
     }
     
-    /// <summary>
-    /// Public method to refresh clan membership status (call after joining/leaving clans)
-    /// </summary>
+    // Public method to refresh clan membership status (call after joining/leaving clans)
     public async Task RefreshMembershipStatusAsync()
     {
         await LoadUserClanStatusAsync();
@@ -592,9 +568,7 @@ public class ClanManager : MonoBehaviour
         UpdateMyClanInfoTexts();
     }
     
-    /// <summary>
-    /// Called when user joins a clan to immediately update panel visibility
-    /// </summary>
+    // Called when user joins a clan to immediately update panel visibility
     public void OnUserJoinedClan()
     {
         LogDebug("User joined a clan - updating panel visibility");
@@ -609,9 +583,7 @@ public class ClanManager : MonoBehaviour
         _ = LoadClansAsync();
     }
     
-    /// <summary>
-    /// Called when user leaves a clan to immediately update panel visibility
-    /// </summary>
+    // Called when user leaves a clan to immediately update panel visibility
     public void OnUserLeftClan()
     {
         LogDebug("User left a clan - updating panel visibility");

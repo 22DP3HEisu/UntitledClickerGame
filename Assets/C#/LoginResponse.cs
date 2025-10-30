@@ -1,8 +1,6 @@
 using System;
 
-/// <summary>
-/// Response model for login API endpoint
-/// </summary>
+// Response model for login API endpoint
 [Serializable]
 public class LoginResponse
 {
@@ -11,9 +9,7 @@ public class LoginResponse
     public LoginUserData user;
 }
 
-/// <summary>
-/// User data structure returned on login
-/// </summary>
+// User data structure returned on login
 [Serializable]
 public class LoginUserData
 {
@@ -21,13 +17,11 @@ public class LoginUserData
     public string username;
     public string email;
     public string role;
-    public bool isBanned; // Added ban status field
+    public bool isBanned;
     public string createdAt;
 }
 
-/// <summary>
-/// Login request data structure
-/// </summary>
+// Login request data structure
 [Serializable]
 public class LoginData
 {

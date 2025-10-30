@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System; // vajadzīgs EventAction
+using System;
 
 public class SwipeController : MonoBehaviour, IEndDragHandler
 {
@@ -14,7 +14,7 @@ public class SwipeController : MonoBehaviour, IEndDragHandler
     [SerializeField] LeanTweenType tweenType;
     private float dragThreshold;
 
-    public event Action<int> OnPageChanged; // jauna notikuma sistēma
+    public event Action<int> OnPageChanged;
 
     private void Awake()
     {
@@ -31,7 +31,7 @@ public class SwipeController : MonoBehaviour, IEndDragHandler
         targetPos += pageStep * diff;
         currentPage = pageNumber;
         MovePage();
-        OnPageChanged?.Invoke(currentPage); // paziņo, ka lapa mainīta
+        OnPageChanged?.Invoke(currentPage);
     }
 
     void MovePage()

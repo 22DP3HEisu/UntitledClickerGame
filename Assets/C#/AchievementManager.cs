@@ -480,11 +480,8 @@ public class AchievementManager : MonoBehaviour
             Debug.LogError($"[AchievementManager] Error loading achievements from server: {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// Saves a completed achievement to the server
-    /// </summary>
-    /// <param name="achievement">The completed achievement to save</param>
+    // Saves a completed achievement to the server
+    // <param name="achievement">The completed achievement to save</param>
     private async Task SaveAchievementToServerAsync(AchievementItem achievement)
     {
         if (!ApiClient.IsTokenValid())
@@ -523,10 +520,8 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Applies achievements from server data to local achievements
-    /// </summary>
-    /// <param name="serverAchievements">List of completed achievements from server</param>
+    // Applies achievements from server data to local achievements
+    // <param name="serverAchievements">List of completed achievements from server</param>
     private void ApplyServerAchievements(List<ServerAchievementData> serverAchievements)
     {
         foreach (var serverAchievement in serverAchievements)

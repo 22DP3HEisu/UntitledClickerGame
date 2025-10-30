@@ -20,7 +20,7 @@ public class RegisterManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private int minUsernameLength = 3;
     [SerializeField] private int maxUsernameLength = 30;
-    [SerializeField] private int minPasswordLength = 8; // Increased from 6 for better security
+    [SerializeField] private int minPasswordLength = 8;
     [SerializeField] private string gameSceneName = "game";
     [SerializeField] private string introSceneName = "Intro";
     
@@ -113,11 +113,9 @@ public class RegisterManager : MonoBehaviour
         return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 
-    /// <summary>
-    /// Comprehensive password validation with strong security requirements
-    /// </summary>
-    /// <param name="password">Password to validate</param>
-    /// <returns>True if password meets all security criteria</returns>
+    // Comprehensive password validation with strong security requirements
+    // <param name="password">Password to validate</param>
+    // <returns>True if password meets all security criteria</returns>
     private bool IsValidPassword(string password)
     {
         // Check minimum length
@@ -164,9 +162,7 @@ public class RegisterManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>
-    /// Check for weak password patterns
-    /// </summary>
+    // Check for weak password patterns
     private bool ContainsWeakPatterns(string password)
     {
         string lowerPassword = password.ToLower();
@@ -187,9 +183,7 @@ public class RegisterManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Check for common dictionary words
-    /// </summary>
+    // Check for common dictionary words
     private bool ContainsCommonWords(string password)
     {
         string[] commonWords = {
@@ -208,9 +202,7 @@ public class RegisterManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Check for excessive character repetition
-    /// </summary>
+    // Check for excessive character repetition
     private bool HasExcessiveRepetition(string password)
     {
         int maxRepeats = 2; // Allow maximum 2 consecutive identical characters
@@ -231,9 +223,7 @@ public class RegisterManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Check for sequential characters (ascending or descending)
-    /// </summary>
+    // Check for sequential characters (ascending or descending)
     private bool HasSequentialCharacters(string password)
     {
         int maxSequential = 2; // Allow maximum 2 sequential characters

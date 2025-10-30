@@ -2,10 +2,8 @@ using UnityEngine;
 using System;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Manages automatic synchronization of currency data with the server.
-/// Syncs every 60 seconds to keep client and server data consistent.
-/// </summary>
+// Manages automatic synchronization of currency data with the server.
+// Syncs every 60 seconds to keep client and server data consistent.
 public class CurrencySyncManager : MonoBehaviour
 {
     [Header("Sync Settings")]
@@ -128,9 +126,7 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Manually trigger a currency sync
-    /// </summary>
+    // Manually trigger a currency sync
     public async Task<bool> SyncCurrencyAsync()
     {
         if (!ApiClient.IsTokenValid())
@@ -200,9 +196,7 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Add currency (with automatic sync marking)
-    /// </summary>
+    // Add currency (with automatic sync marking)
     public void AddCurrency(int carrotAmount, int horseShoesAmount = 0, int goldenCarrotAmount = 0)
     {
         if (carrotAmount > 0) Carrots += carrotAmount;
@@ -212,9 +206,7 @@ public class CurrencySyncManager : MonoBehaviour
         LogDebug($"Added currency: +{carrotAmount} carrots, +{horseShoesAmount} horseshoes, +{goldenCarrotAmount} golden carrots");
     }
     
-    /// <summary>
-    /// Spend currency (returns true if successful)
-    /// </summary>
+    // Spend currency (returns true if successful)
     public bool SpendCurrency(int carrotCost, int horseShoeCost = 0, int goldenCarrotCost = 0)
     {
         if (carrots >= carrotCost && horseShoes >= horseShoeCost && goldenCarrots >= goldenCarrotCost)
@@ -231,9 +223,7 @@ public class CurrencySyncManager : MonoBehaviour
         return false;
     }
     
-    /// <summary>
-    /// Load currency from server (called on login)
-    /// </summary>
+    // Load currency from server (called on login)
     public async Task LoadCurrencyFromServer()
     {
         if (!ApiClient.IsTokenValid()) return;
@@ -266,9 +256,7 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Load upgrades from server and apply them locally
-    /// </summary>
+    // Load upgrades from server and apply them locally
     public async Task LoadUpgradesFromServer()
     {
         if (!ApiClient.IsTokenValid()) return;
@@ -305,9 +293,7 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Load buildings from server and apply them locally
-    /// </summary>
+    // Load buildings from server and apply them locally
     public async Task LoadBuildingsFromServer()
     {
         if (!ApiClient.IsTokenValid()) return;
@@ -396,9 +382,8 @@ public class CurrencySyncManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Call this method after successful login to load currency from server
-    /// </summary>
+
+    // Call this method after successful login to load currency from server
     public async Task InitializeAfterLogin()
     {
         LogDebug("Initializing currency after login");

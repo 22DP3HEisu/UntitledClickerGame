@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Manages the upgrade shop UI, handles upgrade item generation, visibility, and purchase interactions
-/// </summary>
+// Manages the upgrade shop UI, handles upgrade item generation, visibility, and purchase interactions
 public class UpgradeShopManager : MonoBehaviour
 {
     #region Serialized Fields
@@ -51,9 +49,7 @@ public class UpgradeShopManager : MonoBehaviour
 
     #region Initialization
     
-    /// <summary>
-    /// Initializes the upgrade manager reference
-    /// </summary>
+    // Initializes the upgrade manager reference
     private void InitializeUpgradeManager()
     {
         upgradeManager = FindObjectOfType<PassiveUpgradeManager>(true);
@@ -71,9 +67,7 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Validates that required components are assigned in the inspector
-    /// </summary>
+    // Validates that required components are assigned in the inspector
     private void ValidateRequiredComponents()
     {
         if (upgradeListParent == null)
@@ -87,9 +81,7 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Subscribes to necessary events
-    /// </summary>
+    // Subscribes to necessary events
     private void SubscribeToEvents()
     {
         if (upgradeManager != null)
@@ -100,9 +92,7 @@ public class UpgradeShopManager : MonoBehaviour
         CurrencySyncManager.OnGameDataLoaded += HandleGameDataLoaded;
     }
     
-    /// <summary>
-    /// Unsubscribes from events to prevent memory leaks
-    /// </summary>
+    // Unsubscribes from events to prevent memory leaks
     private void UnsubscribeFromEvents()
     {
         if (upgradeManager != null)
@@ -117,18 +107,14 @@ public class UpgradeShopManager : MonoBehaviour
 
     #region Event Handlers
     
-    /// <summary>
-    /// Handles upgrade purchase events by refreshing the UI
-    /// </summary>
-    /// <param name="purchasedUpgrade">The upgrade that was purchased</param>
+    // Handles upgrade purchase events by refreshing the UI
+    // <param name="purchasedUpgrade">The upgrade that was purchased</param>
     private void HandleUpgradePurchased(PassiveUpgradeData purchasedUpgrade)
     {
         RefreshUpgradeItems();
     }
     
-    /// <summary>
-    /// Handles game data loaded events by refreshing the upgrade UI
-    /// </summary>
+    // Handles game data loaded events by refreshing the upgrade UI
     private void HandleGameDataLoaded()
     {
         Debug.Log("[UpgradeShopManager] Game data loaded - refreshing upgrade UI");
@@ -139,9 +125,7 @@ public class UpgradeShopManager : MonoBehaviour
 
     #region Public Interface
     
-    /// <summary>
-    /// Generates all upgrade items in the shop UI based on available upgrades
-    /// </summary>
+    // Generates all upgrade items in the shop UI based on available upgrades
     public void GenerateUpgradeItems()
     {
         if (!CanGenerateUpgradeItems())
@@ -155,10 +139,8 @@ public class UpgradeShopManager : MonoBehaviour
         CreateUpgradeItems(upgrades);
         RefreshUpgradeItems();
     }
-    
-    /// <summary>
-    /// Refreshes the visibility and state of all upgrade items
-    /// </summary>
+
+    // Refreshes the visibility and state of all upgrade items
     public void RefreshUpgradeItems()
     {
         if (!CanRefreshUpgradeItems())
@@ -168,11 +150,10 @@ public class UpgradeShopManager : MonoBehaviour
         UpdateUpgradeItemsVisibility(upgrades);
     }
 
-    /// <summary>
-    /// Attempts to purchase an upgrade by index
-    /// </summary>
-    /// <param name="index">Index of the upgrade to purchase</param>
-    /// <returns>True if purchase was successful, false otherwise</returns>
+
+    // Attempts to purchase an upgrade by index
+    // <param name="index">Index of the upgrade to purchase</param>
+    // <returns>True if purchase was successful, false otherwise</returns>
     public bool TryPurchaseUpgrade(int index)
     {
         if (upgradeManager == null)
@@ -194,10 +175,8 @@ public class UpgradeShopManager : MonoBehaviour
 
     #region Private Helpers
     
-    /// <summary>
-    /// Validates if upgrade items can be generated
-    /// </summary>
-    /// <returns>True if generation is possible</returns>
+    // Validates if upgrade items can be generated
+    // <returns>True if generation is possible</returns>
     private bool CanGenerateUpgradeItems()
     {
         if (upgradeManager == null)
@@ -214,21 +193,17 @@ public class UpgradeShopManager : MonoBehaviour
 
         return true;
     }
-    
-    /// <summary>
-    /// Validates if refresh operations can be performed
-    /// </summary>
-    /// <returns>True if refresh is possible</returns>
+
+    // Validates if refresh operations can be performed
+    // <returns>True if refresh is possible</returns>
     private bool CanRefreshUpgradeItems()
     {
         return upgradeManager != null && upgradeListParent != null;
     }
     
-    /// <summary>
-    /// Checks if the upgrades list is valid and contains items
-    /// </summary>
-    /// <param name="upgrades">List of upgrades to validate</param>
-    /// <returns>True if upgrades are valid</returns>
+    // Checks if the upgrades list is valid and contains items
+    // <param name="upgrades">List of upgrades to validate</param>
+    // <returns>True if upgrades are valid</returns>
     private bool HasValidUpgrades(List<PassiveUpgradeData> upgrades)
     {
         if (upgrades == null || upgrades.Count == 0)
@@ -239,9 +214,7 @@ public class UpgradeShopManager : MonoBehaviour
         return true;
     }
     
-    /// <summary>
-    /// Clears all existing upgrade item GameObjects from the parent
-    /// </summary>
+    // Clears all existing upgrade item GameObjects from the parent
     private void ClearExistingUpgradeItems()
     {
         for (int i = upgradeListParent.childCount - 1; i >= 0; i--)
@@ -250,10 +223,8 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Creates upgrade item GameObjects for each upgrade
-    /// </summary>
-    /// <param name="upgrades">List of upgrades to create items for</param>
+    // Creates upgrade item GameObjects for each upgrade
+    // <param name="upgrades">List of upgrades to create items for</param>
     private void CreateUpgradeItems(List<PassiveUpgradeData> upgrades)
     {
         for (int i = 0; i < upgrades.Count; i++)
@@ -262,11 +233,9 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Creates a single upgrade item GameObject
-    /// </summary>
-    /// <param name="upgradeData">Data for the upgrade</param>
-    /// <param name="index">Index of the upgrade</param>
+    // Creates a single upgrade item GameObject
+    // <param name="upgradeData">Data for the upgrade</param>
+    // <param name="index">Index of the upgrade</param>
     private void CreateSingleUpgradeItem(PassiveUpgradeData upgradeData, int index)
     {
         var upgradeObject = Instantiate(upgradeItemPrefab, upgradeListParent);
@@ -286,10 +255,8 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Updates the visibility of all upgrade items based on purchase status
-    /// </summary>
-    /// <param name="upgrades">List of upgrade data</param>
+    // Updates the visibility of all upgrade items based on purchase status
+    // <param name="upgrades">List of upgrade data</param>
     private void UpdateUpgradeItemsVisibility(List<PassiveUpgradeData> upgrades)
     {
         for (int i = 0; i < upgradeListParent.childCount; i++)
@@ -319,12 +286,10 @@ public class UpgradeShopManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Determines if an upgrade should be visible based on visibility rules
-    /// Visibility rule: first upgrade always visible, subsequent upgrades visible only if previous upgrade purchased
-    /// </summary>
-    /// <param name="upgradeIndex">Index of the upgrade to check</param>
-    /// <returns>True if the upgrade should be visible</returns>
+    // Determines if an upgrade should be visible based on visibility rules
+    // Visibility rule: first upgrade always visible, subsequent upgrades visible only if previous upgrade purchased
+    // <param name="upgradeIndex">Index of the upgrade to check</param>
+    // <returns>True if the upgrade should be visible</returns>
     private bool ShouldUpgradeBeVisible(int upgradeIndex)
     {
         if (upgradeIndex == 0)

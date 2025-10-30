@@ -4,10 +4,8 @@ using TMPro;
 using System;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Handles individual clan member items in the member list
-/// Manages member display, role management, and member actions
-/// </summary>
+// Handles individual clan member items in the member list
+// Manages member display, role management, and member actions
 public class ClanMemberItem : MonoBehaviour
 {
     [Header("Member Display")]
@@ -36,9 +34,7 @@ public class ClanMemberItem : MonoBehaviour
     
     #region Public Interface
     
-    /// <summary>
-    /// Setup the member item with data and references
-    /// </summary>
+    // Setup the member item with data and references
     public void SetupMember(ClanMember member, ClanDetailData clan, UserProfileResponse.UserProfile user, ClanDetailModal modal)
     {
         memberData = member;
@@ -51,9 +47,7 @@ public class ClanMemberItem : MonoBehaviour
         DetermineButtonVisibility();
     }
     
-    /// <summary>
-    /// Get the member data associated with this item
-    /// </summary>
+    // Get the member data associated with this item
     public ClanMember GetMemberData()
     {
         return memberData;

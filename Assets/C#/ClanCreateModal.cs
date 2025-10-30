@@ -4,9 +4,8 @@ using TMPro;
 using System;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Handles the clan creation modal functionality including validation and API calls
-/// </summary>
+
+// Handles the clan creation modal functionality including validation and API calls
 public class ClanCreateModal : MonoBehaviour
 {
     [Header("UI Elements")]
@@ -46,9 +45,7 @@ public class ClanCreateModal : MonoBehaviour
     
     #region Public Interface
     
-    /// <summary>
-    /// Show the clan creation modal
-    /// </summary>
+    // Show the clan creation modal
     public void ShowModal(ClanManager manager = null)
     {
         clanManager = manager;
@@ -62,9 +59,7 @@ public class ClanCreateModal : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Hide the clan creation modal
-    /// </summary>
+    // Hide the clan creation modal
     public void HideModal()
     {
         gameObject.SetActive(false);
