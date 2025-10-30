@@ -24,6 +24,7 @@ public class QuestProgressBar : MonoBehaviour
     [SerializeField] private int carrotTarget = 1000;
     [SerializeField] private bool showAsFraction = true;
     [SerializeField] private UnityEvent onQuestCompleted;
+    [SerializeField] private TMP_Text completionText;
 
     [Tooltip("How many carrots to add to the player's total when this quest completes.")]
     [SerializeField] private int rewardCarrotsOnComplete = 0;
@@ -132,6 +133,7 @@ public class QuestProgressBar : MonoBehaviour
                 {
                     CurrencySyncManager.Instance.AddCurrency(rewardCarrotsOnComplete);
                     Debug.Log($"QuestProgressBar: added {rewardCarrotsOnComplete} carrots on quest completion.");
+                    completionText.text = "Claimed";
                 }
 
                 onQuestCompleted?.Invoke();

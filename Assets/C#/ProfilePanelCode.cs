@@ -82,7 +82,7 @@ public class ProfilePanelCode : MonoBehaviour
 
         try
         {
-            // ✅ Updated endpoint to use user ID
+            // Updated endpoint to use user ID
             var response = await ApiClient.GetAsync<UserProfileResponse>("/user");
 
             if (response != null && response.user != null)
