@@ -6,69 +6,70 @@ public class IntroButtonManager : MonoBehaviour
 {
     [SerializeField] private Button loginButton;
     [SerializeField] private Button registerButton;
-        
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private Button playButton;
+
+    private void Start()
     {
-        SetupButtons();
+        AssignButton(loginButton, OnLoginButtonClicked, "Login");
+        AssignButton(registerButton, OnRegisterButtonClicked, "Register");
+        AssignButton(playButton, OnPlayButtonClicked, "Play");
     }
-    
-    private void SetupButtons()
+
+    private void AssignButton(Button button, UnityEngine.Events.UnityAction action, string name)
     {
-        // Set up the login button click listener
-        if (loginButton != null)
+        if (button)
         {
-            loginButton.onClick.AddListener(OnLoginButtonClicked);
+            button.onClick.AddListener(action);
         }
         else
         {
-            Debug.LogWarning("Login button is not assigned in the IntroButtonManager!");
-        }
-        
-        // Set up the register button click listener
-        if (registerButton != null)
-        {
-            registerButton.onClick.AddListener(OnRegisterButtonClicked);
-        }
-        else
-        {
-            Debug.LogWarning("Register button is not assigned in the IntroButtonManager!");
+            Debug.LogWarning($"{name} button is not assigned in {nameof(IntroButtonManager)}!");
         }
     }
 
-    // Handle login button click
     private void OnLoginButtonClicked()
     {
         Debug.Log("Login button clicked!");
-        
         SceneManager.LoadScene("Login");
     }
-    
-    // Handle register button click
+
     private void OnRegisterButtonClicked()
     {
         Debug.Log("Register button clicked!");
-
         SceneManager.LoadScene("Register");
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnPlayButtonClicked()
     {
-        
+        Debug.Log("Play button clicked! Starting as Guest...");
+
+        string guestUsername = PlayerPrefs.GetString("GuestUsername", "");
+
+        if (string.IsNullOrEmpty(guestUsername))
+        {
+            guestUsername = $"Guest{Random.Range(1000, 9999)}";
+            PlayerPrefs.SetString("GuestUsername", guestUsername);
+        }
+
+        PlayerPrefs.SetInt("IsGuest", 1);
+        PlayerPrefs.DeleteKey("RegisteredUserId");
+        PlayerPrefs.DeleteKey("AuthToken");
+        PlayerPrefs.Save();
+
+        Debug.Log($"Starting game as {guestUsername}");
+        SceneManager.LoadScene("game");
     }
-    
-    // Clean up event listeners when the object is destroyed
-    void OnDestroy()
+
+    private void OnDestroy()
     {
-        if (loginButton != null)
-        {
-            loginButton.onClick.RemoveListener(OnLoginButtonClicked);
-        }
-        
-        if (registerButton != null)
-        {
-            registerButton.onClick.RemoveListener(OnRegisterButtonClicked);
-        }
+        RemoveButtonListener(loginButton, OnLoginButtonClicked);
+        RemoveButtonListener(registerButton, OnRegisterButtonClicked);
+        RemoveButtonListener(playButton, OnPlayButtonClicked);
+    }
+
+    private void RemoveButtonListener(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button)
+            button.onClick.RemoveListener(action);
     }
 }

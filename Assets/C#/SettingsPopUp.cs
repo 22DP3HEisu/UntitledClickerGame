@@ -1,21 +1,27 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
 {
+    public enum ButtonType
+    {
+        Settings,
+        Quest
+    }
+
+    [Header("Settings")]
     [SerializeField] private Transform SettingsPanel;
     [SerializeField] private int pageNumber;
 
-    // msg controls whether clicking opens the settings panel (1 = enabled)
+    [Header("Behavior Settings")]
     [SerializeField] private int msg = 0;
 
+    [Header("Button Type")]
+    [SerializeField] private ButtonType buttonType = ButtonType.Settings;
+
     private Vector3 startScale;
-
-    private Sprite originalSprite;
-    private Color originalColor;
-
-    // canvas/raycaster used to keep popup above the panel without changing hierarchy
     private Canvas popupCanvas;
     private bool hadCanvas;
     private bool createdCanvas;
@@ -29,14 +35,12 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
     {
         startScale = transform.localScale;
 
-
-        // Ensure settings panel starts closed
         if (SettingsPanel != null)
             SettingsPanel.gameObject.SetActive(false);
 
-        // cache canvas state so we can restore it on close
         popupCanvas = GetComponent<Canvas>();
         hadCanvas = popupCanvas != null;
+
         if (hadCanvas)
         {
             originalSortingOrder = popupCanvas.sortingOrder;
@@ -55,8 +59,43 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
                 LeanTween.scale(gameObject, startScale, duration).setEaseInQuad();
 
                 if (msg == 1)
-                    ToggleSettingsPanel();
+                    HandleButtonAction();
             });
+    }
+
+    /// <summary>
+    /// Handles different button actions based on button type.
+    /// Quest button requires active token.
+    /// </summary>
+    private void HandleButtonAction()
+    {
+        switch (buttonType)
+        {
+            case ButtonType.Quest:
+                TryOpenQuestPanel();
+                break;
+
+            case ButtonType.Settings:
+                ToggleSettingsPanel();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Only Quest button checks for token before opening.
+    /// </summary>
+    private void TryOpenQuestPanel()
+    {
+        string authToken = PlayerPrefs.GetString("AuthToken", "");
+
+        if (string.IsNullOrEmpty(authToken))
+        {
+            Debug.LogWarning("No active token found. Redirecting to Register scene...");
+            SceneManager.LoadScene("Register");
+            return;
+        }
+
+        ToggleSettingsPanel();
     }
 
     private void ToggleSettingsPanel()
@@ -70,7 +109,6 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
             // Close panel
             SettingsPanel.gameObject.SetActive(false);
 
-            // Destroy raycaster we created (GraphicRaycaster depends on Canvas)
             if (createdGraphicRaycaster && popupGraphicRaycaster != null)
             {
                 Destroy(popupGraphicRaycaster);
@@ -78,7 +116,6 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
                 createdGraphicRaycaster = false;
             }
 
-            // If we created the Canvas, destroy it; otherwise restore original settings
             if (createdCanvas && popupCanvas != null)
             {
                 Destroy(popupCanvas);
@@ -96,32 +133,27 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
             // Open panel
             SettingsPanel.gameObject.SetActive(true);
 
-            // Determine a sorting order that ensures popup renders above the panel
             int targetOrder = 1000;
             Canvas panelCanvas = SettingsPanel.GetComponentInParent<Canvas>();
             if (panelCanvas != null)
                 targetOrder = panelCanvas.sortingOrder + 1;
 
-            // Ensure we have a Canvas on the popup and set it to render above the panel.
             popupCanvas = GetComponent<Canvas>();
             if (popupCanvas == null)
             {
                 popupCanvas = gameObject.AddComponent<Canvas>();
                 createdCanvas = true;
-                // if popup had no canvas before, no need to restore previous values
                 originalSortingOrder = 0;
                 originalOverrideSorting = false;
             }
             else
             {
                 createdCanvas = false;
-                // if it existed, originalSortingOrder/originalOverrideSorting were cached in Awake
             }
 
             popupCanvas.overrideSorting = true;
             popupCanvas.sortingOrder = targetOrder;
 
-            // Ensure there's a GraphicRaycaster so this Canvas can receive clicks.
             popupGraphicRaycaster = GetComponent<GraphicRaycaster>();
             if (popupGraphicRaycaster == null)
             {
@@ -133,12 +165,10 @@ public class SettingsPopUp : MonoBehaviour, IPointerClickHandler
                 createdGraphicRaycaster = false;
             }
         }
-
     }
 
     private void OnDisable()
     {
-        // Clean up any components we created
         if (createdGraphicRaycaster && popupGraphicRaycaster != null)
         {
             Destroy(popupGraphicRaycaster);

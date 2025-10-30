@@ -303,6 +303,7 @@ UnityEngine.Animator::get_hasBoundPlayables_Injected
 UnityEngine.Animator::StringToHash_Injected
 UnityEngine.Animator::ResetTriggerString_Injected
 UnityEngine.Animator::SetTriggerString_Injected
+UnityEngine.Application::CanStreamedLevelBeLoaded_Injected
 UnityEngine.Application::get_isBatchMode
 UnityEngine.Application::get_isFocused
 UnityEngine.Application::get_isPlaying

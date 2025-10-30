@@ -1490,6 +1490,7 @@
           {
             "name": "Font",
             "scenes": [
+              "Assets/Scenes/Admin.unity",
               "Assets/Scenes/game.unity",
               "Assets/Scenes/Leaderboard.unity",
               "Assets/Scenes/Login.unity",

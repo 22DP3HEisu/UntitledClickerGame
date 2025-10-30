@@ -362,6 +362,7 @@ GameObject:
   - component: {fileID: 3751705669446148327}
   - component: {fileID: 2947437333388388773}
   - component: {fileID: 2070101570475826613}
+  - component: {fileID: 8976072215276707684}
   m_Layer: 5
   m_Name: ClanPrefab
   m_TagString: Untagged
@@ -489,6 +490,20 @@ MonoBehaviour:
   memberCountText: {fileID: 8880506589012524337}
   cardButton: {fileID: 2947437333388388773}
   clanIcon: {fileID: 0}
+--- !u!114 &8976072215276707684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7516397017428825798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103023b2e6782aa4496b88e468c90002, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestChecker
+  registerSceneName: Register
+  allowGuestAccess: 0
 --- !u!1 &7973219494147714137
 GameObject:
   m_ObjectHideFlags: 0
